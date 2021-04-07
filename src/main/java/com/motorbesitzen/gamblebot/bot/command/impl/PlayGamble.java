@@ -105,7 +105,7 @@ class PlayGamble extends CommandImpl {
 
 		final DiscordGuild dcGuild = player.getGuild();
 		final TextChannel logChannel = channel.getGuild().getTextChannelById(dcGuild.getLogChannelId());
-		if(winInfo.getName().equalsIgnoreCase("ban")) {
+		if(winInfo.getName().equalsIgnoreCase("ban") || winInfo.getName().toLowerCase().startsWith("ban ")) {
 			final Member self = channel.getGuild().getSelfMember();
 			if(self.canInteract(member)) {
 				answer(
@@ -133,7 +133,7 @@ class PlayGamble extends CommandImpl {
 			return;
 		}
 
-		if(winInfo.getName().equalsIgnoreCase("kick")) {
+		if(winInfo.getName().equalsIgnoreCase("kick") || winInfo.getName().toLowerCase().startsWith("kick ")) {
 			final Member self = channel.getGuild().getSelfMember();
 			if(self.canInteract(member)) {
 				answer(
