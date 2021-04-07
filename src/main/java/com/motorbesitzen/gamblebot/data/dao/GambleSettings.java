@@ -9,7 +9,7 @@ import java.util.*;
 public class GambleSettings {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long settingsId;
 
 	@Min(0)
