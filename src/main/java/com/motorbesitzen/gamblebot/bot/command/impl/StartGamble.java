@@ -217,7 +217,8 @@ class StartGamble extends CommandImpl {
 	}
 
 	private void requestDuration(final DiscordGuild dcGuild, final TextChannel originalChannel, final long originalAuthorId) {
-		final GambleSettings settings = dcGuild.getGambleSettings();
+		final GambleSettings settings = GambleSettings.createDefault(dcGuild);
+		dcGuild.setGambleSettings(settings);
 		settings.setPrizes(new HashSet<>());
 		settingsRepo.save(settings);
 		final long originalChannelId = originalChannel.getIdLong();
