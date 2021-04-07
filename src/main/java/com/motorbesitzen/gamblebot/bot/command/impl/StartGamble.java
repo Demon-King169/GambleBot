@@ -315,8 +315,8 @@ class StartGamble extends CommandImpl {
 						"type `\"win description\" <number>%`.\nReplace <number> with the desired percentage " +
 						"(e.g. `\"Fortnite Gift Card $19\" 15.3%`).\n" +
 						"If your prize starts with add \"ban\" or \"kick\" the 'winner' will get kicked or banned if the bot has the needed permissions.\n" +
-						"*To start the giveaway type `start`. If your wins do not add up to 100% the free space will be a loss (a blank)!*" :
-				"Entered " + prizes.size() + " prize(s), totaling to " + getTotalPercent(prizes) + "%. To start the giveaway type `start`.";
+						"*To start the gamble type `start`. If your wins do not add up to 100% the free space will be a loss (a blank)!*" :
+				"Entered " + prizes.size() + " prize(s), totaling to " + getTotalPercent(prizes) + "%. To start the gamble type `start`.";
 
 		originalChannel.sendMessage(request).queue(
 				msg -> eventWaiter.waitForEvent(
@@ -384,7 +384,7 @@ class StartGamble extends CommandImpl {
 							prizeRepo.save(prize);
 							settings.getPrizes().add(prize);
 							if (Double.compare(100d, getTotalPercent(prizes)) == 0) {
-								answer(newEvent.getChannel(), "Reached 100%! Starting giveaway...");
+								answer(newEvent.getChannel(), "Reached 100%! Starting gamble...");
 								settingsRepo.save(settings);
 								requestStart(dcGuild, newEvent.getChannel(), originalAuthorId);
 								return;
