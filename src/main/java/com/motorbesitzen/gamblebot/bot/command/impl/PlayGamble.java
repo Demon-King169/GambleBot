@@ -97,7 +97,7 @@ class PlayGamble extends CommandImpl {
 			answer(
 					channel,
 					playerMention + ", you drew a blank! You did not win anything.\n" +
-							"Your unlucky number: " + nf.format(winInfo.getLuckyNumber())
+							"Your (rounded) unlucky number: " + nf.format(winInfo.getLuckyNumber())
 			);
 			return;
 		}
@@ -111,7 +111,7 @@ class PlayGamble extends CommandImpl {
 				answer(
 						channel,
 						"Unlucky " + playerMention + "! You won a ban. Enforcing ban in a few seconds...\n" +
-								"Your unlucky number: " + nf.format(winInfo.getLuckyNumber())
+								"Your (rounded) unlucky number: " + nf.format(winInfo.getLuckyNumber())
 				);
 				member.ban(0, "'Won' a ban in the gamble.").queueAfter(
 						10, TimeUnit.SECONDS,
@@ -124,7 +124,7 @@ class PlayGamble extends CommandImpl {
 				answer(
 						channel,
 						"Unlucky " + playerMention + "! You won a ban. Be glad that I can not ban you myself. Reporting to authorities...\n" +
-						"Your unlucky number: " + nf.format(winInfo.getLuckyNumber())
+						"Your (rounded) unlucky number: " + nf.format(winInfo.getLuckyNumber())
 				);
 				if(logChannel != null) {
 					answer(logChannel, playerMention + " won a ban. However, I can not ban that user.");
@@ -139,7 +139,7 @@ class PlayGamble extends CommandImpl {
 				answer(
 						channel,
 						"Unlucky " + playerMention + "! You won a kick. Enforcing kick in a few seconds...\n" +
-								"Your unlucky number: " + nf.format(winInfo.getLuckyNumber())
+								"Your (rounded) unlucky number: " + nf.format(winInfo.getLuckyNumber())
 				);
 				member.kick("'Won' a kick in the gamble.").queueAfter(
 						5, TimeUnit.SECONDS,
@@ -152,7 +152,7 @@ class PlayGamble extends CommandImpl {
 				answer(
 						channel,
 						"Unlucky " + playerMention + "! You won a kick. Be glad that I can not kick you myself. Reporting to authorities...\n" +
-								"Your unlucky number: " + nf.format(winInfo.getLuckyNumber())
+								"Your (rounded) unlucky number: " + nf.format(winInfo.getLuckyNumber())
 				);
 				if(logChannel != null) {
 					answer(logChannel, playerMention + " won a kick. However, I can not kick that user.");
@@ -164,7 +164,7 @@ class PlayGamble extends CommandImpl {
 		answer(
 				channel,
 				playerMention + " you won \"" + winInfo.getName() + "\"!\n" +
-						"Your lucky number: " + nf.format(winInfo.getLuckyNumber())
+						"Your (rounded) lucky number: " + nf.format(winInfo.getLuckyNumber())
 		);
 		if (logChannel != null) {
 			answer(logChannel, playerMention + " won \"" + winInfo.getName() + "\"!");
