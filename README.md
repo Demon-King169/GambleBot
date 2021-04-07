@@ -30,6 +30,8 @@ select your application. Now switch to the "OAuth2" tab on the left and in the l
 down and select all needed permissions:
 
 ```text
+Kick Members
+Ban Members
 View Channels
 Send Messages
 Embed Links
