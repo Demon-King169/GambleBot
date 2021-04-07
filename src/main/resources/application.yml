@@ -37,7 +37,7 @@ logging:
   level:
     com:
       motorbesitzen:
-        messagewatcher:
+        gamblebot:
           debug
 ---
 # additionally turn on (or overwrite) if first start profile ("firststart")
@@ -85,7 +85,7 @@ logging:
   level:
     com:
       motorbesitzen:
-        messagewatcher:
+        gamblebot:
           debug
   #    org:
   #      hibernate:
