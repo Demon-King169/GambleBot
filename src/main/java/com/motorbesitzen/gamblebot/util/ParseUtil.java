@@ -55,7 +55,7 @@ public final class ParseUtil {
 		String durationText = days > 0 ? "**" + days + "**d " : "";
 		durationText += hours > 0 ? "**" + hours + "**h " : "";
 		durationText += minutes > 0 ? "**" + minutes + "**m " : "";
-		durationText += seconds > 0 ? "**" + seconds + "**s " : "";
+		durationText += seconds > 0 ? "**" + seconds + "**s" : "";
 		return durationText;
 	}
 

@@ -63,7 +63,8 @@ class PlayGamble extends CommandImpl {
 		dcGuildOpt.ifPresentOrElse(
 				dcGuild -> {
 					if (!dcGuild.hasRunningGamble()) {
-						reply(event.getMessage(), "There is no running gamble.");
+						final String timeSinceEndText = dcGuild.getTimeSinceEndText();
+						reply(event.getMessage(), "The gamble ended " + timeSinceEndText + " ago.");
 						return;
 					}
 

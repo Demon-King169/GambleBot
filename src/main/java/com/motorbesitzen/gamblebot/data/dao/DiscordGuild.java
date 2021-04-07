@@ -84,7 +84,22 @@ public class DiscordGuild {
 		final long endMs = startMs + gambleSettings.getDurationMs();
 		final long toEndMs = endMs - System.currentTimeMillis();
 		if (toEndMs <= 0) {
-			return "Gamble already ended.";
+			return "0s";
+		}
+
+		return ParseUtil.parseMillisecondsToText(toEndMs);
+	}
+
+	public String getTimeSinceEndText() {
+		if (gambleSettings == null) {
+			return "This guild did not start a giveaway yet.";
+		}
+
+		final long startMs = gambleSettings.getStartTimestampMs();
+		final long endMs = startMs + gambleSettings.getDurationMs();
+		final long toEndMs = System.currentTimeMillis() - endMs;
+		if (toEndMs <= 0) {
+			return "0s";
 		}
 
 		return ParseUtil.parseMillisecondsToText(toEndMs);
