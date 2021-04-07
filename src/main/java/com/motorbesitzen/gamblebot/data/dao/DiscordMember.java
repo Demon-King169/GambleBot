@@ -2,10 +2,7 @@ package com.motorbesitzen.gamblebot.data.dao;
 
 import com.motorbesitzen.gamblebot.util.ParseUtil;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -13,6 +10,9 @@ import javax.validation.constraints.NotNull;
 public class DiscordMember {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
+
 	@Min(value = 10000000000000000L)
 	private long discordId;
 

@@ -74,7 +74,7 @@ class PlayGamble extends CommandImpl {
 					}
 
 					final long memberId = member.getIdLong();
-					final Optional<DiscordMember> memberOpt = memberRepo.findById(memberId);
+					final Optional<DiscordMember> memberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(memberId, guildId);
 					final DiscordMember player = memberOpt.orElseGet(() -> DiscordMember.createDefault(memberId, dcGuild));
 					if (!player.canPlay()) {
 						reply(event.getMessage(), "You are on cooldown. You can play again in " + player.getTimeToCooldownEndText() + ".");
