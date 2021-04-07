@@ -94,9 +94,7 @@ class Help extends CommandImpl {
 	 * @return An {@code EmbedBuilder} with page identification if needed.
 	 */
 	private EmbedBuilder buildEmbedPage(final int page, final int totalPages) {
-		return new EmbedBuilder().setColor(
-				DiscordMessageUtil.getEmbedColor()
-		).setTitle(
+		return new EmbedBuilder().setTitle(
 				page == 1 && totalPages == 1 ?
 						"Commands and their variations" :
 						"Commands and their variations [" + page + "/" + totalPages + "]"
