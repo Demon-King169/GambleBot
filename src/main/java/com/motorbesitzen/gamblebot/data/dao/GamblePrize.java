@@ -41,4 +41,9 @@ public class GamblePrize {
 	public double getPrizeChance() {
 		return prizeChance;
 	}
+
+	@Override
+	public String toString() {
+		return "{\"" + prizeName + "\", " + prizeChance + "}";
+	}
 }

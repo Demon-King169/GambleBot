@@ -313,6 +313,7 @@ class StartGamble extends CommandImpl {
 						"All chances combined are not allowed to surpass 100%!\nTo add a win with its chance " +
 						"type `\"win description\" <number>%`.\nReplace <number> with the desired percentage " +
 						"(e.g. `\"Fortnite Gift Card $19\" 15.3%`).\n" +
+						"If you add \"ban\" or \"kick\" the 'winner' will get kicked or banned if the bot has the needed permissions.\n" +
 						"*To start the giveaway type `start`. If your wins do not add up to 100% the free space will be a loss (a blank)!*" :
 				"Entered " + prizes.size() + " prize(s), totaling to " + getTotalPercent(prizes) + "%. To start the giveaway type `start`.";
 
