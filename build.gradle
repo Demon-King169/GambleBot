@@ -1,0 +1,64 @@
+plugins {
+    id 'org.springframework.boot' version '2.4.4'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
+
+group = 'com.motorbesitzen'
+version = '0.0.1'
+sourceCompatibility = '11'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://m2.dv8tion.net/releases'
+        name 'm2-dv8tion'
+    }
+    maven {
+        url 'https://dl.bintray.com/jagrosh/maven'
+    }
+}
+
+dependencies {
+    // development
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // runtime
+    runtimeOnly 'com.h2database:h2'
+    implementation 'net.dv8tion:JDA:4.2.1_254'
+    implementation 'com.jagrosh:jda-utilities-commons:3.0.5'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+//    implementation 'org.springframework.boot:spring-boot-starter-web' // enable to be able to use the h2 web console
+
+    // test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+bootRun {
+    file('.env').readLines().each() {
+        if (!it.isBlank() && !it.startsWith("#")) {
+            def pos = it.indexOf("=")
+            def key = it.substring(0, pos).trim()
+            def value = it.substring(pos + 1).trim()
+            if (value.startsWith("\"") && value.endsWith("\"")) {
+                value = value.substring(1, value.length() - 1)
+            }
+
+            if (System.getenv(key) == null) {
+                environment key, value
+            }
+        }
+    }
+}
