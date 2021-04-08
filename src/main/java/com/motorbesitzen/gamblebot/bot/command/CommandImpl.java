@@ -198,7 +198,7 @@ public abstract class CommandImpl implements Command {
 		final EmbedBuilder eb = new EmbedBuilder();
 		final String prizeText = settings.getPrizeText();
 		eb.setTitle("Gamble information:")
-				.addField("Ends in:", dcGuild.getTimeToEndText(), false)
+				.addField("Duration:", dcGuild.getTimeToEndText(), false)
 				.addField("Cooldown between participations:", ParseUtil.parseMillisecondsToText(settings.getCooldownMs()), false)
 				.addField("Prizes:", prizeText.substring(0, Math.min(1999, prizeText.length())), false)
 				.setFooter("Use " + EnvironmentUtil.getEnvironmentVariable("CMD_PREFIX") + "gamble to participate!");
