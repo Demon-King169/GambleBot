@@ -10,6 +10,7 @@ import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
+import com.motorbesitzen.gamblebot.util.EnvironmentUtil;
 import com.motorbesitzen.gamblebot.util.LogUtil;
 import com.motorbesitzen.gamblebot.util.ParseUtil;
 import net.dv8tion.jda.api.entities.Member;
@@ -45,12 +46,17 @@ public class PlayRoulette extends CommandImpl {
 
 	@Override
 	public String getUsage() {
-		return getName() + " wager";
+		return getName() + " wager bet";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Starts a round of roulette with the set wager.";
+		return "Starts a round of roulette with the set wager. You can choose from the following bets:\n" +
+				"**B** - bet on black\n**R** - bet on red\n**E** - bet on even numbers\n" +
+				"**U** - bet on uneven numbers\n**L** - bet on low numbers (1-18)\n" +
+				"**H** - bet on high numbers (19-36)\n**0**-**36** - bet on a number between 0 and 36, " +
+				"you can bet on up to 6 numbers at once (separate numbers with a comma)\n" +
+				"*Betting on multiple numbers decreases your payout!*\n`Example: 3,7,17 would bet on 3, 7 and 17.`";
 	}
 
 	@Override
@@ -69,10 +75,24 @@ public class PlayRoulette extends CommandImpl {
 		final long guildId = event.getGuild().getIdLong();
 		final Message message = event.getMessage();
 		final String content = message.getContentRaw();
+		final String prefix = EnvironmentUtil.getEnvironmentVariable("CMD_PREFIX");
+		if(!content.matches("(?i)" + prefix + getName() + " [0-9]+ ([BREULH]|[0-9]{1,2}(,[0-9]{1,2}){0,5})")) {
+			sendErrorMessage(event.getChannel(), "Please use the correct syntax! Use `" +
+					prefix + "help` for a list of valid bets.");
+			return;
+		}
+
 		final String[] tokens = content.split(" ");
-		final long wager = ParseUtil.safelyParseStringToLong(tokens[tokens.length - 1]);
+		final long wager = ParseUtil.safelyParseStringToLong(tokens[tokens.length - 2]);
 		if(wager <= 0) {
 			sendErrorMessage(event.getChannel(), "Please set a wager of at least 1 coin for your bet!");
+			return;
+		}
+
+		final String betText = tokens[tokens.length -1];
+		if(!betText.matches("(?i)([BREULH]|[0-9]{1,2}(,[0-9]{1,2}){0,5})")) {
+			sendErrorMessage(event.getChannel(), "Please choose a valid bet! Use `" +
+					prefix + "help` for a list of valid bets.");
 			return;
 		}
 
@@ -84,57 +104,22 @@ public class PlayRoulette extends CommandImpl {
 			return;
 		}
 
-		final long originalChannelId = event.getChannel().getIdLong();
-		final Message instructionMsg = answerPlaceholder(
-				event.getChannel(), "Please place your bet! You can set the following bets:\n" +
-						"**B** - bet on black\n**R** - bet on red\n**E** - bet on even numbers\n" +
-						"**U** - bet on uneven numbers\n**L** - bet on low numbers (1-18)\n" +
-						"**H** - bet on high numbers (19-36)\n**0**-**36** - bet on a number between 0 and 36, " +
-						"you can bet on up to 6 numbers at once (separate numbers with a comma)\n" +
-						"*Betting on multiple numbers decreases your payout!*\n`Example: 3,7,17 would bet on 3, 7 and 17.`"
-		);
-		eventWaiter.waitForEvent(
-				GuildMessageReceivedEvent.class,
-				newEvent -> {
-					if(isWrongDialog(newEvent, originalChannelId, authorId)) {
-						return false;
-					}
+		final RouletteBet bet = new RouletteBet(wager, betText);
+		final RouletteWinInfo winInfo = rouletteGame.play(bet);
+		final String fieldColor = RouletteInfo.getColorEmote(winInfo.getResultNumber());
+		if(!winInfo.isWin()) {
+			dcMember.removeCoins(wager);
+			memberRepo.save(dcMember);
+			reply(event.getMessage(), "You lost the bet. Your balance: **" +
+					dcMember.getCoins() + "** coins.\n" + fieldColor + " Roulette result: " + winInfo.getResultNumber());
+			return;
+		}
 
-					final Message newMessage = newEvent.getMessage();
-					final String newContent = newMessage.getContentRaw().trim();
-					if(!newContent.matches("(?i)([BREULH]|[0-9]{1,2}(,[0-9]{1,2}){0,5})")) {
-						sendErrorMessage(newEvent.getChannel(), "Please select one of the mentioned methods!");
-						return false;
-					}
-
-					return true;
-				},
-				newEvent -> {
-					final Message newMessage = newEvent.getMessage();
-					final String newContent = newMessage.getContentRaw().trim();
-					final RouletteBet bet = new RouletteBet(wager, newContent);
-					final RouletteWinInfo winInfo = rouletteGame.play(bet);
-					final String fieldColor = RouletteInfo.getColorEmote(winInfo.getResultNumber());
-					if(!winInfo.isWin()) {
-						dcMember.removeCoins(wager);
-						memberRepo.save(dcMember);
-						reply(newMessage, "You lost the bet. Your balance: **" +
-								dcMember.getCoins() + "** coins.\n" + fieldColor + " Roulette result: " + winInfo.getResultNumber());
-						return;
-					}
-
-					final long winAmount = winInfo.getWinAmount();
-					dcMember.addCoins(winAmount);
-					memberRepo.save(dcMember);
-					reply(newMessage, "You won **" + winAmount + "** coins! Your balance: **" +
-							dcMember.getCoins() + "** coins.\n" + fieldColor + " Roulette result: " + winInfo.getResultNumber());
-				},
-				1, TimeUnit.MINUTES,
-				() -> instructionMsg.delete().queue(
-						v -> LogUtil.logDebug("Deleted roulette instruction message."),
-						throwable -> LogUtil.logDebug("Could not delete the roulette instruction message.", throwable)
-				)
-		);
+		final long winAmount = winInfo.getWinAmount();
+		dcMember.addCoins(winAmount);
+		memberRepo.save(dcMember);
+		reply(event.getMessage(), "You won **" + winAmount + "** coins! Your balance: **" +
+				dcMember.getCoins() + "** coins.\n" + fieldColor + " Roulette result: " + winInfo.getResultNumber());
 	}
 
 	private DiscordMember createNewMember(final long memberId, final long guildId) {
