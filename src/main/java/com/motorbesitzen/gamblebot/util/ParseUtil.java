@@ -1,6 +1,7 @@
 package com.motorbesitzen.gamblebot.util;
 
 import java.math.BigInteger;
+import java.util.Locale;
 
 /**
  * Helper functions for safely parsing inputs. Since mostly IDs need to be parsed -1 is an anomaly
@@ -19,15 +20,33 @@ public final class ParseUtil {
 			return -1;
 		}
 
+		final String numberString = parseUnitChars(integerString);
 		try {
-			return Integer.parseInt(integerString.trim());
+			return Integer.parseInt(numberString);
 		} catch (NumberFormatException e) {
 			return -1;
 		}
 	}
 
 	/**
-	 * Tries to parse a {@code String} to a {@code long}.
+	 * Replaces 'units' in Strings by replacing "k" for "thousand" with "000", "m" for "million" with "000000"
+	 * and "b" for "billion" with "000000000".
+	 * @param numberWithUnit The number String that may or may not include the mentioned 'units'.
+	 * @return The string with the mentioned 'units' replaced if they exist.
+	 */
+	private static String parseUnitChars(final String numberWithUnit) {
+		String lowerNumberWithUnit = numberWithUnit.toLowerCase().trim();
+		if(lowerNumberWithUnit.matches("[0-9]+[km]")) {
+			lowerNumberWithUnit = lowerNumberWithUnit.replaceFirst("k", "000");
+			lowerNumberWithUnit = lowerNumberWithUnit.replaceFirst("m", "000000");
+			lowerNumberWithUnit = lowerNumberWithUnit.replaceFirst("b", "000000000");
+		}
+
+		return lowerNumberWithUnit;
+	}
+
+	/**
+	 * Tries to parse a {@code String} to a {@code long}. Also supports text like "1k" for "1000".
 	 *
 	 * @param longString The {@code String} representation of a number.
 	 * @return The number as {@code long} or -1 if the {@code String} can not be parsed.
@@ -37,8 +56,9 @@ public final class ParseUtil {
 			return -1;
 		}
 
+		final String numberString = parseUnitChars(longString);
 		try {
-			return Long.parseLong(longString.trim());
+			return Long.parseLong(numberString);
 		} catch (NumberFormatException e) {
 			return -1;
 		}

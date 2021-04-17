@@ -68,7 +68,7 @@ public class GiveCoin extends CommandImpl {
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(member.getIdLong(), guildId));
 		final String content = event.getMessage().getContentRaw();
 		final String[] tokens = content.split(" ");
-		final String coinText = tokens[tokens.length - 1].toLowerCase().replaceAll("k", "000");
+		final String coinText = tokens[tokens.length - 1];
 		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
 		if(coinAmount < 1 || coinAmount > Integer.MAX_VALUE) {
 			sendErrorMessage(event.getChannel(), "Please set a valid coin amount (1 - " + Integer.MAX_VALUE + ")!");
