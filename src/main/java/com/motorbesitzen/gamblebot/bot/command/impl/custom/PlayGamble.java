@@ -105,9 +105,9 @@ class PlayGamble extends CommandImpl {
 
 		final DiscordGuild dcGuild = player.getGuild();
 		final TextChannel logChannel = channel.getGuild().getTextChannelById(dcGuild.getLogChannelId());
-		if(gambleWinInfo.getName().equalsIgnoreCase("ban") || gambleWinInfo.getName().toLowerCase().startsWith("ban ")) {
+		if (gambleWinInfo.getName().equalsIgnoreCase("ban") || gambleWinInfo.getName().toLowerCase().startsWith("ban ")) {
 			final Member self = channel.getGuild().getSelfMember();
-			if(self.canInteract(member)) {
+			if (self.canInteract(member)) {
 				answer(
 						channel,
 						"Unlucky " + playerMention + "! You won a ban. Enforcing ban in a few seconds...\n" +
@@ -117,25 +117,25 @@ class PlayGamble extends CommandImpl {
 						10, TimeUnit.SECONDS,
 						b -> answer(channel, "Enforced ban of " + playerMention + ". Rip in pieces :poop:")
 				);
-				if(logChannel != null) {
+				if (logChannel != null) {
 					answer(logChannel, playerMention + " won a ban. Enforcing ban in the next 10 seconds.");
 				}
 			} else {
 				answer(
 						channel,
 						"Unlucky " + playerMention + "! You won a ban. Be glad that I can not ban you myself. Reporting to authorities...\n" +
-						"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
+								"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 				);
-				if(logChannel != null) {
+				if (logChannel != null) {
 					answer(logChannel, playerMention + " won a ban. However, I can not ban that user.");
 				}
 			}
 			return;
 		}
 
-		if(gambleWinInfo.getName().equalsIgnoreCase("kick") || gambleWinInfo.getName().toLowerCase().startsWith("kick ")) {
+		if (gambleWinInfo.getName().equalsIgnoreCase("kick") || gambleWinInfo.getName().toLowerCase().startsWith("kick ")) {
 			final Member self = channel.getGuild().getSelfMember();
-			if(self.canInteract(member)) {
+			if (self.canInteract(member)) {
 				answer(
 						channel,
 						"Unlucky " + playerMention + "! You won a kick. Enforcing kick in a few seconds...\n" +
@@ -145,7 +145,7 @@ class PlayGamble extends CommandImpl {
 						5, TimeUnit.SECONDS,
 						k -> answer(channel, "Enforced kick of " + playerMention + ". Hopefully it is a ban next time :smiling_imp:")
 				);
-				if(logChannel != null) {
+				if (logChannel != null) {
 					answer(logChannel, playerMention + " won a kick. Enforcing kick in the next 5 seconds.");
 				}
 			} else {
@@ -154,7 +154,7 @@ class PlayGamble extends CommandImpl {
 						"Unlucky " + playerMention + "! You won a kick. Be glad that I can not kick you myself. Reporting to authorities...\n" +
 								"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 				);
-				if(logChannel != null) {
+				if (logChannel != null) {
 					answer(logChannel, playerMention + " won a kick. However, I can not kick that user.");
 				}
 			}

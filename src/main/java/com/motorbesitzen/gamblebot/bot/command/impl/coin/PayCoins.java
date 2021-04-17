@@ -50,25 +50,25 @@ public class PayCoins extends CommandImpl {
 	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
 		final Member author = event.getMember();
-		if(author == null) {
+		if (author == null) {
 			return;
 		}
 
 		final long guildId = event.getGuild().getIdLong();
 		final Optional<DiscordMember> dcAuthorOpt = memberRepo.findByDiscordIdAndGuild_GuildId(author.getIdLong(), guildId);
-		if(dcAuthorOpt.isEmpty()) {
+		if (dcAuthorOpt.isEmpty()) {
 			sendErrorMessage(event.getChannel(), "You do not have any coins!");
 			return;
 		}
 
 		final Message message = event.getMessage();
 		final long userId = DiscordMessageUtil.getMentionedMemberId(message);
-		if(userId == author.getIdLong()) {
+		if (userId == author.getIdLong()) {
 			sendErrorMessage(event.getChannel(), "You can not pay coins to yourself!");
 			return;
 		}
 
-		if(userId <= 100000000000000L) {
+		if (userId <= 100000000000000L) {
 			sendErrorMessage(event.getChannel(), "That user seems to be invalid!");
 			return;
 		}
@@ -87,7 +87,7 @@ public class PayCoins extends CommandImpl {
 		final String[] tokens = content.split(" ");
 		final String coinText = tokens[tokens.length - 1];
 		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
-		if(coinAmount < 1 || coinAmount > Integer.MAX_VALUE || coinAmount > author.getCoins()) {
+		if (coinAmount < 1 || coinAmount > Integer.MAX_VALUE || coinAmount > author.getCoins()) {
 			sendErrorMessage(event.getChannel(), "Please set a valid coin amount (1 - " + Math.min(dcMember.getCoins(), Integer.MAX_VALUE) + ")!");
 			return;
 		}

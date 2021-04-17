@@ -50,7 +50,7 @@ public class TopCoin extends CommandImpl {
 		final long guildId = guild.getIdLong();
 		final PageRequest pageRequest = PageRequest.of(0, TOP_LIST_LENGTH);
 		final List<DiscordMember> topMembers = memberRepo.findAllByGuild_GuildIdOrderByCoinsDesc(guildId, pageRequest);
-		if(topMembers.size() == 0) {
+		if (topMembers.size() == 0) {
 			sendErrorMessage(event.getChannel(), "There is not enough data for a top list yet!");
 			return;
 		}

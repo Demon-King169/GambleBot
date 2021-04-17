@@ -51,7 +51,7 @@ public class DailyCoinAmount extends CommandImpl {
 		final String[] tokens = content.split(" ");
 		final String coinText = tokens[tokens.length - 1];
 		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
-		if(coinAmount < 0 || coinAmount > Integer.MAX_VALUE) {
+		if (coinAmount < 0 || coinAmount > Integer.MAX_VALUE) {
 			sendErrorMessage(event.getChannel(), "Please set a valid amount of daily coins (0 - " + Integer.MAX_VALUE + ")!");
 			return;
 		}

@@ -15,10 +15,9 @@ import java.util.Optional;
 @Service("dailycoins")
 public class DailyCoins extends CommandImpl {
 
+	private static final int MS_PER_DAY = 86400000;
 	private final DiscordMemberRepo memberRepo;
 	private final DiscordGuildRepo guildRepo;
-
-	private static final int MS_PER_DAY = 86400000;
 
 	@Autowired
 	private DailyCoins(final DiscordMemberRepo memberRepo, final DiscordGuildRepo guildRepo) {

@@ -52,6 +52,10 @@ public class DiscordMember {
 		return nextGambleMs;
 	}
 
+	public void setNextGambleMs(final long nextGambleMs) {
+		this.nextGambleMs = nextGambleMs;
+	}
+
 	public long getNextDailyCoinsMs() {
 		return nextDailyCoinsMs;
 	}
@@ -62,10 +66,6 @@ public class DiscordMember {
 
 	public long getCoins() {
 		return coins;
-	}
-
-	public void setNextGambleMs(final long nextGambleMs) {
-		this.nextGambleMs = nextGambleMs;
 	}
 
 	public DiscordGuild getGuild() {

@@ -51,7 +51,7 @@ public class GiveCoin extends CommandImpl {
 	public void execute(final GuildMessageReceivedEvent event) {
 		final Message message = event.getMessage();
 		final long userId = DiscordMessageUtil.getMentionedMemberId(message);
-		if(userId <= 100000000000000L) {
+		if (userId <= 100000000000000L) {
 			sendErrorMessage(event.getChannel(), "That user seems to be invalid!");
 			return;
 		}
@@ -70,7 +70,7 @@ public class GiveCoin extends CommandImpl {
 		final String[] tokens = content.split(" ");
 		final String coinText = tokens[tokens.length - 1];
 		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
-		if(coinAmount < 1 || coinAmount > Integer.MAX_VALUE) {
+		if (coinAmount < 1 || coinAmount > Integer.MAX_VALUE) {
 			sendErrorMessage(event.getChannel(), "Please set a valid coin amount (1 - " + Integer.MAX_VALUE + ")!");
 			return;
 		}

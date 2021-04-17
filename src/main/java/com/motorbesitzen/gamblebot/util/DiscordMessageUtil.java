@@ -2,7 +2,6 @@ package com.motorbesitzen.gamblebot.util;
 
 import net.dv8tion.jda.api.entities.Message;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;

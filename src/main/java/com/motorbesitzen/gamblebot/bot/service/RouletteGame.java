@@ -39,7 +39,7 @@ public class RouletteGame {
 	*/
 
 	public RouletteWinInfo play(final RouletteBet bet) {
-		final int result = random.nextInt(37);	// 0 -36
+		final int result = random.nextInt(37);    // 0 -36
 		LogUtil.logDebug("Result: " + result);
 		final long winAmount = bet.getBetInfo().matches("(?i)[BREULH]") ?
 				getSectionWin(bet, result) :
@@ -50,32 +50,32 @@ public class RouletteGame {
 	private long getSectionWin(final RouletteBet bet, final int result) {
 		switch (bet.getBetInfo().toLowerCase()) {
 			case "b":
-				if(RouletteInfo.isBlackField(result)) {
+				if (RouletteInfo.isBlackField(result)) {
 					return bet.getWager();
 				}
 				break;
 			case "r":
-				if(RouletteInfo.isRedField(result)) {
+				if (RouletteInfo.isRedField(result)) {
 					return bet.getWager();
 				}
 				break;
 			case "e":
-				if(result != 0 && result % 2 == 0) {
+				if (result != 0 && result % 2 == 0) {
 					return bet.getWager();
 				}
 				break;
 			case "u":
-				if(result % 2 == 1) {
+				if (result % 2 == 1) {
 					return bet.getWager();
 				}
 				break;
 			case "l":
-				if(result > 0 && result <= 18) {
+				if (result > 0 && result <= 18) {
 					return bet.getWager();
 				}
 				break;
 			case "h":
-				if(result >= 19 && result < 37) {
+				if (result >= 19 && result < 37) {
 					return bet.getWager();
 				}
 				break;
@@ -86,7 +86,7 @@ public class RouletteGame {
 
 	private long getNumberWin(final RouletteBet bet, final int result) {
 		final String[] bets = bet.getBetInfo().split(",");
-		for(String singleBet : bets) {
+		for (String singleBet : bets) {
 			if (singleBet.equals(String.valueOf(result))) {
 				return getMultiBetWin(bets.length, bet.getWager());
 			}

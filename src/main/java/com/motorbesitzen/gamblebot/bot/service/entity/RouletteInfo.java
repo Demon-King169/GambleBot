@@ -6,8 +6,8 @@ public class RouletteInfo {
 	private static final int[] RED_FIELDS = {32, 19, 21, 25, 34, 27, 36, 30, 23, 5, 16, 1, 14, 9, 18, 7, 12, 3};
 
 	public static boolean isBlackField(final int field) {
-		for(int number : BLACK_FIELDS) {
-			if(number == field) {
+		for (int number : BLACK_FIELDS) {
+			if (number == field) {
 				return true;
 			}
 		}
@@ -16,8 +16,8 @@ public class RouletteInfo {
 	}
 
 	public static boolean isRedField(final int field) {
-		for(int number : RED_FIELDS) {
-			if(number == field) {
+		for (int number : RED_FIELDS) {
+			if (number == field) {
 				return true;
 			}
 		}
@@ -26,11 +26,11 @@ public class RouletteInfo {
 	}
 
 	public static String getColorEmote(final int field) {
-		if(field == 0) {
+		if (field == 0) {
 			return ":green_square:";
 		}
 
-		if(isRedField(field)) {
+		if (isRedField(field)) {
 			return ":red_square:";
 		}
 

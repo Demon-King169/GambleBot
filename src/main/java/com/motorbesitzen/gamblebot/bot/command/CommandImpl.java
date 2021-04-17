@@ -71,10 +71,10 @@ public abstract class CommandImpl implements Command {
 	 * {@link #sendMessage(TextChannel, MessageEmbed)} but clarifies that the message will be send as an answer to a
 	 * command in the caller channel.
 	 *
-	 * @param channel      <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
-	 *                     to send the message in.
+	 * @param channel <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                to send the message in.
 	 * @param message The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/MessageEmbed.html">embedded message</a>
-	 *                     to send as answer.
+	 *                to send as answer.
 	 */
 	protected void answer(final TextChannel channel, final MessageEmbed message) {
 		sendMessage(channel, message);
@@ -96,10 +96,10 @@ public abstract class CommandImpl implements Command {
 	/**
 	 * Sends an embedded message to a channel. Does not do anything if bot can not write in that channel.
 	 *
-	 * @param channel      <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
-	 *                     to send the message in.
+	 * @param channel <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                to send the message in.
 	 * @param message The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/MessageEmbed.html">embedded message</a>
-	 *                     to send as answer.
+	 *                to send as answer.
 	 */
 	protected void sendMessage(final TextChannel channel, final MessageEmbed message) {
 		if (channel.canTalk()) {
@@ -186,7 +186,7 @@ public abstract class CommandImpl implements Command {
 	/**
 	 * Replies to a given message and pings the user without needing to mention him.
 	 *
-	 * @param message the message to reply to.
+	 * @param message    the message to reply to.
 	 * @param newMessage the content to reply with.
 	 */
 	protected void reply(final Message message, final String newMessage) {
@@ -209,9 +209,9 @@ public abstract class CommandImpl implements Command {
 	/**
 	 * Determines if the new message is part of the original dialog.
 	 *
-	 * @param newEvent The event of the new guild message.
+	 * @param newEvent          The event of the new guild message.
 	 * @param originalChannelId The channel ID of the channel where the original dialog started in.
-	 * @param originalAuthorId The member ID of the member who started the conversation.
+	 * @param originalAuthorId  The member ID of the member who started the conversation.
 	 * @return {@code true} if the dialog is the original one. {@code false} if not.
 	 */
 	protected boolean isWrongDialog(final GuildMessageReceivedEvent newEvent, final long originalChannelId, final long originalAuthorId) {

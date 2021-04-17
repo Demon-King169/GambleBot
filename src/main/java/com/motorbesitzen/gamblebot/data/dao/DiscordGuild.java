@@ -58,16 +58,16 @@ public class DiscordGuild {
 		return logChannelId;
 	}
 
+	public void setLogChannelId(long logChannelId) {
+		this.logChannelId = logChannelId;
+	}
+
 	public long getDailyCoins() {
 		return dailyCoins;
 	}
 
 	public void setDailyCoins(long dailyCoins) {
 		this.dailyCoins = dailyCoins;
-	}
-
-	public void setLogChannelId(long logChannelId) {
-		this.logChannelId = logChannelId;
 	}
 
 	public GambleSettings getGambleSettings() {

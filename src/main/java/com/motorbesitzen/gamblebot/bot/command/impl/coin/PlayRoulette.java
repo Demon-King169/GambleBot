@@ -11,7 +11,6 @@ import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
 import com.motorbesitzen.gamblebot.util.EnvironmentUtil;
-import com.motorbesitzen.gamblebot.util.LogUtil;
 import com.motorbesitzen.gamblebot.util.ParseUtil;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -20,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @Service("roulette")
 public class PlayRoulette extends CommandImpl {
@@ -67,7 +65,7 @@ public class PlayRoulette extends CommandImpl {
 	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
 		final Member author = event.getMember();
-		if(author == null) {
+		if (author == null) {
 			return;
 		}
 
@@ -76,7 +74,7 @@ public class PlayRoulette extends CommandImpl {
 		final Message message = event.getMessage();
 		final String content = message.getContentRaw();
 		final String prefix = EnvironmentUtil.getEnvironmentVariable("CMD_PREFIX");
-		if(!content.matches("(?i)" + prefix + getName() + " [0-9]+[km]? ([BREULH]|[0-9]{1,2}(,[0-9]{1,2}){0,5})")) {
+		if (!content.matches("(?i)" + prefix + getName() + " [0-9]+[km]? ([BREULH]|[0-9]{1,2}(,[0-9]{1,2}){0,5})")) {
 			sendErrorMessage(event.getChannel(), "Please use the correct syntax! Use `" +
 					prefix + "help` for a list of valid bets.");
 			return;
@@ -85,13 +83,13 @@ public class PlayRoulette extends CommandImpl {
 		final String[] tokens = content.split(" ");
 		final String wagerText = tokens[tokens.length - 2];
 		final long wager = ParseUtil.safelyParseStringToLong(wagerText);
-		if(wager <= 0) {
+		if (wager <= 0) {
 			sendErrorMessage(event.getChannel(), "Please set a wager of at least 1 coin for your bet!");
 			return;
 		}
 
-		final String betText = tokens[tokens.length -1];
-		if(!betText.matches("(?i)([BREULH]|[0-9]{1,2}(,[0-9]{1,2}){0,5})")) {
+		final String betText = tokens[tokens.length - 1];
+		if (!betText.matches("(?i)([BREULH]|[0-9]{1,2}(,[0-9]{1,2}){0,5})")) {
 			sendErrorMessage(event.getChannel(), "Please choose a valid bet! Use `" +
 					prefix + "help` for a list of valid bets.");
 			return;
@@ -99,7 +97,7 @@ public class PlayRoulette extends CommandImpl {
 
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(authorId, guildId));
-		if(dcMember.getCoins() < wager) {
+		if (dcMember.getCoins() < wager) {
 			sendErrorMessage(event.getChannel(), "You do not have enough coins for that bet.\n" +
 					"You only have **" + dcMember.getCoins() + "** coins right now.");
 			return;
@@ -108,7 +106,7 @@ public class PlayRoulette extends CommandImpl {
 		final RouletteBet bet = new RouletteBet(wager, betText);
 		final RouletteWinInfo winInfo = rouletteGame.play(bet);
 		final String fieldColor = RouletteInfo.getColorEmote(winInfo.getResultNumber());
-		if(!winInfo.isWin()) {
+		if (!winInfo.isWin()) {
 			dcMember.removeCoins(wager);
 			memberRepo.save(dcMember);
 			reply(event.getMessage(), "You lost the bet. Your balance: **" +

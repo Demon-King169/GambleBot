@@ -58,7 +58,7 @@ class Help extends CommandImpl {
 	public void execute(final GuildMessageReceivedEvent event) {
 		final TextChannel channel = event.getChannel();
 		final Member author = event.getMember();
-		if(author != null) {
+		if (author != null) {
 			sendHelpMessage(channel, author);
 		}
 	}
@@ -77,8 +77,8 @@ class Help extends CommandImpl {
 		}
 
 		final List<Command> fittingCommands = new ArrayList<>();
-		for(Command command : commands) {
-			if(command.isAdminCommand() && !author.hasPermission(Permission.ADMINISTRATOR)) {
+		for (Command command : commands) {
+			if (command.isAdminCommand() && !author.hasPermission(Permission.ADMINISTRATOR)) {
 				continue;
 			}
 

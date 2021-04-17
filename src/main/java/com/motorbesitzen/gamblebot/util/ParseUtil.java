@@ -1,7 +1,6 @@
 package com.motorbesitzen.gamblebot.util;
 
 import java.math.BigInteger;
-import java.util.Locale;
 
 /**
  * Helper functions for safely parsing inputs. Since mostly IDs need to be parsed -1 is an anomaly
@@ -31,12 +30,13 @@ public final class ParseUtil {
 	/**
 	 * Replaces 'units' in Strings by replacing "k" for "thousand" with "000", "m" for "million" with "000000"
 	 * and "b" for "billion" with "000000000".
+	 *
 	 * @param numberWithUnit The number String that may or may not include the mentioned 'units'.
 	 * @return The string with the mentioned 'units' replaced if they exist.
 	 */
 	private static String parseUnitChars(final String numberWithUnit) {
 		String lowerNumberWithUnit = numberWithUnit.toLowerCase().trim();
-		if(lowerNumberWithUnit.matches("[0-9]+[km]")) {
+		if (lowerNumberWithUnit.matches("[0-9]+[km]")) {
 			lowerNumberWithUnit = lowerNumberWithUnit.replaceFirst("k", "000");
 			lowerNumberWithUnit = lowerNumberWithUnit.replaceFirst("m", "000000");
 			lowerNumberWithUnit = lowerNumberWithUnit.replaceFirst("b", "000000000");
@@ -122,12 +122,12 @@ public final class ParseUtil {
 	 */
 	public static long safelyParseBigIntToLong(final BigInteger number) {
 		final BigInteger lowerLimit = BigInteger.valueOf(Long.MIN_VALUE);
-		if(number.compareTo(lowerLimit) <= 0) {
+		if (number.compareTo(lowerLimit) <= 0) {
 			return Long.MIN_VALUE;
 		}
 
 		final BigInteger upperLimit = BigInteger.valueOf(Long.MAX_VALUE);
-		if(number.compareTo(upperLimit) >= 0) {
+		if (number.compareTo(upperLimit) >= 0) {
 			return Long.MAX_VALUE;
 		}
 
