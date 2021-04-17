@@ -5,6 +5,7 @@ import com.motorbesitzen.gamblebot.data.dao.GambleSettings;
 import com.motorbesitzen.gamblebot.util.EnvironmentUtil;
 import com.motorbesitzen.gamblebot.util.ParseUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -205,5 +206,25 @@ public abstract class CommandImpl implements Command {
 		return eb.build();
 	}
 
+	/**
+	 * Determines if the new message is part of the original dialog.
+	 *
+	 * @param newEvent The event of the new guild message.
+	 * @param originalChannelId The channel ID of the channel where the original dialog started in.
+	 * @param originalAuthorId The member ID of the member who started the conversation.
+	 * @return {@code true} if the dialog is the original one. {@code false} if not.
+	 */
+	protected boolean isWrongDialog(final GuildMessageReceivedEvent newEvent, final long originalChannelId, final long originalAuthorId) {
+		final TextChannel channel = newEvent.getChannel();
+		if (channel.getIdLong() != originalChannelId) {
+			return true;
+		}
 
+		final Member author = newEvent.getMember();
+		if (author == null) {
+			return true;
+		}
+
+		return author.getIdLong() != originalAuthorId;
+	}
 }

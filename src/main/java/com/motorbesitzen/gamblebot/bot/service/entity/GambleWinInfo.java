@@ -1,11 +1,11 @@
-package com.motorbesitzen.gamblebot.bot.service;
+package com.motorbesitzen.gamblebot.bot.service.entity;
 
-public class WinInfo {
+public class GambleWinInfo {
 
 	private final String name;
 	private final double luckyNumber;
 
-	public WinInfo(String name, double luckyNumber) {
+	public GambleWinInfo(String name, double luckyNumber) {
 		this.name = name;
 		this.luckyNumber = luckyNumber;
 	}

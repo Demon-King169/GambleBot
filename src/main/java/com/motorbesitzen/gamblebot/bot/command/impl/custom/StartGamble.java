@@ -1,4 +1,4 @@
-package com.motorbesitzen.gamblebot.bot.command.impl;
+package com.motorbesitzen.gamblebot.bot.command.impl.custom;
 
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
@@ -111,7 +111,7 @@ class StartGamble extends CommandImpl {
 				msg -> eventWaiter.waitForEvent(
 						GuildMessageReceivedEvent.class,
 						newEvent -> {
-							if (!isOriginalDialog(newEvent, originalChannelId, originalAuthorId)) {
+							if (isWrongDialog(newEvent, originalChannelId, originalAuthorId)) {
 								return false;
 							}
 
@@ -153,20 +153,6 @@ class StartGamble extends CommandImpl {
 		);
 	}
 
-	private boolean isOriginalDialog(final GuildMessageReceivedEvent newEvent, final long originalChannelId, final long originalAuthorId) {
-		final TextChannel channel = newEvent.getChannel();
-		if (channel.getIdLong() != originalChannelId) {
-			return false;
-		}
-
-		final Member author = newEvent.getMember();
-		if (author == null) {
-			return false;
-		}
-
-		return author.getIdLong() == originalAuthorId;
-	}
-
 	private void requestOldSettings(final DiscordGuild dcGuild, final TextChannel originalChannel, final long originalAuthorId) {
 		final long originalChannelId = originalChannel.getIdLong();
 		originalChannel.sendMessage(
@@ -176,7 +162,7 @@ class StartGamble extends CommandImpl {
 				msg -> eventWaiter.waitForEvent(
 						GuildMessageReceivedEvent.class,
 						newEvent -> {
-							if (!isOriginalDialog(newEvent, originalChannelId, originalAuthorId)) {
+							if (isWrongDialog(newEvent, originalChannelId, originalAuthorId)) {
 								return false;
 							}
 
@@ -226,7 +212,7 @@ class StartGamble extends CommandImpl {
 				msg -> eventWaiter.waitForEvent(
 						GuildMessageReceivedEvent.class,
 						newEvent -> {
-							if (!isOriginalDialog(newEvent, originalChannelId, originalAuthorId)) {
+							if (isWrongDialog(newEvent, originalChannelId, originalAuthorId)) {
 								return false;
 							}
 
@@ -273,7 +259,7 @@ class StartGamble extends CommandImpl {
 				msg -> eventWaiter.waitForEvent(
 						GuildMessageReceivedEvent.class,
 						newEvent -> {
-							if (!isOriginalDialog(newEvent, originalChannelId, originalAuthorId)) {
+							if (isWrongDialog(newEvent, originalChannelId, originalAuthorId)) {
 								return false;
 							}
 
@@ -322,7 +308,7 @@ class StartGamble extends CommandImpl {
 				msg -> eventWaiter.waitForEvent(
 						GuildMessageReceivedEvent.class,
 						newEvent -> {
-							if (!isOriginalDialog(newEvent, originalChannelId, originalAuthorId)) {
+							if (isWrongDialog(newEvent, originalChannelId, originalAuthorId)) {
 								return false;
 							}
 
@@ -440,7 +426,7 @@ class StartGamble extends CommandImpl {
 				msg -> eventWaiter.waitForEvent(
 						GuildMessageReceivedEvent.class,
 						newEvent -> {
-							if (!isOriginalDialog(newEvent, originalChannelId, originalAuthorId)) {
+							if (isWrongDialog(newEvent, originalChannelId, originalAuthorId)) {
 								return false;
 							}
 

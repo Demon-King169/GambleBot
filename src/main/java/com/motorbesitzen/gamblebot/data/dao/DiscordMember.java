@@ -5,6 +5,7 @@ import com.motorbesitzen.gamblebot.util.ParseUtil;
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.math.BigInteger;
 
 @Entity
 public class DiscordMember {
@@ -18,6 +19,12 @@ public class DiscordMember {
 
 	@Min(0)
 	private long nextGambleMs;
+
+	@Min(0)
+	private long nextDailyCoinsMs;
+
+	@Min(0)
+	private long coins;
 
 	@NotNull
 	@ManyToOne
@@ -45,6 +52,18 @@ public class DiscordMember {
 		return nextGambleMs;
 	}
 
+	public long getNextDailyCoinsMs() {
+		return nextDailyCoinsMs;
+	}
+
+	public void setNextDailyCoinsMs(final long nextDailyCoinsMs) {
+		this.nextDailyCoinsMs = nextDailyCoinsMs;
+	}
+
+	public long getCoins() {
+		return coins;
+	}
+
 	public void setNextGambleMs(final long nextGambleMs) {
 		this.nextGambleMs = nextGambleMs;
 	}
@@ -64,5 +83,29 @@ public class DiscordMember {
 		}
 
 		return ParseUtil.parseMillisecondsToText(toEndMs);
+	}
+
+	public String getTimeToNextDailyText() {
+		final long toNextMs = nextDailyCoinsMs - System.currentTimeMillis();
+		if (toNextMs <= 0) {
+			return "0s";
+		}
+
+		return ParseUtil.parseMillisecondsToText(toNextMs);
+	}
+
+	public void addCoins(final long coins) {
+		this.coins = safelyAdd(this.coins, coins);
+	}
+
+	private long safelyAdd(final long a, final long b) {
+		final BigInteger bigA = BigInteger.valueOf(a);
+		final BigInteger bigB = BigInteger.valueOf(b);
+		final BigInteger result = bigA.add(bigB);
+		return ParseUtil.safelyParseBigIntToLong(result);
+	}
+
+	public void removeCoins(final long coins) {
+		this.coins = Math.max(0, this.coins - coins);
 	}
 }

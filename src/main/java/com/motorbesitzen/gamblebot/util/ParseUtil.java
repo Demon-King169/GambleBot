@@ -1,5 +1,7 @@
 package com.motorbesitzen.gamblebot.util;
 
+import java.math.BigInteger;
+
 /**
  * Helper functions for safely parsing inputs. Since mostly IDs need to be parsed -1 is an anomaly
  * that can be used instead of an error/exception.
@@ -88,5 +90,27 @@ public final class ParseUtil {
 		}
 
 		return ms;
+	}
+
+	/**
+	 * Tries to parse a {@code BigInteger} to a {@code long}.
+	 *
+	 * @param number The {@code BigInteger} representation of a number.
+	 * @return The number as {@code long}. If the {@param number} is greater than {@code Long.MAX_VALUE} it
+	 * returns {@code Long.MAX_VALUE}. If the {@param number} is smaller than {@code Long.MIN_VALUE} it
+	 * returns {@code Long.MIN_VALUE}.
+	 */
+	public static long safelyParseBigIntToLong(final BigInteger number) {
+		final BigInteger lowerLimit = BigInteger.valueOf(Long.MIN_VALUE);
+		if(number.compareTo(lowerLimit) <= 0) {
+			return Long.MIN_VALUE;
+		}
+
+		final BigInteger upperLimit = BigInteger.valueOf(Long.MAX_VALUE);
+		if(number.compareTo(upperLimit) >= 0) {
+			return Long.MAX_VALUE;
+		}
+
+		return number.longValue();
 	}
 }

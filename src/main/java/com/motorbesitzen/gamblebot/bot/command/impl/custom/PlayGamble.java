@@ -1,8 +1,8 @@
-package com.motorbesitzen.gamblebot.bot.command.impl;
+package com.motorbesitzen.gamblebot.bot.command.impl.custom;
 
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.bot.service.GambleGame;
-import com.motorbesitzen.gamblebot.bot.service.WinInfo;
+import com.motorbesitzen.gamblebot.bot.service.entity.GambleWinInfo;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
@@ -90,14 +90,14 @@ class PlayGamble extends CommandImpl {
 	}
 
 	private void playGamble(final TextChannel channel, final DiscordMember player, final Member member) {
-		final WinInfo winInfo = gambleGame.play(player);
+		final GambleWinInfo gambleWinInfo = gambleGame.play(player);
 		final NumberFormat nf = generateNumberFormat();
 		final String playerMention = "<@" + player.getDiscordId() + ">";
-		if (winInfo.getName() == null) {
+		if (gambleWinInfo.getName() == null) {
 			answer(
 					channel,
 					playerMention + ", you drew a blank! You did not win anything.\n" +
-							"Your (rounded) unlucky number: " + nf.format(winInfo.getLuckyNumber())
+							"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 			);
 			return;
 		}
@@ -105,13 +105,13 @@ class PlayGamble extends CommandImpl {
 
 		final DiscordGuild dcGuild = player.getGuild();
 		final TextChannel logChannel = channel.getGuild().getTextChannelById(dcGuild.getLogChannelId());
-		if(winInfo.getName().equalsIgnoreCase("ban") || winInfo.getName().toLowerCase().startsWith("ban ")) {
+		if(gambleWinInfo.getName().equalsIgnoreCase("ban") || gambleWinInfo.getName().toLowerCase().startsWith("ban ")) {
 			final Member self = channel.getGuild().getSelfMember();
 			if(self.canInteract(member)) {
 				answer(
 						channel,
 						"Unlucky " + playerMention + "! You won a ban. Enforcing ban in a few seconds...\n" +
-								"Your (rounded) unlucky number: " + nf.format(winInfo.getLuckyNumber())
+								"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 				);
 				member.ban(0, "'Won' a ban in the gamble.").queueAfter(
 						10, TimeUnit.SECONDS,
@@ -124,7 +124,7 @@ class PlayGamble extends CommandImpl {
 				answer(
 						channel,
 						"Unlucky " + playerMention + "! You won a ban. Be glad that I can not ban you myself. Reporting to authorities...\n" +
-						"Your (rounded) unlucky number: " + nf.format(winInfo.getLuckyNumber())
+						"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 				);
 				if(logChannel != null) {
 					answer(logChannel, playerMention + " won a ban. However, I can not ban that user.");
@@ -133,13 +133,13 @@ class PlayGamble extends CommandImpl {
 			return;
 		}
 
-		if(winInfo.getName().equalsIgnoreCase("kick") || winInfo.getName().toLowerCase().startsWith("kick ")) {
+		if(gambleWinInfo.getName().equalsIgnoreCase("kick") || gambleWinInfo.getName().toLowerCase().startsWith("kick ")) {
 			final Member self = channel.getGuild().getSelfMember();
 			if(self.canInteract(member)) {
 				answer(
 						channel,
 						"Unlucky " + playerMention + "! You won a kick. Enforcing kick in a few seconds...\n" +
-								"Your (rounded) unlucky number: " + nf.format(winInfo.getLuckyNumber())
+								"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 				);
 				member.kick("'Won' a kick in the gamble.").queueAfter(
 						5, TimeUnit.SECONDS,
@@ -152,7 +152,7 @@ class PlayGamble extends CommandImpl {
 				answer(
 						channel,
 						"Unlucky " + playerMention + "! You won a kick. Be glad that I can not kick you myself. Reporting to authorities...\n" +
-								"Your (rounded) unlucky number: " + nf.format(winInfo.getLuckyNumber())
+								"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 				);
 				if(logChannel != null) {
 					answer(logChannel, playerMention + " won a kick. However, I can not kick that user.");
@@ -163,11 +163,11 @@ class PlayGamble extends CommandImpl {
 
 		answer(
 				channel,
-				playerMention + " you won \"" + winInfo.getName() + "\"!\n" +
-						"Your (rounded) lucky number: " + nf.format(winInfo.getLuckyNumber())
+				playerMention + " you won \"" + gambleWinInfo.getName() + "\"!\n" +
+						"Your (rounded) lucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 		);
 		if (logChannel != null) {
-			answer(logChannel, playerMention + " won \"" + winInfo.getName() + "\"!");
+			answer(logChannel, playerMention + " won \"" + gambleWinInfo.getName() + "\"!");
 		}
 	}
 

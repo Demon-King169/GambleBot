@@ -1,10 +1,11 @@
-package com.motorbesitzen.gamblebot.bot.command.impl;
+package com.motorbesitzen.gamblebot.bot.command.impl.general;
 
 import com.motorbesitzen.gamblebot.bot.command.Command;
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
-import com.motorbesitzen.gamblebot.util.DiscordMessageUtil;
 import com.motorbesitzen.gamblebot.util.EnvironmentUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ class Help extends CommandImpl {
 
 	@Override
 	public boolean isAdminCommand() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -56,30 +57,48 @@ class Help extends CommandImpl {
 	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
 		final TextChannel channel = event.getChannel();
-		sendHelpMessage(channel);
+		final Member author = event.getMember();
+		if(author != null) {
+			sendHelpMessage(channel, author);
+		}
 	}
 
 	/**
 	 * Sends the help message in the channel where the help got requested.
 	 *
 	 * @param channel The channel in which the command got used.
+	 * @param author  The author of the command.
 	 */
-	private void sendHelpMessage(final TextChannel channel) {
+	private void sendHelpMessage(final TextChannel channel, final Member author) {
 		final List<Command> commands = new ArrayList<>(commandMap.values());
 		if (commands.size() == 0) {
 			sendErrorMessage(channel, "No commands found!");
 			return;
 		}
 
-		final int pages = (commands.size() / FIELDS_PER_EMBED) + 1;
+		final List<Command> fittingCommands = new ArrayList<>();
+		for(Command command : commands) {
+			if(command.isAdminCommand() && !author.hasPermission(Permission.ADMINISTRATOR)) {
+				continue;
+			}
+
+			fittingCommands.add(command);
+		}
+
+		if (fittingCommands.size() == 0) {
+			sendErrorMessage(channel, "No commands found!");
+			return;
+		}
+
+		final int pages = (fittingCommands.size() / FIELDS_PER_EMBED) + 1;
 		EmbedBuilder eb = buildEmbedPage(1, pages);
-		for (int i = 0; i < commands.size(); i++) {
+		for (int i = 0; i < fittingCommands.size(); i++) {
 			if (i > 0 && i % 25 == 0) {
 				answer(channel, eb.build());
 				eb = buildEmbedPage((i / FIELDS_PER_EMBED) + 1, pages);
 			}
 
-			final Command command = commands.get(i);
+			final Command command = fittingCommands.get(i);
 			addHelpEntry(eb, command);
 		}
 

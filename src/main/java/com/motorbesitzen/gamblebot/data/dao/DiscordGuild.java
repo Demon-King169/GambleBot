@@ -3,6 +3,7 @@ package com.motorbesitzen.gamblebot.data.dao;
 import com.motorbesitzen.gamblebot.util.ParseUtil;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +17,10 @@ public class DiscordGuild {
 
 	@Min(0)
 	private long logChannelId;
+
+	@Min(0)
+	@Max(Integer.MAX_VALUE)
+	private long dailyCoins;
 
 	@OneToOne
 	private GambleSettings gambleSettings;
@@ -53,6 +58,14 @@ public class DiscordGuild {
 		return logChannelId;
 	}
 
+	public long getDailyCoins() {
+		return dailyCoins;
+	}
+
+	public void setDailyCoins(long dailyCoins) {
+		this.dailyCoins = dailyCoins;
+	}
+
 	public void setLogChannelId(long logChannelId) {
 		this.logChannelId = logChannelId;
 	}
@@ -77,7 +90,7 @@ public class DiscordGuild {
 
 	public String getTimeToEndText() {
 		if (gambleSettings == null) {
-			return "This guild did not start a giveaway yet.";
+			return "∞";
 		}
 
 		final long startMs = gambleSettings.getStartTimestampMs();
@@ -92,7 +105,7 @@ public class DiscordGuild {
 
 	public String getTimeSinceEndText() {
 		if (gambleSettings == null) {
-			return "This guild did not start a giveaway yet.";
+			return "∞";
 		}
 
 		final long startMs = gambleSettings.getStartTimestampMs();
