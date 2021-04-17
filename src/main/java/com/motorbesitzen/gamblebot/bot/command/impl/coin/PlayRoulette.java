@@ -76,14 +76,15 @@ public class PlayRoulette extends CommandImpl {
 		final Message message = event.getMessage();
 		final String content = message.getContentRaw();
 		final String prefix = EnvironmentUtil.getEnvironmentVariable("CMD_PREFIX");
-		if(!content.matches("(?i)" + prefix + getName() + " [0-9]+ ([BREULH]|[0-9]{1,2}(,[0-9]{1,2}){0,5})")) {
+		if(!content.matches("(?i)" + prefix + getName() + " [0-9]+k? ([BREULH]|[0-9]{1,2}(,[0-9]{1,2}){0,5})")) {
 			sendErrorMessage(event.getChannel(), "Please use the correct syntax! Use `" +
 					prefix + "help` for a list of valid bets.");
 			return;
 		}
 
 		final String[] tokens = content.split(" ");
-		final long wager = ParseUtil.safelyParseStringToLong(tokens[tokens.length - 2]);
+		final String wagerText = tokens[tokens.length - 2].toLowerCase().replaceAll("k", "000");
+		final long wager = ParseUtil.safelyParseStringToLong(wagerText);
 		if(wager <= 0) {
 			sendErrorMessage(event.getChannel(), "Please set a wager of at least 1 coin for your bet!");
 			return;

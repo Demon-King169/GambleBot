@@ -85,7 +85,8 @@ public class PayCoins extends CommandImpl {
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(member.getIdLong(), guildId));
 		final String content = event.getMessage().getContentRaw();
 		final String[] tokens = content.split(" ");
-		final long coinAmount = ParseUtil.safelyParseStringToLong(tokens[tokens.length - 1]);
+		final String coinText = tokens[tokens.length - 1].toLowerCase().replaceAll("k", "000");
+		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
 		if(coinAmount < 1 || coinAmount > Integer.MAX_VALUE || coinAmount > author.getCoins()) {
 			sendErrorMessage(event.getChannel(), "Please set a valid coin amount (1 - " + Math.min(dcMember.getCoins(), Integer.MAX_VALUE) + ")!");
 			return;
