@@ -40,7 +40,7 @@ public class RouletteGame {
 
 	public RouletteWinInfo play(final RouletteBet bet) {
 		final int result = random.nextInt(37);    // 0 -36
-		LogUtil.logDebug("Result: " + result);
+		LogUtil.logDebug(bet.getUserId() + " got a roulette result of " + result + " while betting on \"" + bet + "\".");
 		final long winAmount = bet.getBetInfo().matches("(?i)[BREULH]") ?
 				getSectionWin(bet, result) :
 				getNumberWin(bet, result);

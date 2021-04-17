@@ -25,15 +25,13 @@ public class PlayRoulette extends CommandImpl {
 
 	private final DiscordMemberRepo memberRepo;
 	private final DiscordGuildRepo guildRepo;
-	private final EventWaiter eventWaiter;
 	private final RouletteGame rouletteGame;
 
 	@Autowired
 	private PlayRoulette(final DiscordMemberRepo memberRepo, final DiscordGuildRepo guildRepo,
-						 final EventWaiter eventWaiter, final RouletteGame rouletteGame) {
+						 final RouletteGame rouletteGame) {
 		this.memberRepo = memberRepo;
 		this.guildRepo = guildRepo;
-		this.eventWaiter = eventWaiter;
 		this.rouletteGame = rouletteGame;
 	}
 
@@ -103,7 +101,7 @@ public class PlayRoulette extends CommandImpl {
 			return;
 		}
 
-		final RouletteBet bet = new RouletteBet(wager, betText);
+		final RouletteBet bet = new RouletteBet(dcMember.getDiscordId(), wager, betText);
 		final RouletteWinInfo winInfo = rouletteGame.play(bet);
 		final String fieldColor = RouletteInfo.getColorEmote(winInfo.getResultNumber());
 		if (!winInfo.isWin()) {

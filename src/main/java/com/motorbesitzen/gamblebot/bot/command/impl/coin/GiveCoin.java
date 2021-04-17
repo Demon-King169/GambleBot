@@ -6,6 +6,7 @@ import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
 import com.motorbesitzen.gamblebot.util.DiscordMessageUtil;
+import com.motorbesitzen.gamblebot.util.LogUtil;
 import com.motorbesitzen.gamblebot.util.ParseUtil;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -78,6 +79,7 @@ public class GiveCoin extends CommandImpl {
 		dcMember.addCoins(coinAmount);
 		memberRepo.save(dcMember);
 		answer(event.getChannel(), "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ".");
+		LogUtil.logDebug(event.getAuthor().getIdLong() + " gave " + coinAmount + " coins to " + dcMember.getDiscordId());
 	}
 
 	private DiscordMember createNewMember(final long memberId, final long guildId) {
