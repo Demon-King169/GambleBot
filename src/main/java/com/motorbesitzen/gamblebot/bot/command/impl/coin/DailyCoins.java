@@ -62,7 +62,7 @@ public class DailyCoins extends CommandImpl {
 		}
 
 		final long dailyCoinsAmount = dcMember.getGuild().getDailyCoins();
-		dcMember.addCoins(dailyCoinsAmount);
+		dcMember.receiveCoins(dailyCoinsAmount);
 		dcMember.setNextDailyCoinsMs(System.currentTimeMillis() + MS_PER_DAY);
 		memberRepo.save(dcMember);
 		reply(event.getMessage(), "Added **" + dailyCoinsAmount + "** coins to your balance!\n" +

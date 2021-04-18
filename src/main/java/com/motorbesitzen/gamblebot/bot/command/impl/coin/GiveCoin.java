@@ -76,7 +76,7 @@ public class GiveCoin extends CommandImpl {
 			return;
 		}
 
-		dcMember.addCoins(coinAmount);
+		dcMember.receiveCoins(coinAmount);
 		memberRepo.save(dcMember);
 		answer(event.getChannel(), "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ".");
 		LogUtil.logDebug(event.getAuthor().getIdLong() + " gave " + coinAmount + " coins to " + dcMember.getDiscordId());

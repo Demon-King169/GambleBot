@@ -69,6 +69,9 @@ public class Stats extends CommandImpl {
 		eb.addField("Coins:", String.valueOf(dcMember.getCoins()), true);
 		eb.addField("Coins won: ", String.valueOf(dcMember.getCoinsWon()), true);
 		eb.addField("Coins lost: ", String.valueOf(dcMember.getCoinsLost()), true);
+		eb.addField("Coins received: ", String.valueOf(dcMember.getCoinsReceived()), true);
+		eb.addField("Coins spent: ", String.valueOf(dcMember.getCoinsSpend()), true);
+		eb.addBlankField(true);
 		eb.addField("Games: ", String.valueOf(dcMember.getGamesPlayed()), true);
 		eb.addField("Wins: ", String.valueOf(dcMember.getGamesWon()), true);
 		eb.addField("Losses: ", String.valueOf(dcMember.getGamesLost()), true);

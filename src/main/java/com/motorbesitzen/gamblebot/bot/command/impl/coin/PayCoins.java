@@ -93,9 +93,9 @@ public class PayCoins extends CommandImpl {
 			return;
 		}
 
-		author.removeCoins(coinAmount);
+		author.spendCoins(coinAmount);
 		memberRepo.save(author);
-		dcMember.addCoins(coinAmount);
+		dcMember.receiveCoins(coinAmount);
 		memberRepo.save(dcMember);
 		answer(event.getChannel(), "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ".");
 		LogUtil.logDebug(author.getDiscordId() + " paid " + coinAmount + " coins to " + dcMember.getDiscordId());

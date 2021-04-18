@@ -41,6 +41,12 @@ public class DiscordMember {
 	@Min(0)
 	private long gamesLost;
 
+	@Min(0)
+	private long coinsSpend;
+
+	@Min(0)
+	private long coinsReceived;
+
 	@NotNull
 	@ManyToOne
 	@JoinColumn(name = "guildId")
@@ -103,6 +109,14 @@ public class DiscordMember {
 		return gamesLost;
 	}
 
+	public long getCoinsSpend() {
+		return coinsSpend;
+	}
+
+	public long getCoinsReceived() {
+		return coinsReceived;
+	}
+
 	public DiscordGuild getGuild() {
 		return guild;
 	}
@@ -129,10 +143,6 @@ public class DiscordMember {
 		return ParseUtil.parseMillisecondsToText(toNextMs);
 	}
 
-	public void addCoins(final long coins) {
-		this.coins = safelyAdd(this.coins, coins);
-	}
-
 	private long safelyAdd(final long a, final long b) {
 		final BigInteger bigA = BigInteger.valueOf(a);
 		final BigInteger bigB = BigInteger.valueOf(b);
@@ -140,21 +150,27 @@ public class DiscordMember {
 		return ParseUtil.safelyParseBigIntToLong(result);
 	}
 
-	public void removeCoins(final long coins) {
-		this.coins = Math.max(0, this.coins - coins);
-	}
-
 	public void lostGame(final long coinsLost) {
 		this.gamesPlayed++;
 		this.gamesLost++;
-		this.coinsLost += coinsLost;
+		this.coinsLost = safelyAdd(this.coinsLost, coinsLost);
 		this.coins -= coinsLost;
 	}
 
 	public void wonGame(final long coinsWon) {
 		this.gamesPlayed++;
 		this.gamesWon++;
-		this.coinsWon += coinsWon;
-		this.coins += coinsWon;
+		this.coinsWon = safelyAdd(this.coinsWon, coinsWon);
+		this.coins = safelyAdd(this.coins, coinsWon);
+	}
+
+	public void spendCoins(final long coins) {
+		this.coinsSpend = safelyAdd(this.coinsSpend, coins);
+		this.coins -= coins;
+	}
+
+	public void receiveCoins(final long coins) {
+		this.coinsReceived = safelyAdd(this.coinsReceived, coins);
+		this.coins = safelyAdd(this.coins, coins);
 	}
 }
