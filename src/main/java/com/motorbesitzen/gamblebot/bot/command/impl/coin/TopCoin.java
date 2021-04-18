@@ -71,8 +71,14 @@ public class TopCoin extends CommandImpl {
 		int pos = 1;
 		for (DiscordMember dcMember : dcMembers) {
 			eb.addField("",
-					"**" + pos++ + "**. " + "<@" + dcMember.getDiscordId() + "> - Coins: " + dcMember.getCoins(),
-					false
+					"**" + pos++ + "**. " + "<@" + dcMember.getDiscordId() + ">\n" +
+							"Coins: " + dcMember.getCoins() + "\n" +
+							"Coins won: " + dcMember.getCoinsWon() + "\n" +
+							"Coins lost: " + dcMember.getCoinsLost() + "\n" +
+							"Games: " + dcMember.getGamesPlayed() + "\n" +
+							"Wins: " + dcMember.getGamesWon() + "\n" +
+							"Losses: " + dcMember.getGamesLost(),
+					true
 			);
 		}
 	}

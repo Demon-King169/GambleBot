@@ -105,7 +105,7 @@ public class PlayRoulette extends CommandImpl {
 		final RouletteWinInfo winInfo = rouletteGame.play(bet);
 		final String fieldColor = RouletteInfo.getColorEmote(winInfo.getResultNumber());
 		if (!winInfo.isWin()) {
-			dcMember.removeCoins(wager);
+			dcMember.lostGame(wager);
 			memberRepo.save(dcMember);
 			reply(event.getMessage(), "You lost the bet. Your balance: **" +
 					dcMember.getCoins() + "** coins.\n" + fieldColor + " Roulette result: " + winInfo.getResultNumber());
@@ -113,7 +113,7 @@ public class PlayRoulette extends CommandImpl {
 		}
 
 		final long winAmount = winInfo.getWinAmount();
-		dcMember.addCoins(winAmount);
+		dcMember.wonGame(winAmount);
 		memberRepo.save(dcMember);
 		reply(event.getMessage(), "You won **" + winAmount + "** coins! Your balance: **" +
 				dcMember.getCoins() + "** coins.\n" + fieldColor + " Roulette result: " + winInfo.getResultNumber());

@@ -26,6 +26,21 @@ public class DiscordMember {
 	@Min(0)
 	private long coins;
 
+	@Min(0)
+	private long coinsWon;
+
+	@Min(0)
+	private long coinsLost;
+
+	@Min(0)
+	private long gamesPlayed;
+
+	@Min(0)
+	private long gamesWon;
+
+	@Min(0)
+	private long gamesLost;
+
 	@NotNull
 	@ManyToOne
 	@JoinColumn(name = "guildId")
@@ -48,10 +63,6 @@ public class DiscordMember {
 		return discordId;
 	}
 
-	public long getNextGambleMs() {
-		return nextGambleMs;
-	}
-
 	public void setNextGambleMs(final long nextGambleMs) {
 		this.nextGambleMs = nextGambleMs;
 	}
@@ -66,6 +77,30 @@ public class DiscordMember {
 
 	public long getCoins() {
 		return coins;
+	}
+
+	public void setCoins(long coins) {
+		this.coins = coins;
+	}
+
+	public long getCoinsWon() {
+		return coinsWon;
+	}
+
+	public long getCoinsLost() {
+		return coinsLost;
+	}
+
+	public long getGamesPlayed() {
+		return gamesPlayed;
+	}
+
+	public long getGamesWon() {
+		return gamesWon;
+	}
+
+	public long getGamesLost() {
+		return gamesLost;
 	}
 
 	public DiscordGuild getGuild() {
@@ -107,5 +142,19 @@ public class DiscordMember {
 
 	public void removeCoins(final long coins) {
 		this.coins = Math.max(0, this.coins - coins);
+	}
+
+	public void lostGame(final long coinsLost) {
+		this.gamesPlayed++;
+		this.gamesLost++;
+		this.coinsLost += coinsLost;
+		this.coins -= coinsLost;
+	}
+
+	public void wonGame(final long coinsWon) {
+		this.gamesPlayed++;
+		this.gamesWon++;
+		this.coinsWon += coinsWon;
+		this.coins += coinsWon;
 	}
 }

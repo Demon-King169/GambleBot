@@ -23,4 +23,12 @@ public class RouletteBet {
 	public String getBetInfo() {
 		return betInfo;
 	}
+
+	@Override
+	public String toString() {
+		return "RouletteBet{" +
+				"wager=" + wager +
+				", betInfo='" + betInfo + '\'' +
+				'}';
+	}
 }

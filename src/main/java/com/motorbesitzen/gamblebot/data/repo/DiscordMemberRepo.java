@@ -17,6 +17,6 @@ public interface DiscordMemberRepo extends CrudRepository<DiscordMember, Long> {
 	@Query("select d " +
 			"from DiscordMember d " +
 			"where d.guild.guildId = ?1 and d.coins > 0 " +
-			"order by d.coins desc")
+			"order by d.coins desc, d.coinsWon desc")
 	List<DiscordMember> findAllByGuild_GuildIdOrderByCoinsDesc(final long guildId, final Pageable pageable);
 }
