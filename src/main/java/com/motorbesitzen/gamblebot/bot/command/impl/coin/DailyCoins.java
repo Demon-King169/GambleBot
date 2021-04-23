@@ -46,6 +46,11 @@ public class DailyCoins extends CommandImpl {
 	}
 
 	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
 		final Member author = event.getMember();
 		if (author == null) {

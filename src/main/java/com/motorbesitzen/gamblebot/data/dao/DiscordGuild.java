@@ -19,7 +19,9 @@ public class DiscordGuild {
 	private long logChannelId;
 
 	@Min(0)
-	@Max(Integer.MAX_VALUE)
+	private long coinChannelId;
+
+	@Min(0)
 	private long dailyCoins;
 
 	@OneToOne
@@ -60,6 +62,14 @@ public class DiscordGuild {
 
 	public void setLogChannelId(long logChannelId) {
 		this.logChannelId = logChannelId;
+	}
+
+	public long getCoinChannelId() {
+		return coinChannelId;
+	}
+
+	public void setCoinChannelId(long coinChannelId) {
+		this.coinChannelId = coinChannelId;
 	}
 
 	public long getDailyCoins() {

@@ -45,6 +45,11 @@ class Help extends CommandImpl {
 	}
 
 	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
+	@Override
 	public String getDescription() {
 		return "Shows a list of commands that can be used.";
 	}

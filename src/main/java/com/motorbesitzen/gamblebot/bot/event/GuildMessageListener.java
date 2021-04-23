@@ -1,13 +1,11 @@
 package com.motorbesitzen.gamblebot.bot.event;
 
 import com.motorbesitzen.gamblebot.bot.command.Command;
+import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.util.EnvironmentUtil;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -15,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class GuildMessageListener extends ListenerAdapter {
@@ -83,6 +82,10 @@ public class GuildMessageListener extends ListenerAdapter {
 			return;
 		}
 
+		if(!isAuthorizedChannel(command, event)) {
+			return;
+		}
+
 		try {
 			command.execute(event);
 		} catch (InsufficientPermissionException e) {
@@ -97,5 +100,22 @@ public class GuildMessageListener extends ListenerAdapter {
 		}
 
 		return !command.isAdminCommand() || member.hasPermission(Permission.ADMINISTRATOR);
+	}
+
+	private boolean isAuthorizedChannel(final Command command, final GuildMessageReceivedEvent event) {
+		if(command.isGlobalCommand()) {
+			return true;
+		}
+
+		final Guild guild = event.getGuild();
+		final long guildId = guild.getIdLong();
+		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
+		if(dcGuild.getCoinChannelId() == 0) {
+			return true;
+		}
+
+		final TextChannel channel = event.getChannel();
+		return dcGuild.getCoinChannelId() == channel.getIdLong();
 	}
 }

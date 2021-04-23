@@ -44,6 +44,11 @@ public class StopGamble extends CommandImpl {
 	}
 
 	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
+	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
 		final long guildId = event.getGuild().getIdLong();
 		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);

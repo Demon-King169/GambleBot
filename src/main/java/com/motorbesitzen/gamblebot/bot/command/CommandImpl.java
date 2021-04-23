@@ -50,6 +50,14 @@ public abstract class CommandImpl implements Command {
 	/**
 	 * {@inheritDoc}
 	 * Default command implementation without command functionality. Declared as 'unknown command'.
+	 * @return
+	 */
+	@Override
+	public abstract boolean isGlobalCommand();
+
+	/**
+	 * {@inheritDoc}
+	 * Default command implementation without command functionality. Declared as 'unknown command'.
 	 */
 	@Override
 	public abstract void execute(final GuildMessageReceivedEvent event);

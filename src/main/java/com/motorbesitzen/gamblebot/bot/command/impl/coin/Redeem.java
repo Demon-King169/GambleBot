@@ -27,6 +27,11 @@ public class Redeem extends CommandImpl {
 		return false;
 	}
 
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
 	/*
 	 * If win contains a role mention the user should get that role (-> image perms, embed perms, some other perms)
 	 * change nickname

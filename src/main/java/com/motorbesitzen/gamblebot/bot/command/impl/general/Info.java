@@ -27,6 +27,11 @@ public class Info extends CommandImpl {
 	}
 
 	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
+	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
 		answer(event.getChannel(), "Not implemented yet...");
 		// daily coins info

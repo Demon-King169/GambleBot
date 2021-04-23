@@ -36,6 +36,13 @@ public interface Command {
 	boolean isAdminCommand();
 
 	/**
+	 * Defines if the command can get used globally or only in a certain channel if the guild uses that option.
+	 *
+	 * @return {@code true} if the command can be used everywhere the bot has access to.
+	 */
+	boolean isGlobalCommand();
+
+	/**
 	 * A method that performs the necessary actions for the given command.
 	 *
 	 * @param event The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/events/message/guild/GuildMessageReceivedEvent.html">Discord event</a>

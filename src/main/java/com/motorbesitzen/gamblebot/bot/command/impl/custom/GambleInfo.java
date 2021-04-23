@@ -40,6 +40,11 @@ class GambleInfo extends CommandImpl {
 		return true;
 	}
 
+	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
 	@Transactional
 	@Override
 	public void execute(GuildMessageReceivedEvent event) {

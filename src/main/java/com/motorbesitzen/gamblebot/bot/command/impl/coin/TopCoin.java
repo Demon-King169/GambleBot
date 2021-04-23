@@ -45,6 +45,11 @@ public class TopCoin extends CommandImpl {
 	}
 
 	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
 		final Guild guild = event.getGuild();
 		final long guildId = guild.getIdLong();

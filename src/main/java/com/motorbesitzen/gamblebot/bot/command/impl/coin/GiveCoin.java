@@ -49,6 +49,11 @@ public class GiveCoin extends CommandImpl {
 	}
 
 	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
+	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
 		final Message message = event.getMessage();
 		final long userId = DiscordMessageUtil.getMentionedMemberId(message);

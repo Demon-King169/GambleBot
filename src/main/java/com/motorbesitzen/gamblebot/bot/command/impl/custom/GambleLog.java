@@ -43,6 +43,11 @@ class GambleLog extends CommandImpl {
 	}
 
 	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
+	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
 		final Message message = event.getMessage();
 		final List<TextChannel> mentionedChannels = message.getMentionedChannels();

@@ -54,6 +54,11 @@ class PlayGamble extends CommandImpl {
 		return false;
 	}
 
+	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
 	@Transactional
 	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
