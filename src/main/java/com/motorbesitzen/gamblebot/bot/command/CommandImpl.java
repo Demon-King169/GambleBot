@@ -71,7 +71,9 @@ public abstract class CommandImpl implements Command {
 	 * @param message The message content to send as answer.
 	 */
 	protected void answer(final TextChannel channel, final String message) {
-		sendMessage(channel, message);
+		if(isValidMessage(channel, message)) {
+			sendMessage(channel, message);
+		}
 	}
 
 	/**
@@ -85,7 +87,9 @@ public abstract class CommandImpl implements Command {
 	 *                to send as answer.
 	 */
 	protected void answer(final TextChannel channel, final MessageEmbed message) {
-		sendMessage(channel, message);
+		if(isValidMessage(channel, message)) {
+			sendMessage(channel, message);
+		}
 	}
 
 	/**
@@ -95,10 +99,8 @@ public abstract class CommandImpl implements Command {
 	 *                to send the message in.
 	 * @param message The message content to send as answer.
 	 */
-	protected void sendMessage(final TextChannel channel, final String message) {
-		if (channel.canTalk()) {
-			channel.sendMessage(message).queue();
-		}
+	private void sendMessage(final TextChannel channel, final String message) {
+		channel.sendMessage(message).queue();
 	}
 
 	/**
@@ -109,75 +111,8 @@ public abstract class CommandImpl implements Command {
 	 * @param message The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/MessageEmbed.html">embedded message</a>
 	 *                to send as answer.
 	 */
-	protected void sendMessage(final TextChannel channel, final MessageEmbed message) {
-		if (channel.canTalk()) {
-			channel.sendMessage(message).queue();
-		}
-	}
-
-	/**
-	 * Sends a placeholder message which can be updated e.g. when a task succeeds. Does not send a message if the bot
-	 * has no permissions to write in the given chat.
-	 *
-	 * @param channel            <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
-	 *                           to send the placeholder in.
-	 * @param placeholderMessage The message content so send as a placeholder.
-	 * @return The Discord <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/Message.html">Message</a>
-	 * object of the sent message, {@code null} if the bot can not write in the given channel.
-	 */
-	protected Message answerPlaceholder(final TextChannel channel, final String placeholderMessage) {
-		if (!channel.canTalk()) {
-			return null;
-		}
-
-		return channel.sendMessage(placeholderMessage).complete();
-	}
-
-	/**
-	 * Edits a given Discord Message objects message. Sends error message in channel if given message is not written
-	 * by the bot. Does not do anything if message does not exist anymore or if the bot does not have the needed
-	 * permissions.
-	 *
-	 * @param message    The Discord <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/Message.html">Message</a>
-	 *                   object that is supposed to get edited.
-	 * @param newMessage The new message content for the Discord Message.
-	 */
-	protected void editPlaceholder(final Message message, final String newMessage) {
-		if (!message.getTextChannel().canTalk()) {
-			return;
-		}
-
-		try {
-			message.editMessage(newMessage).queue();
-		} catch (IllegalStateException e) {
-			sendErrorMessage(
-					message.getTextChannel(),
-					"Can not edit message (" + message.getId() + ") from another user!"
-			);
-		}
-	}
-
-	/**
-	 * Edits a message in a channel by ID. Sends an error message with the new content if ID does not exist or if
-	 * the given message is not written by the bot. Does not do anything if the bot does not have the needed permissions.
-	 *
-	 * @param channel    The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
-	 *                   where the original message is located in.
-	 * @param messageId  The message ID of the original message.
-	 * @param newMessage The new content for the message.
-	 */
-	protected void editPlaceholder(final TextChannel channel, final long messageId, final String newMessage) {
-		if (!channel.canTalk()) {
-			return;
-		}
-
-		channel.retrieveMessageById(messageId).queue(
-				message -> editPlaceholder(message, newMessage),
-				throwable -> sendErrorMessage(
-						channel, "Can not edit message!\nMessage ID " + messageId + " not found in " +
-								channel.getAsMention() + ".\n New message: \"" + newMessage + "\""
-				)
-		);
+	private void sendMessage(final TextChannel channel, final MessageEmbed message) {
+		channel.sendMessage(message).queue();
 	}
 
 	/**
@@ -188,19 +123,23 @@ public abstract class CommandImpl implements Command {
 	 * @param errorMessage The error message to send.
 	 */
 	protected void sendErrorMessage(final TextChannel channel, final String errorMessage) {
-		answer(channel, errorMessage);
+		if(isValidMessage(channel, errorMessage)) {
+			sendMessage(channel, errorMessage);
+		}
 	}
 
 	/**
 	 * Replies to a given message and pings the user without needing to mention him.
+	 * If the {@param message} does not exist or the content to reply with is invalid (e.g. blank) it does not reply!
 	 *
 	 * @param message    the message to reply to.
 	 * @param newMessage the content to reply with.
 	 */
 	protected void reply(final Message message, final String newMessage) {
-		message.reply(newMessage).queue();
+		if(isValidMessage(message, newMessage)) {
+			message.reply(newMessage).queue();
+		}
 	}
-
 
 	protected MessageEmbed buildGambleInfoEmbed(final DiscordGuild dcGuild) {
 		final GambleSettings settings = dcGuild.getGambleSettings();
@@ -244,6 +183,60 @@ public abstract class CommandImpl implements Command {
 	 * @param logMessage The log message to send.
 	 */
 	protected void sendLogMessage(final TextChannel channel, final String logMessage) {
-		answer(channel, logMessage);
+		if(isValidMessage(channel, logMessage)) {
+			sendMessage(channel, logMessage);
+		}
+	}
+
+	private boolean isValidMessage(final TextChannel channel, final String content) {
+		if(channel == null) {
+			return false;
+		}
+
+		if(!channel.canTalk()) {
+			return false;
+		}
+
+		return isValidContent(content);
+	}
+
+	private boolean isValidMessage(final TextChannel channel, final MessageEmbed content) {
+		if(channel == null) {
+			return false;
+		}
+
+		if(!channel.canTalk()) {
+			return false;
+		}
+
+		return isValidContent(content);
+	}
+
+	private boolean isValidMessage(final Message replyMessage, final String content) {
+		if(replyMessage == null) {
+			return false;
+		}
+
+		if(!replyMessage.getTextChannel().canTalk()) {
+			return false;
+		}
+
+		return isValidContent(content);
+	}
+
+	private boolean isValidContent(final String content) {
+		if(content == null) {
+			return false;
+		}
+
+		return !content.isBlank();
+	}
+
+	private boolean isValidContent(final MessageEmbed content) {
+		if(content == null) {
+			return false;
+		}
+
+		return content.isSendable();
 	}
 }

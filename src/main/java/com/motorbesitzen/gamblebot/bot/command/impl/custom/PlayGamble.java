@@ -122,18 +122,14 @@ class PlayGamble extends CommandImpl {
 						10, TimeUnit.SECONDS,
 						b -> answer(channel, "Enforced ban of " + playerMention + ". Rip in pieces :poop:")
 				);
-				if (logChannel != null) {
-					sendLogMessage(logChannel, playerMention + " won a ban. Enforcing ban in the next 10 seconds.");
-				}
+				sendLogMessage(logChannel, playerMention + " won a ban. Enforcing ban in the next 10 seconds.");
 			} else {
 				answer(
 						channel,
 						"Unlucky " + playerMention + "! You won a ban. Be glad that I can not ban you myself. Reporting to authorities...\n" +
 								"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 				);
-				if (logChannel != null) {
-					sendLogMessage(logChannel, playerMention + " won a ban. However, I can not ban that user.");
-				}
+				sendLogMessage(logChannel, playerMention + " won a ban. However, I can not ban that user.");
 			}
 			return;
 		}
@@ -150,18 +146,14 @@ class PlayGamble extends CommandImpl {
 						5, TimeUnit.SECONDS,
 						k -> answer(channel, "Enforced kick of " + playerMention + ". Hopefully it is a ban next time :smiling_imp:")
 				);
-				if (logChannel != null) {
-					sendLogMessage(logChannel, playerMention + " won a kick. Enforcing kick in the next 5 seconds.");
-				}
+				sendLogMessage(logChannel, playerMention + " won a kick. Enforcing kick in the next 5 seconds.");
 			} else {
 				answer(
 						channel,
 						"Unlucky " + playerMention + "! You won a kick. Be glad that I can not kick you myself. Reporting to authorities...\n" +
 								"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 				);
-				if (logChannel != null) {
-					sendLogMessage(logChannel, playerMention + " won a kick. However, I can not kick that user.");
-				}
+				sendLogMessage(logChannel, playerMention + " won a kick. However, I can not kick that user.");
 			}
 			return;
 		}
@@ -171,9 +163,7 @@ class PlayGamble extends CommandImpl {
 				playerMention + " you won \"" + gambleWinInfo.getName() + "\"!\n" +
 						"Your (rounded) lucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 		);
-		if (logChannel != null) {
-			sendLogMessage(logChannel, playerMention + " won \"" + gambleWinInfo.getName() + "\"!");
-		}
+		sendLogMessage(logChannel, playerMention + " won \"" + gambleWinInfo.getName() + "\"!");
 	}
 
 	private NumberFormat generateNumberFormat() {
