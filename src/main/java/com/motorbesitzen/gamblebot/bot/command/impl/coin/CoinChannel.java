@@ -38,7 +38,7 @@ public class CoinChannel extends CommandImpl {
 	public String getDescription() {
 		return "Sets a channel as the only channel where coin commands can be used in. If there is no " +
 				"coin channel set coin commands can be used in every channel the bot has access to. To clear " +
-				"the selected channel use `" + getName() + " 0`";
+				"the selected channel use `" + getName() + " 0`.";
 	}
 
 	@Override
