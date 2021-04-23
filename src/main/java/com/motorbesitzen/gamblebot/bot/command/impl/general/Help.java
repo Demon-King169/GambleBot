@@ -25,7 +25,7 @@ class Help extends CommandImpl {
 	private final Map<String, Command> commandMap;
 
 	@Autowired
-	Help(final Map<String, Command> commandMap) {
+	private Help(final Map<String, Command> commandMap) {
 		this.commandMap = commandMap;
 	}
 

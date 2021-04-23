@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Stops the currently running gamble of a guild if there is one.
+ */
 @Service("stopgamble")
 public class StopGamble extends CommandImpl {
 
@@ -18,7 +21,7 @@ public class StopGamble extends CommandImpl {
 	private final GambleSettingsRepo settingsRepo;
 
 	@Autowired
-	StopGamble(final DiscordGuildRepo guildRepo, final GambleSettingsRepo settingsRepo) {
+	private StopGamble(final DiscordGuildRepo guildRepo, final GambleSettingsRepo settingsRepo) {
 		this.guildRepo = guildRepo;
 		this.settingsRepo = settingsRepo;
 	}

@@ -16,8 +16,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Pay an amount of coins to a user.
+ */
 @Service("pay")
-public class PayCoins extends CommandImpl {
+class PayCoins extends CommandImpl {
 
 	private final DiscordMemberRepo memberRepo;
 	private final DiscordGuildRepo guildRepo;

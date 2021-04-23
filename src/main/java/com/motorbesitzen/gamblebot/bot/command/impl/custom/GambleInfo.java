@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+/**
+ * Prints information about the current gamble. If there is none running it prints the information about the last gamble.
+ */
 @Service("gambleinfo")
 class GambleInfo extends CommandImpl {
 

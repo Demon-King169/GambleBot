@@ -11,11 +11,13 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
+/**
+ * Shows the stats of the user.
+ */
 @Service("stats")
-public class Stats extends CommandImpl {
+class Stats extends CommandImpl {
 
 	private final DiscordMemberRepo memberRepo;
 

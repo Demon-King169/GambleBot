@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service("roulette")
-public class PlayRoulette extends CommandImpl {
+class PlayRoulette extends CommandImpl {
 
 	private final DiscordMemberRepo memberRepo;
 	private final DiscordGuildRepo guildRepo;

@@ -13,8 +13,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Shows a top 10 user list ordered by coins.
+ */
 @Service("top")
-public class TopCoin extends CommandImpl {
+class TopCoin extends CommandImpl {
 
 	private static final int TOP_LIST_LENGTH = 10;
 	private final DiscordMemberRepo memberRepo;

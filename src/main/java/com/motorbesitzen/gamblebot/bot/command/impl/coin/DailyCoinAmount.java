@@ -11,8 +11,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Sets the amount of daily coins for the guild.
+ */
 @Service("setdaily")
-public class DailyCoinAmount extends CommandImpl {
+class DailyCoinAmount extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 

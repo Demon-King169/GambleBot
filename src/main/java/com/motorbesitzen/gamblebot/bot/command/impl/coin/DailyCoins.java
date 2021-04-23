@@ -12,8 +12,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Collect the daily coins.
+ */
 @Service("dailycoins")
-public class DailyCoins extends CommandImpl {
+class DailyCoins extends CommandImpl {
 
 	private static final int MS_PER_DAY = 86400000;
 	private final DiscordMemberRepo memberRepo;

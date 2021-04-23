@@ -24,6 +24,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Starts a custom gamble dialog.
+ */
 @Service("startgamble")
 class StartGamble extends CommandImpl {
 

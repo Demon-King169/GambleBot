@@ -10,8 +10,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Shows the coin balance of the user.
+ */
 @Service("coins")
-public class CoinInfo extends CommandImpl {
+class CoinInfo extends CommandImpl {
 
 	private final DiscordMemberRepo memberRepo;
 

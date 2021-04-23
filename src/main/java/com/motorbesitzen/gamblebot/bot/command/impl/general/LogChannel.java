@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service("log")
-public class LogChannel extends CommandImpl {
+class LogChannel extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 

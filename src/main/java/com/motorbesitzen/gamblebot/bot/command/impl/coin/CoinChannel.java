@@ -14,8 +14,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Sets a channel where coin commands are allowed in.
+ */
 @Service("coinchannel")
-public class CoinChannel extends CommandImpl {
+class CoinChannel extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 

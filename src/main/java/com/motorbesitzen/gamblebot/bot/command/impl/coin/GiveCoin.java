@@ -16,8 +16,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Give a user coins without taking them from your balance.
+ */
 @Service("give")
-public class GiveCoin extends CommandImpl {
+class GiveCoin extends CommandImpl {
 
 	private final DiscordMemberRepo memberRepo;
 	private final DiscordGuildRepo guildRepo;

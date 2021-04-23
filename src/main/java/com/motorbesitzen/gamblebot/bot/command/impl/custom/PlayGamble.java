@@ -20,6 +20,9 @@ import java.text.NumberFormat;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Play the currently available gamble if there is one.
+ */
 @Service("gamble")
 class PlayGamble extends CommandImpl {
 

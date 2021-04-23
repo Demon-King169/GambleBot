@@ -13,13 +13,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Sends an info message about specific guild settings.
+ */
 @Service("info")
 class Info extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	private Info(DiscordGuildRepo guildRepo) {
+	private Info(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 
