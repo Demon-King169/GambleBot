@@ -1,4 +1,4 @@
-package com.motorbesitzen.gamblebot.bot.command.impl.coin;
+package com.motorbesitzen.gamblebot.bot.command.impl.coin.game;
 
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.bot.service.RouletteGame;
