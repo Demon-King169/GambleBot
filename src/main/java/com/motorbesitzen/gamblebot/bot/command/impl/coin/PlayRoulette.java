@@ -1,11 +1,10 @@
 package com.motorbesitzen.gamblebot.bot.command.impl.coin;
 
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.bot.service.RouletteGame;
-import com.motorbesitzen.gamblebot.bot.service.entity.RouletteBet;
-import com.motorbesitzen.gamblebot.bot.service.entity.RouletteInfo;
-import com.motorbesitzen.gamblebot.bot.service.entity.RouletteWinInfo;
+import com.motorbesitzen.gamblebot.bot.service.entity.roulette.RouletteBet;
+import com.motorbesitzen.gamblebot.bot.service.entity.roulette.RouletteInfo;
+import com.motorbesitzen.gamblebot.bot.service.entity.roulette.RouletteWinInfo;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;

@@ -1,6 +1,6 @@
 package com.motorbesitzen.gamblebot.bot.service;
 
-import com.motorbesitzen.gamblebot.bot.service.entity.GambleWinInfo;
+import com.motorbesitzen.gamblebot.bot.service.entity.gamble.GambleWinInfo;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.dao.GamblePrize;

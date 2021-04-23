@@ -1,8 +1,8 @@
 package com.motorbesitzen.gamblebot.bot.service;
 
-import com.motorbesitzen.gamblebot.bot.service.entity.RouletteBet;
-import com.motorbesitzen.gamblebot.bot.service.entity.RouletteInfo;
-import com.motorbesitzen.gamblebot.bot.service.entity.RouletteWinInfo;
+import com.motorbesitzen.gamblebot.bot.service.entity.roulette.RouletteBet;
+import com.motorbesitzen.gamblebot.bot.service.entity.roulette.RouletteInfo;
+import com.motorbesitzen.gamblebot.bot.service.entity.roulette.RouletteWinInfo;
 import com.motorbesitzen.gamblebot.util.LogUtil;
 import com.motorbesitzen.gamblebot.util.ParseUtil;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.motorbesitzen.gamblebot.bot.service.entity;
+package com.motorbesitzen.gamblebot.bot.service.entity.gamble;
 
 public class GambleWinInfo {
 
