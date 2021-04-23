@@ -235,4 +235,15 @@ public abstract class CommandImpl implements Command {
 
 		return author.getIdLong() != originalAuthorId;
 	}
+
+	/**
+	 * Used to clarify in the code that a log message is sent, doesn't do anything else than a normal answer message.
+	 *
+	 * @param channel      The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                     where the original message is located in.
+	 * @param logMessage The log message to send.
+	 */
+	protected void sendLogMessage(final TextChannel channel, final String logMessage) {
+		answer(channel, logMessage);
+	}
 }

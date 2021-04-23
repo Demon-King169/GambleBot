@@ -123,7 +123,7 @@ class PlayGamble extends CommandImpl {
 						b -> answer(channel, "Enforced ban of " + playerMention + ". Rip in pieces :poop:")
 				);
 				if (logChannel != null) {
-					answer(logChannel, playerMention + " won a ban. Enforcing ban in the next 10 seconds.");
+					sendLogMessage(logChannel, playerMention + " won a ban. Enforcing ban in the next 10 seconds.");
 				}
 			} else {
 				answer(
@@ -132,7 +132,7 @@ class PlayGamble extends CommandImpl {
 								"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 				);
 				if (logChannel != null) {
-					answer(logChannel, playerMention + " won a ban. However, I can not ban that user.");
+					sendLogMessage(logChannel, playerMention + " won a ban. However, I can not ban that user.");
 				}
 			}
 			return;
@@ -151,7 +151,7 @@ class PlayGamble extends CommandImpl {
 						k -> answer(channel, "Enforced kick of " + playerMention + ". Hopefully it is a ban next time :smiling_imp:")
 				);
 				if (logChannel != null) {
-					answer(logChannel, playerMention + " won a kick. Enforcing kick in the next 5 seconds.");
+					sendLogMessage(logChannel, playerMention + " won a kick. Enforcing kick in the next 5 seconds.");
 				}
 			} else {
 				answer(
@@ -160,7 +160,7 @@ class PlayGamble extends CommandImpl {
 								"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 				);
 				if (logChannel != null) {
-					answer(logChannel, playerMention + " won a kick. However, I can not kick that user.");
+					sendLogMessage(logChannel, playerMention + " won a kick. However, I can not kick that user.");
 				}
 			}
 			return;
@@ -172,7 +172,7 @@ class PlayGamble extends CommandImpl {
 						"Your (rounded) lucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 		);
 		if (logChannel != null) {
-			answer(logChannel, playerMention + " won \"" + gambleWinInfo.getName() + "\"!");
+			sendLogMessage(logChannel, playerMention + " won \"" + gambleWinInfo.getName() + "\"!");
 		}
 	}
 
