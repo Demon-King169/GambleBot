@@ -35,7 +35,6 @@ Ban Members
 View Channels
 Send Messages
 Embed Links
-Attach Files
 Mention everyone
 Use External Emojis
 ```
