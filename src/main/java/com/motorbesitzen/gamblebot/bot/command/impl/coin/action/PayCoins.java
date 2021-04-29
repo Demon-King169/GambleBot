@@ -1,4 +1,4 @@
-package com.motorbesitzen.gamblebot.bot.command.impl.coin;
+package com.motorbesitzen.gamblebot.bot.command.impl.coin.action;
 
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
@@ -17,61 +17,74 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 /**
- * Give a user coins without taking them from your balance.
+ * Pay an amount of coins to a user.
  */
-@Service("give")
-class GiveCoin extends CommandImpl {
+@Service("pay")
+class PayCoins extends CommandImpl {
 
 	private final DiscordMemberRepo memberRepo;
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	private GiveCoin(final DiscordMemberRepo memberRepo, final DiscordGuildRepo guildRepo) {
+	private PayCoins(final DiscordMemberRepo memberRepo, final DiscordGuildRepo guildRepo) {
 		this.memberRepo = memberRepo;
 		this.guildRepo = guildRepo;
 	}
 
 	@Override
 	public String getName() {
-		return "give";
+		return "pay";
 	}
 
 	@Override
 	public String getUsage() {
-		return getName() + " (@user|userid) <coins>";
+		return getName() + " (@user|id) <amount>";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Adds an amount of coins to a given user.";
+		return "Transfers the specified amount of coins to the mentioned user.";
 	}
 
 	@Override
 	public boolean isAdminCommand() {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean isGlobalCommand() {
-		return true;
+		return false;
 	}
 
 	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
+		final long authorId = event.getAuthor().getIdLong();
+		final long guildId = event.getGuild().getIdLong();
+		final Optional<DiscordMember> dcAuthorOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
+		if (dcAuthorOpt.isEmpty()) {
+			sendErrorMessage(event.getChannel(), "You do not have any coins!");
+			return;
+		}
+
 		final Message message = event.getMessage();
 		final long userId = DiscordMessageUtil.getMentionedMemberId(message);
+		if (userId == authorId) {
+			sendErrorMessage(event.getChannel(), "You can not pay coins to yourself!");
+			return;
+		}
+
 		if (userId <= 100000000000000L) {
 			sendErrorMessage(event.getChannel(), "That user seems to be invalid!");
 			return;
 		}
 
 		event.getGuild().retrieveMemberById(userId).queue(
-				member -> addCoins(event, member),
+				member -> payCoins(event, dcAuthorOpt.get(), member),
 				throwable -> sendErrorMessage(event.getChannel(), "That user is not in this guild!")
 		);
 	}
 
-	private void addCoins(final GuildMessageReceivedEvent event, final Member member) {
+	private void payCoins(final GuildMessageReceivedEvent event, final DiscordMember author, final Member member) {
 		final long guildId = event.getGuild().getIdLong();
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(member.getIdLong(), guildId);
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(member.getIdLong(), guildId));
@@ -79,15 +92,17 @@ class GiveCoin extends CommandImpl {
 		final String[] tokens = content.split(" ");
 		final String coinText = tokens[tokens.length - 1];
 		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
-		if (coinAmount < 1) {
-			sendErrorMessage(event.getChannel(), "Please set a valid coin amount (> 1)!");
+		if (coinAmount < 1 || coinAmount > author.getCoins()) {
+			sendErrorMessage(event.getChannel(), "Please set a valid coin amount (1 - " + dcMember.getCoins() + ")!");
 			return;
 		}
 
+		author.spendCoins(coinAmount);
+		memberRepo.save(author);
 		dcMember.receiveCoins(coinAmount);
 		memberRepo.save(dcMember);
 		answer(event.getChannel(), "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ".");
-		LogUtil.logDebug(event.getAuthor().getIdLong() + " gave " + coinAmount + " coins to " + dcMember.getDiscordId());
+		LogUtil.logDebug(author.getDiscordId() + " paid " + coinAmount + " coins to " + dcMember.getDiscordId());
 	}
 
 	private DiscordMember createNewMember(final long memberId, final long guildId) {

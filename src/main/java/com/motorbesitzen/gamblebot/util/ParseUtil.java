@@ -36,7 +36,7 @@ public final class ParseUtil {
 	 */
 	private static String parseUnitChars(final String numberWithUnit) {
 		String lowerNumberWithUnit = numberWithUnit.toLowerCase().trim();
-		if (lowerNumberWithUnit.matches("[0-9]+[km]")) {
+		if (lowerNumberWithUnit.matches("[0-9]+[kmb]")) {
 			lowerNumberWithUnit = lowerNumberWithUnit.replaceFirst("k", "000");
 			lowerNumberWithUnit = lowerNumberWithUnit.replaceFirst("m", "000000");
 			lowerNumberWithUnit = lowerNumberWithUnit.replaceFirst("b", "000000000");

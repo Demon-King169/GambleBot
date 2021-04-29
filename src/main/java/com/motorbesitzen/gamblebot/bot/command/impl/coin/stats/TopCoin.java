@@ -1,4 +1,4 @@
-package com.motorbesitzen.gamblebot.bot.command.impl.coin;
+package com.motorbesitzen.gamblebot.bot.command.impl.coin.stats;
 
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;

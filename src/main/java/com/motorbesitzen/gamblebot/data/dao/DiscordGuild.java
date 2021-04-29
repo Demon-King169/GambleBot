@@ -3,7 +3,6 @@ package com.motorbesitzen.gamblebot.data.dao;
 import com.motorbesitzen.gamblebot.util.ParseUtil;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +25,9 @@ public class DiscordGuild {
 
 	@OneToOne
 	private GambleSettings gambleSettings;
+
+	@OneToMany(mappedBy = "guild", cascade = CascadeType.ALL, fetch = FetchType.EAGER)	// eager as it is limited to 25 anyway
+	private Set<CoinShopOffer> shopOffers;
 
 	@OneToMany(mappedBy = "guild", cascade = CascadeType.ALL)
 	private Set<DiscordMember> members;
@@ -86,6 +88,14 @@ public class DiscordGuild {
 
 	public void setGambleSettings(GambleSettings gambleSettings) {
 		this.gambleSettings = gambleSettings;
+	}
+
+	public Set<CoinShopOffer> getShopOffers() {
+		return shopOffers;
+	}
+
+	public void setShopOffers(Set<CoinShopOffer> shopOffers) {
+		this.shopOffers = shopOffers;
 	}
 
 	public boolean hasRunningGamble() {
