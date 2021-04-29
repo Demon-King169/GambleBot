@@ -40,7 +40,7 @@ class PlayRoulette extends CommandImpl {
 
 	@Override
 	public String getUsage() {
-		return getName() + " wager bet";
+		return getName() + " <wager> bet";
 	}
 
 	@Override

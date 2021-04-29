@@ -38,7 +38,7 @@ class PayCoins extends CommandImpl {
 
 	@Override
 	public String getUsage() {
-		return getName() + " (@user|id) amount";
+		return getName() + " (@user|id) <amount>";
 	}
 
 	@Override

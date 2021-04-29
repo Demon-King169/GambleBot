@@ -124,7 +124,8 @@ class Help extends CommandImpl {
 						"Commands and their variations [" + page + "/" + totalPages + "]"
 		).setDescription(
 				"A list of all commands you can use and what they do. " +
-						"Note that \"(a|b|c)\" means that a, b or c can be chosen."
+						"Note that \"(a|b|c)\" means that a, b or c can be chosen. \"<...>\" " +
+						"requires you to add a value. Do not keep the \"<\", \">\"!"
 		);
 	}
 

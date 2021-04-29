@@ -39,7 +39,7 @@ class PlayRps extends CommandImpl {
 
 	@Override
 	public String getUsage() {
-		return getName() + " wager (rock|paper|scissors)";
+		return getName() + " <wager> (rock|paper|scissors)";
 	}
 
 	@Override

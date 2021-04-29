@@ -31,7 +31,7 @@ class DailyCoinAmount extends CommandImpl {
 
 	@Override
 	public String getUsage() {
-		return getName() + " coins";
+		return getName() + " <coins>";
 	}
 
 	@Override

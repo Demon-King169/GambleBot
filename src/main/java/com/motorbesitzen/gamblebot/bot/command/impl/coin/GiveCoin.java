@@ -38,7 +38,7 @@ class GiveCoin extends CommandImpl {
 
 	@Override
 	public String getUsage() {
-		return getName() + " (@user|userid) coins";
+		return getName() + " (@user|userid) <coins>";
 	}
 
 	@Override

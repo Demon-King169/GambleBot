@@ -40,7 +40,7 @@ public class PlayFlip extends CommandImpl {
 
 	@Override
 	public String getUsage() {
-		return getName() + " wager (head|tail)";
+		return getName() + " <wager> (head|tail)";
 	}
 
 	@Override
