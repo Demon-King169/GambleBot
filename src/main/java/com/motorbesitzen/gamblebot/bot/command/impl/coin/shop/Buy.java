@@ -76,7 +76,8 @@ public class Buy extends CommandImpl {
 		final List<CoinShopOffer> offers = offerRepo.findCoinShopOffersByGuild_GuildIdOrderByPriceAsc(guildId);
 		final CoinShopOffer boughtOffer = offers.get(shopId - 1);
 		if(dcAuthor.getCoins() < boughtOffer.getPrice()) {
-			sendErrorMessage(event.getChannel(), "You do not have enough coins for that!");
+			sendErrorMessage(event.getChannel(), "You do not have enough coins for that!\n" +
+					"You only have **" + dcAuthor.getCoins() + "** coins right now.");
 			return;
 		}
 

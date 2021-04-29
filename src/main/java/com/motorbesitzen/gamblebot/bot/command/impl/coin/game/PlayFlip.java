@@ -68,7 +68,7 @@ public class PlayFlip extends CommandImpl {
 		final Message message = event.getMessage();
 		final String content = message.getContentRaw();
 		final String prefix = EnvironmentUtil.getEnvironmentVariable("CMD_PREFIX");
-		if (!content.matches("(?i)" + prefix + getName() + " [0-9]+[km]? (H(ead)?|T(ails?)?)")) {
+		if (!content.matches("(?i)" + prefix + getName() + " [0-9]+[kmb]? (H(ead)?|T(ails?)?)")) {
 			sendErrorMessage(event.getChannel(), "Please use the correct syntax! Use `" +
 					prefix + "help` for a list of valid bets.");
 			return;

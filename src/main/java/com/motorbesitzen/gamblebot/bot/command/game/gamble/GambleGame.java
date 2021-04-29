@@ -13,7 +13,7 @@ public class GambleGame {
 	private final Random random;
 
 	@Autowired
-	GambleGame(final Random random) {
+	private GambleGame(final Random random) {
 		this.random = random;
 	}
 
