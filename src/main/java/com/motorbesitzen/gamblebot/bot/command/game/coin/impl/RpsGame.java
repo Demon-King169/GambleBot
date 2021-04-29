@@ -46,7 +46,7 @@ public class RpsGame implements Game {
 
 	private boolean isWin(final String bet, final String headOrTail) {
 		return (bet.matches("(?i)R(ock)?") && headOrTail.equals("Scissors")) ||
-				(bet.matches("(?i)S(cissors)?") && headOrTail.equals("Paper")) ||
+				(bet.matches("(?i)S(cissors?)?") && headOrTail.equals("Paper")) ||
 				(bet.matches("(?i)P(aper)?") && headOrTail.equals("Rock"));
 	}
 }
