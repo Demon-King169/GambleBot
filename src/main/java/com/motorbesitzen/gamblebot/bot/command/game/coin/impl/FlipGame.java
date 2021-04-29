@@ -35,7 +35,7 @@ public class FlipGame implements Game {
 	}
 
 	private boolean isWin(final String bet, final String headOrTail) {
-		return (bet.matches("(?i)H(ead)?") && headOrTail.equals("Head")) ||
-				(bet.matches("(?i)T(ail)?") && headOrTail.equals("Tail"));
+		return (bet.matches("(?i)H(eads?)?") && headOrTail.equals("Head")) ||
+				(bet.matches("(?i)T(ails?)?") && headOrTail.equals("Tail"));
 	}
 }
