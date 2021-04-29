@@ -67,7 +67,7 @@ public class Shop extends CommandImpl {
 				.setFooter("Use \"" + prefix + "buy <id>\" to buy something from the shop.");
 		for (int i = 0; i < Math.min(25, offers.size()); i++) {
 			final CoinShopOffer offer = offers.get(i);
-			eb.addField("[" + (i + 1) + "] " + offer.getName() + ":", "**" + offer.getPrice() + "** coins", true);
+			eb.addField("[" + (i + 1) + "] " + offer.getName() + ":", "**" + offer.getPrice() + "** coins", false);
 		}
 		return eb.build();
 	}
