@@ -1,6 +1,5 @@
-package com.motorbesitzen.gamblebot.bot.service;
+package com.motorbesitzen.gamblebot.bot.command.game.gamble;
 
-import com.motorbesitzen.gamblebot.bot.service.entity.gamble.GambleWinInfo;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.dao.GamblePrize;
@@ -21,6 +20,7 @@ public class GambleGame {
 		this.random = random;
 	}
 
+	// TODO: change parameter to GambleSettings, not player, log outside of this method (reutnr value)
 	public GambleWinInfo play(final DiscordMember player) {
 		final DiscordGuild dcGuild = player.getGuild();
 		final double randomNumber = random.nextDouble() * 100;

@@ -35,6 +35,7 @@ Ban Members
 View Channels
 Send Messages
 Embed Links
+Read Message History
 Mention everyone
 Use External Emojis
 ```

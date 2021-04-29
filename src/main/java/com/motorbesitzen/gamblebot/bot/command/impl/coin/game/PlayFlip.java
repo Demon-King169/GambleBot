@@ -3,7 +3,7 @@ package com.motorbesitzen.gamblebot.bot.command.impl.coin.game;
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.bot.command.game.coin.GameBet;
 import com.motorbesitzen.gamblebot.bot.command.game.coin.GameWinInfo;
-import com.motorbesitzen.gamblebot.bot.command.game.coin.impl.RouletteGame;
+import com.motorbesitzen.gamblebot.bot.command.game.coin.impl.FlipGame;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
@@ -18,39 +18,34 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@Service("roulette")
-class PlayRoulette extends CommandImpl {
+@Service("flip")
+public class PlayFlip extends CommandImpl {
 
 	private final DiscordMemberRepo memberRepo;
 	private final DiscordGuildRepo guildRepo;
-	private final RouletteGame rouletteGame;
+	private final FlipGame flipGame;
 
 	@Autowired
-	private PlayRoulette(final DiscordMemberRepo memberRepo, final DiscordGuildRepo guildRepo,
-						 final RouletteGame rouletteGame) {
+	private PlayFlip(final DiscordMemberRepo memberRepo, final DiscordGuildRepo guildRepo,
+					 final FlipGame flipGame) {
 		this.memberRepo = memberRepo;
 		this.guildRepo = guildRepo;
-		this.rouletteGame = rouletteGame;
+		this.flipGame = flipGame;
 	}
 
 	@Override
 	public String getName() {
-		return "roulette";
+		return "flip";
 	}
 
 	@Override
 	public String getUsage() {
-		return getName() + " wager bet";
+		return getName() + " wager (head|tail)";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Starts a round of roulette with the set wager. You can choose from the following bets:\n" +
-				"**B** - bet on black\n**R** - bet on red\n**E** - bet on even numbers\n" +
-				"**U** - bet on uneven numbers\n**L** - bet on low numbers (1-18)\n" +
-				"**H** - bet on high numbers (19-36)\n**0**-**36** - bet on a number between 0 and 36, " +
-				"you can bet on up to 6 numbers at once (separate numbers with a comma)\n" +
-				"*Betting on multiple numbers decreases your payout!*\n`Example: 3,7,17 would bet on 3, 7 and 17.`";
+		return "Play a game of coin flip against the bot.";
 	}
 
 	@Override
@@ -70,12 +65,10 @@ class PlayRoulette extends CommandImpl {
 			return;
 		}
 
-		final long authorId = author.getIdLong();
-		final long guildId = event.getGuild().getIdLong();
 		final Message message = event.getMessage();
 		final String content = message.getContentRaw();
 		final String prefix = EnvironmentUtil.getEnvironmentVariable("CMD_PREFIX");
-		if (!content.matches("(?i)" + prefix + getName() + " [0-9]+[km]? ([BREULH]|[0-9]{1,2}(,[0-9]{1,2}){0,5})")) {
+		if (!content.matches("(?i)" + prefix + getName() + " [0-9]+[km]? (H(ead)?|T(ails?)?)")) {
 			sendErrorMessage(event.getChannel(), "Please use the correct syntax! Use `" +
 					prefix + "help` for a list of valid bets.");
 			return;
@@ -90,12 +83,14 @@ class PlayRoulette extends CommandImpl {
 		}
 
 		final String betText = tokens[tokens.length - 1];
-		if (!betText.matches("(?i)([BREULH]|[0-9]{1,2}(,[0-9]{1,2}){0,5})")) {
+		if (!betText.matches("(?i)(H(ead)?|T(ails?)?)")) {
 			sendErrorMessage(event.getChannel(), "Please choose a valid bet! Use `" +
 					prefix + "help` for a list of valid bets.");
 			return;
 		}
 
+		final long authorId = author.getIdLong();
+		final long guildId = event.getGuild().getIdLong();
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(authorId, guildId));
 		if (dcMember.getCoins() < wager) {
@@ -105,20 +100,20 @@ class PlayRoulette extends CommandImpl {
 		}
 
 		final GameBet bet = new GameBet(wager, betText);
-		final GameWinInfo winInfo = rouletteGame.play(bet);
+		final GameWinInfo winInfo = flipGame.play(bet);
 		if (winInfo.isWin()) {
 			final long winAmount = winInfo.getWinAmount();
 			dcMember.wonGame(winAmount);
 			memberRepo.save(dcMember);
-			reply(event.getMessage(), "You won **" + winAmount + "** coins! Your balance: **" +
-					dcMember.getCoins() + "** coins.\n" + winInfo.getResultText());
+			reply(event.getMessage(), "It is **" + winInfo.getResultText() + "**! You won **" + winAmount + "** coins!\n" +
+					"Your balance: **" + dcMember.getCoins() + "** coins.");
 			return;
 		}
 
 		dcMember.lostGame(wager);
 		memberRepo.save(dcMember);
-		reply(event.getMessage(), "You lost the bet. Your balance: **" +
-				dcMember.getCoins() + "** coins.\n" + winInfo.getResultText());
+		reply(event.getMessage(), "It is **" + winInfo.getResultText() + "**! You lost the bet.\n" +
+				"Your balance: **" + dcMember.getCoins() + "** coins.");
 	}
 
 	private DiscordMember createNewMember(final long memberId, final long guildId) {

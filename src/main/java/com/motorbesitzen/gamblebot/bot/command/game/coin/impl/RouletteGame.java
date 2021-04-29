@@ -1,9 +1,8 @@
-package com.motorbesitzen.gamblebot.bot.service;
+package com.motorbesitzen.gamblebot.bot.command.game.coin.impl;
 
-import com.motorbesitzen.gamblebot.bot.service.entity.roulette.RouletteBet;
-import com.motorbesitzen.gamblebot.bot.service.entity.roulette.RouletteInfo;
-import com.motorbesitzen.gamblebot.bot.service.entity.roulette.RouletteWinInfo;
-import com.motorbesitzen.gamblebot.util.LogUtil;
+import com.motorbesitzen.gamblebot.bot.command.game.coin.Game;
+import com.motorbesitzen.gamblebot.bot.command.game.coin.GameBet;
+import com.motorbesitzen.gamblebot.bot.command.game.coin.GameWinInfo;
 import com.motorbesitzen.gamblebot.util.ParseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,9 +11,12 @@ import java.math.BigInteger;
 import java.util.Random;
 
 @Service
-public class RouletteGame {
+public class RouletteGame implements Game {
 
 	private final Random random;
+
+	private static final int[] BLACK_FIELDS = {15, 4, 2, 17, 6, 13, 11, 8, 10, 24, 33, 20, 31, 22, 29, 28, 35, 26};
+	private static final int[] RED_FIELDS = {32, 19, 21, 25, 34, 27, 36, 30, 23, 5, 16, 1, 14, 9, 18, 7, 12, 3};
 
 	@Autowired
 	private RouletteGame(final Random random) {
@@ -38,24 +40,24 @@ public class RouletteGame {
 		0-36 - set on 6 numbers			-> 5*wager
 	*/
 
-	public RouletteWinInfo play(final RouletteBet bet) {
+	public GameWinInfo play(final GameBet bet) {
 		final int result = random.nextInt(37);    // 0 -36
-		LogUtil.logDebug(bet.getUserId() + " got a roulette result of " + result + " while betting on \"" + bet.getBetInfo() + "\".");
 		final long winAmount = bet.getBetInfo().matches("(?i)[BREULH]") ?
 				getSectionWin(bet, result) :
 				getNumberWin(bet, result);
-		return new RouletteWinInfo(winAmount, result);
+		final String resultText = getColorEmote(result) + " Roulette result: " + result;
+		return new GameWinInfo(winAmount, resultText);
 	}
 
-	private long getSectionWin(final RouletteBet bet, final int result) {
+	private long getSectionWin(final GameBet bet, final int result) {
 		switch (bet.getBetInfo().toLowerCase()) {
 			case "b":
-				if (RouletteInfo.isBlackField(result)) {
+				if (isBlackField(result)) {
 					return bet.getWager();
 				}
 				break;
 			case "r":
-				if (RouletteInfo.isRedField(result)) {
+				if (isRedField(result)) {
 					return bet.getWager();
 				}
 				break;
@@ -84,7 +86,27 @@ public class RouletteGame {
 		return 0;
 	}
 
-	private long getNumberWin(final RouletteBet bet, final int result) {
+	private boolean isBlackField(final int field) {
+		for (int number : BLACK_FIELDS) {
+			if (number == field) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean isRedField(final int field) {
+		for (int number : RED_FIELDS) {
+			if (number == field) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private long getNumberWin(final GameBet bet, final int result) {
 		final String[] bets = bet.getBetInfo().split(",");
 		for (String singleBet : bets) {
 			if (singleBet.equals(String.valueOf(result))) {
@@ -119,5 +141,17 @@ public class RouletteGame {
 		final BigInteger bigB = BigInteger.valueOf(b);
 		final BigInteger result = bigA.multiply(bigB);
 		return ParseUtil.safelyParseBigIntToLong(result);
+	}
+
+	private String getColorEmote(final int field) {
+		if (field == 0) {
+			return ":green_square:";
+		}
+
+		if (isRedField(field)) {
+			return ":red_square:";
+		}
+
+		return ":black_large_square:";
 	}
 }

@@ -5,10 +5,8 @@ import com.motorbesitzen.gamblebot.data.dao.GambleSettings;
 import com.motorbesitzen.gamblebot.util.EnvironmentUtil;
 import com.motorbesitzen.gamblebot.util.ParseUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.stereotype.Service;
 
@@ -131,14 +129,33 @@ public abstract class CommandImpl implements Command {
 	/**
 	 * Replies to a given message and pings the user without needing to mention him.
 	 * If the {@param message} does not exist or the content to reply with is invalid (e.g. blank) it does not reply!
+	 * If the bot does not have the 'Read Message History' permission it will send a normal message with a
+	 * prepended mention of the user the bot replies to.
 	 *
 	 * @param message    the message to reply to.
 	 * @param newMessage the content to reply with.
 	 */
 	protected void reply(final Message message, final String newMessage) {
+		if(!canReply(message)) {
+			sendMessage(message.getTextChannel(), message.getAuthor().getAsMention() + "\n" + newMessage);
+			return;
+		}
+
 		if(isValidMessage(message, newMessage)) {
 			message.reply(newMessage).queue();
 		}
+	}
+
+	/**
+	 * Checks if the bot has the needed permissions to reply to a message.
+	 * @param message The message to reply to.
+	 * @return {@code true} if the bod has the 'Read Message History' permission.
+	 */
+	private boolean canReply(final Message message) {
+		final TextChannel channel = message.getTextChannel();
+		final Guild guild = channel.getGuild();
+		final Member self = guild.getSelfMember();
+		return self.hasPermission(Permission.MESSAGE_HISTORY);
 	}
 
 	protected MessageEmbed buildGambleInfoEmbed(final DiscordGuild dcGuild) {
