@@ -1,10 +1,7 @@
 package com.motorbesitzen.gamblebot.bot.command.game.gamble;
 
-import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
-import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.dao.GamblePrize;
 import com.motorbesitzen.gamblebot.data.dao.GambleSettings;
-import com.motorbesitzen.gamblebot.util.LogUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,15 +17,11 @@ public class GambleGame {
 		this.random = random;
 	}
 
-	// TODO: change parameter to GambleSettings, not player, log outside of this method (reutnr value)
-	public GambleWinInfo play(final DiscordMember player) {
-		final DiscordGuild dcGuild = player.getGuild();
+	public GambleWinInfo play(final GambleSettings settings) {
 		final double randomNumber = random.nextDouble() * 100;
-		final GambleSettings settings = dcGuild.getGambleSettings();
 		final Set<GamblePrize> prizes = settings.getPrizes();
 		final List<GamblePrize> prizeList = new ArrayList<>(prizes);
 		prizeList.sort(Comparator.comparingLong(GamblePrize::getPrizeId));
-		LogUtil.logInfo(player.getDiscordId() + " got a " + randomNumber + " in " + Arrays.toString(prizeList.toArray()));
 
 		double currentPos = 0.0;
 		for (GamblePrize prize : prizeList) {

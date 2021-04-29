@@ -5,8 +5,10 @@ import com.motorbesitzen.gamblebot.bot.command.game.gamble.GambleGame;
 import com.motorbesitzen.gamblebot.bot.command.game.gamble.GambleWinInfo;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
+import com.motorbesitzen.gamblebot.data.dao.GambleSettings;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
+import com.motorbesitzen.gamblebot.util.LogUtil;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -98,10 +101,17 @@ class PlayGamble extends CommandImpl {
 	}
 
 	private void playGamble(final TextChannel channel, final DiscordMember player, final Member member) {
-		final GambleWinInfo gambleWinInfo = gambleGame.play(player);
+		final DiscordGuild dcGuild = player.getGuild();
+		final GambleSettings settings = dcGuild.getGambleSettings();
+		final GambleWinInfo gambleWinInfo = gambleGame.play(settings);
+		LogUtil.logInfo(
+				player.getDiscordId() + " got a " + gambleWinInfo.getLuckyNumber() + " in " +
+						Arrays.toString(settings.getPrizes().toArray()) + " -> " + gambleWinInfo.getPriceName()
+		);
+
 		final NumberFormat nf = generateNumberFormat();
 		final String playerMention = "<@" + player.getDiscordId() + ">";
-		if (gambleWinInfo.getName() == null) {
+		if (gambleWinInfo.getPriceName() == null) {
 			answer(
 					channel,
 					playerMention + ", you drew a blank! You did not win anything.\n" +
@@ -110,10 +120,8 @@ class PlayGamble extends CommandImpl {
 			return;
 		}
 
-
-		final DiscordGuild dcGuild = player.getGuild();
 		final TextChannel logChannel = channel.getGuild().getTextChannelById(dcGuild.getLogChannelId());
-		if (gambleWinInfo.getName().equalsIgnoreCase("ban") || gambleWinInfo.getName().toLowerCase().startsWith("ban ")) {
+		if (gambleWinInfo.getPriceName().equalsIgnoreCase("ban") || gambleWinInfo.getPriceName().toLowerCase().startsWith("ban ")) {
 			final Member self = channel.getGuild().getSelfMember();
 			if (self.canInteract(member)) {
 				answer(
@@ -137,7 +145,7 @@ class PlayGamble extends CommandImpl {
 			return;
 		}
 
-		if (gambleWinInfo.getName().equalsIgnoreCase("kick") || gambleWinInfo.getName().toLowerCase().startsWith("kick ")) {
+		if (gambleWinInfo.getPriceName().equalsIgnoreCase("kick") || gambleWinInfo.getPriceName().toLowerCase().startsWith("kick ")) {
 			final Member self = channel.getGuild().getSelfMember();
 			if (self.canInteract(member)) {
 				answer(
@@ -163,10 +171,10 @@ class PlayGamble extends CommandImpl {
 
 		answer(
 				channel,
-				playerMention + " you won \"" + gambleWinInfo.getName() + "\"!\n" +
+				playerMention + " you won \"" + gambleWinInfo.getPriceName() + "\"!\n" +
 						"Your (rounded) lucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
 		);
-		sendLogMessage(logChannel, playerMention + " won \"" + gambleWinInfo.getName() + "\"!");
+		sendLogMessage(logChannel, playerMention + " won \"" + gambleWinInfo.getPriceName() + "\"!");
 	}
 
 	private NumberFormat generateNumberFormat() {
