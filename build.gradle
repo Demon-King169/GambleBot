@@ -45,20 +45,3 @@ dependencies {
 test {
     useJUnitPlatform()
 }
-
-bootRun {
-    file('.env').readLines().each() {
-        if (!it.isBlank() && !it.startsWith("#")) {
-            def pos = it.indexOf("=")
-            def key = it.substring(0, pos).trim()
-            def value = it.substring(pos + 1).trim()
-            if (value.startsWith("\"") && value.endsWith("\"")) {
-                value = value.substring(1, value.length() - 1)
-            }
-
-            if (System.getenv(key) == null) {
-                environment key, value
-            }
-        }
-    }
-}

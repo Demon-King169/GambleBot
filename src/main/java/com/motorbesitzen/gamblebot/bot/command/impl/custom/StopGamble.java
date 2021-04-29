@@ -63,7 +63,7 @@ public class StopGamble extends CommandImpl {
 					}
 
 					final GambleSettings settings = dcGuild.getGambleSettings();
-					settings.setStartTimestampMs(0);
+					settings.setStartTimestampMs(System.currentTimeMillis() - settings.getDurationMs());
 					settingsRepo.save(settings);
 					answer(event.getChannel(), "Stopped the gamble.");
 				},
