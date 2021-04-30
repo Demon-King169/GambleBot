@@ -99,8 +99,10 @@ class PayCoins extends CommandImpl {
 
 		if (coinAmount > author.getCoins()) {
 			final long authorCoins = author.getCoins();
-			final String coinRange = authorCoins > 0 ? "(1 - " + dcMember.getCoins() + ")" : "of at least 1";
-			sendErrorMessage(event.getChannel(), "Please set a valid coin amount " + coinRange + "!");
+			final String errorMsg = authorCoins > 0 ?
+					"Please set a valid coin amount (1 - " + dcMember.getCoins() + ")!" :
+					"You do not have enough coins for that!\nYou only have **" + dcMember.getCoins() + "** coins right now.";
+			sendErrorMessage(event.getChannel(), errorMsg);
 			return;
 		}
 
