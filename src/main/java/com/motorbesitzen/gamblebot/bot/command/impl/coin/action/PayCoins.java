@@ -92,8 +92,15 @@ class PayCoins extends CommandImpl {
 		final String[] tokens = content.split(" ");
 		final String coinText = tokens[tokens.length - 1];
 		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
-		if (coinAmount < 1 || coinAmount > author.getCoins()) {
-			sendErrorMessage(event.getChannel(), "Please set a valid coin amount (1 - " + dcMember.getCoins() + ")!");
+		if (coinAmount < 1) {
+			sendErrorMessage(event.getChannel(), "Please choose a coin amount of at least 1!");
+			return;
+		}
+
+		if (coinAmount > author.getCoins()) {
+			final long authorCoins = author.getCoins();
+			final String coinRange = authorCoins > 0 ? "(1 - " + dcMember.getCoins() + ")" : "of at least 1";
+			sendErrorMessage(event.getChannel(), "Please set a valid coin amount " + coinRange + "!");
 			return;
 		}
 
