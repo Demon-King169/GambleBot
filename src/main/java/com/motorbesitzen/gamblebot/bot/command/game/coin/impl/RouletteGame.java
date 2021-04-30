@@ -83,7 +83,7 @@ public class RouletteGame implements Game {
 				break;
 		}
 
-		return 0;
+		return -1;
 	}
 
 	private boolean isBlackField(final int field) {
@@ -114,7 +114,7 @@ public class RouletteGame implements Game {
 			}
 		}
 
-		return 0;
+		return -1;
 	}
 
 	private long getMultiBetWin(final int betSize, final long wager) {
@@ -132,7 +132,7 @@ public class RouletteGame implements Game {
 			case 6:
 				return safelyMultiply(wager, 5);
 			default:
-				return 0;
+				return -1;
 		}
 	}
 

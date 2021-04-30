@@ -41,12 +41,22 @@ public class RpsGame implements Game {
 			return bet.getWager();
 		}
 
-		return 0L;
+		if(isDraw(bet.getBetInfo(), headOrTail)) {
+			return 0L;
+		}
+
+		return -1L;
 	}
 
 	private boolean isWin(final String bet, final String headOrTail) {
 		return (bet.matches("(?i)R(ock)?") && headOrTail.equals("Scissors")) ||
 				(bet.matches("(?i)S(cissors?)?") && headOrTail.equals("Paper")) ||
 				(bet.matches("(?i)P(aper)?") && headOrTail.equals("Rock"));
+	}
+
+	private boolean isDraw(final String bet, final String headOrTail) {
+		char betChar = bet.toLowerCase().charAt(0);
+		char resChar = headOrTail.toLowerCase().charAt(0);
+		return betChar == resChar;
 	}
 }

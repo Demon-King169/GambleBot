@@ -28,10 +28,10 @@ public class FlipGame implements Game {
 
 	private long getWin(final GameBet bet, final String headOrTail) {
 		if(isWin(bet.getBetInfo(), headOrTail)) {
-			return bet.getWager();
+			return bet.getWager() / 2;
 		}
 
-		return 0L;
+		return -1L;
 	}
 
 	private boolean isWin(final String bet, final String headOrTail) {

@@ -109,6 +109,12 @@ class PlayRps extends CommandImpl {
 			return;
 		}
 
+		if(winInfo.isDraw()) {
+			reply(event.getMessage(), "I chose **" + winInfo.getResultText() + "**!\n" +
+					"It's a draw! Your balance: **" + dcMember.getCoins() + "** coins.");
+			return;
+		}
+
 		dcMember.lostGame(wager);
 		memberRepo.save(dcMember);
 		reply(event.getMessage(), "I chose **" + winInfo.getResultText() + "**!\nYou lost the bet. " +

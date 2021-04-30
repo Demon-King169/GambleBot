@@ -21,4 +21,8 @@ public class GameWinInfo {
 	public boolean isWin() {
 		return winAmount > 0;
 	}
+
+	public boolean isDraw() {
+		return winAmount == 0;
+	}
 }
