@@ -173,4 +173,12 @@ public class DiscordMember {
 		this.coinsReceived = safelyAdd(this.coinsReceived, coins);
 		this.coins = safelyAdd(this.coins, coins);
 	}
+
+	public void giveCoins(final long coins) {
+		this.coins = safelyAdd(this.coins, coins);
+	}
+
+	public void removeCoins(final long coins) {
+		this.coins -= coins;
+	}
 }

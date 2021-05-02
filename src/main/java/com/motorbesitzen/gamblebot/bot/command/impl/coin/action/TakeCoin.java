@@ -84,7 +84,13 @@ class TakeCoin extends CommandImpl {
 			return;
 		}
 
-		dcMember.spendCoins(coinAmount);
+		if(coinAmount > dcMember.getCoins()) {
+			sendErrorMessage(event.getChannel(), "That user does not have that many coins. <@" +
+					dcMember.getDiscordId() + "> balance: " + dcMember.getCoins());
+			return;
+		}
+
+		dcMember.removeCoins(coinAmount);
 		memberRepo.save(dcMember);
 		answer(event.getChannel(), "Took **" + coinAmount + "** coins from the balance of " + member.getAsMention() + ".");
 		LogUtil.logDebug(event.getAuthor().getIdLong() + " took " + coinAmount + " coins from " + dcMember.getDiscordId());
