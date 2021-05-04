@@ -16,12 +16,12 @@ import java.util.Optional;
  * Shows the coin balance of the user.
  */
 @Service("balance")
-class CoinInfo extends CommandImpl {
+class Balance extends CommandImpl {
 
 	private final DiscordMemberRepo memberRepo;
 
 	@Autowired
-	private CoinInfo(final DiscordMemberRepo memberRepo) {
+	private Balance(final DiscordMemberRepo memberRepo) {
 		this.memberRepo = memberRepo;
 	}
 
