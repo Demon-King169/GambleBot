@@ -3,10 +3,9 @@ package com.motorbesitzen.gamblebot.bot.command.impl.coin.stats;
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
+import com.motorbesitzen.gamblebot.util.DiscordMessageUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,35 +52,39 @@ class Stats extends CommandImpl {
 
 	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
-		final Member author = event.getMember();
-		if(author == null) {
-			return;
-		}
-
-		final Guild guild = event.getGuild();
-		final long guildId = guild.getIdLong();
-		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(author.getIdLong(), guildId);
+		final Message message = event.getMessage();
+		final long mentionedUserId = DiscordMessageUtil.getMentionedMemberId(message);
+		final long requestedUserId = mentionedUserId <= 0 ?
+				event.getAuthor().getIdLong() :
+				DiscordMessageUtil.getMentionedMemberId(message);
+		final long guildId = event.getGuild().getIdLong();
+		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(requestedUserId, guildId);
 		dcMemberOpt.ifPresentOrElse(
 				dcMember -> {
-					final MessageEmbed embed = buildStatsMessage(author, dcMember);
+					final MessageEmbed embed = buildStatsMessage(event.getAuthor(), dcMember);
 					answer(event.getChannel(), embed);
 				},
-				() -> sendErrorMessage(event.getChannel(), "There are no stats for you yet!")
+				() -> {
+					final String errorMsg = mentionedUserId <= 0 ?
+							"There are no stats for you yet!" :
+							"There are no stats for that user!";
+					sendErrorMessage(event.getChannel(), errorMsg);
+				}
 		);
 	}
 
-	private MessageEmbed buildStatsMessage(final Member author, final DiscordMember dcMember) {
+	private MessageEmbed buildStatsMessage(final User author, final DiscordMember dcMember) {
 		final EmbedBuilder eb = new EmbedBuilder();
-		eb.setTitle("Stats of " + author.getUser().getAsTag() + ":");
-		eb.addField("Coins:", String.valueOf(dcMember.getCoins()), true);
-		eb.addField("Coins won: ", String.valueOf(dcMember.getCoinsWon()), true);
-		eb.addField("Coins lost: ", String.valueOf(dcMember.getCoinsLost()), true);
-		eb.addField("Coins received: ", String.valueOf(dcMember.getCoinsReceived()), true);
-		eb.addField("Coins spent: ", String.valueOf(dcMember.getCoinsSpend()), true);
-		eb.addBlankField(true);
-		eb.addField("Games: ", String.valueOf(dcMember.getGamesPlayed()), true);
-		eb.addField("Wins: ", String.valueOf(dcMember.getGamesWon()), true);
-		eb.addField("Losses: ", String.valueOf(dcMember.getGamesLost()), true);
+		eb.setTitle("Stats of " + author.getAsTag() + ":")
+			.addField("Coins:", String.valueOf(dcMember.getCoins()), true)
+			.addField("Coins won: ", String.valueOf(dcMember.getCoinsWon()), true)
+			.addField("Coins lost: ", String.valueOf(dcMember.getCoinsLost()), true)
+			.addField("Coins received: ", String.valueOf(dcMember.getCoinsReceived()), true)
+			.addField("Coins spent: ", String.valueOf(dcMember.getCoinsSpend()), true)
+			.addBlankField(true)
+			.addField("Games: ", String.valueOf(dcMember.getGamesPlayed()), true)
+			.addField("Wins: ", String.valueOf(dcMember.getGamesWon()), true)
+			.addField("Losses: ", String.valueOf(dcMember.getGamesLost()), true);
 		return eb.build();
 	}
 }
