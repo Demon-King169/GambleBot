@@ -28,6 +28,10 @@ public final class DiscordMessageUtil {
 			return message.getMentionedMembers().get(1).getIdLong();
 		}
 
+		if(message.getReferencedMessage() != null && mentionedUsers.size() == 1) {
+			return -1;
+		}
+
 		if (message.getMentionedMembers().size() != 0) {
 			return message.getMentionedMembers().get(0).getIdLong();
 		}
