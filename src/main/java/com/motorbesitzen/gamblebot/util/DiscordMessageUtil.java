@@ -1,5 +1,6 @@
 package com.motorbesitzen.gamblebot.util;
 
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 
 import java.util.ArrayList;
@@ -14,13 +15,19 @@ public final class DiscordMessageUtil {
 
 	/**
 	 * Get a mentioned member ID from a message. If the message has a mention it uses the ID of the first mentioned member.
-	 * If there is no mention it checks for a numeric ID token and if there are multiple chooses the first one.
+	 * If there is no mention it checks for a numeric ID token and if there are multiple chooses the first one. If
+	 * there is a mention due to a reply mention that mention gets ignored.
 	 *
 	 * @param message The Discord message object.
 	 * @return If there is a member ID found it returns the ID as a {@code long}. If a raw ID exceeds the {@code Long}
 	 * limits it returns -1 as well if there is no ID found in the message.
 	 */
 	public static long getMentionedMemberId(final Message message) {
+		final List<Member> mentionedUsers = message.getMentionedMembers();
+		if(message.getReferencedMessage() != null && mentionedUsers.size() > 1) {
+			return message.getMentionedMembers().get(1).getIdLong();
+		}
+
 		if (message.getMentionedMembers().size() != 0) {
 			return message.getMentionedMembers().get(0).getIdLong();
 		}
