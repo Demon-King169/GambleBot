@@ -4,8 +4,10 @@ import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
 import com.motorbesitzen.gamblebot.util.DiscordMessageUtil;
+import com.motorbesitzen.gamblebot.util.LogUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,10 +62,17 @@ class Stats extends CommandImpl {
 		final long guildId = event.getGuild().getIdLong();
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(requestedUserId, guildId);
 		dcMemberOpt.ifPresentOrElse(
-				dcMember -> {
-					final MessageEmbed embed = buildStatsMessage(event.getAuthor(), dcMember);
-					answer(event.getChannel(), embed);
-				},
+				dcMember -> event.getJDA().retrieveUserById(requestedUserId).queue(
+						requestedUser -> {
+							final MessageEmbed embed = buildStatsMessage(requestedUser.getAsTag(), dcMember);
+							answer(event.getChannel(), embed);
+						},
+						throwable -> {
+							LogUtil.logDebug("Could not find user with ID: " + requestedUserId);
+							final MessageEmbed embed = buildStatsMessage("Unknown User", dcMember);
+							answer(event.getChannel(), embed);
+						}
+				),
 				() -> {
 					final String errorMsg = mentionedUserId <= 0 ?
 							"There are no stats for you yet!" :
@@ -73,18 +82,18 @@ class Stats extends CommandImpl {
 		);
 	}
 
-	private MessageEmbed buildStatsMessage(final User author, final DiscordMember dcMember) {
+	private MessageEmbed buildStatsMessage(final String tag, final DiscordMember dcMember) {
 		final EmbedBuilder eb = new EmbedBuilder();
-		eb.setTitle("Stats of " + author.getAsTag() + ":")
-			.addField("Coins:", String.valueOf(dcMember.getCoins()), true)
-			.addField("Coins won: ", String.valueOf(dcMember.getCoinsWon()), true)
-			.addField("Coins lost: ", String.valueOf(dcMember.getCoinsLost()), true)
-			.addField("Coins received: ", String.valueOf(dcMember.getCoinsReceived()), true)
-			.addField("Coins spent: ", String.valueOf(dcMember.getCoinsSpend()), true)
-			.addBlankField(true)
-			.addField("Games: ", String.valueOf(dcMember.getGamesPlayed()), true)
-			.addField("Wins: ", String.valueOf(dcMember.getGamesWon()), true)
-			.addField("Losses: ", String.valueOf(dcMember.getGamesLost()), true);
+		eb.setTitle("Stats of " + tag + ":")
+				.addField("Coins:", String.valueOf(dcMember.getCoins()), true)
+				.addField("Coins won: ", String.valueOf(dcMember.getCoinsWon()), true)
+				.addField("Coins lost: ", String.valueOf(dcMember.getCoinsLost()), true)
+				.addField("Coins received: ", String.valueOf(dcMember.getCoinsReceived()), true)
+				.addField("Coins spent: ", String.valueOf(dcMember.getCoinsSpend()), true)
+				.addBlankField(true)
+				.addField("Games: ", String.valueOf(dcMember.getGamesPlayed()), true)
+				.addField("Wins: ", String.valueOf(dcMember.getGamesWon()), true)
+				.addField("Losses: ", String.valueOf(dcMember.getGamesLost()), true);
 		return eb.build();
 	}
 }
