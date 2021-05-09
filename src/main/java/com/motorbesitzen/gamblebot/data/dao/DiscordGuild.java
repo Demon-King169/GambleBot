@@ -24,7 +24,7 @@ public class DiscordGuild {
 	private long dailyCoins;
 
 	@Min(0)
-	private long boosterDailyCoins;
+	private long boosterDailyBonus;
 
 	@OneToOne
 	private GambleSettings gambleSettings;
@@ -85,12 +85,12 @@ public class DiscordGuild {
 		this.dailyCoins = dailyCoins;
 	}
 
-	public long getBoosterDailyCoins() {
-		return boosterDailyCoins;
+	public long getBoosterDailyBonus() {
+		return boosterDailyBonus;
 	}
 
-	public void setBoosterDailyCoins(final long boosterDailyCoins) {
-		this.boosterDailyCoins = boosterDailyCoins;
+	public void setBoosterDailyBonus(final long boosterDailyCoins) {
+		this.boosterDailyBonus = boosterDailyCoins;
 	}
 
 	public GambleSettings getGambleSettings() {

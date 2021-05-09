@@ -69,9 +69,7 @@ class DailyCoins extends CommandImpl {
 			return;
 		}
 
-		final long dailyCoinsAmount = author.getTimeBoosted() == null ?
-				dcMember.getGuild().getDailyCoins() :
-				dcMember.getGuild().getBoosterDailyCoins();
+		final long dailyCoinsAmount = getDailyAmount(author, dcMember.getGuild());
 		dcMember.giveCoins(dailyCoinsAmount);
 		dcMember.setNextDailyCoinsMs(System.currentTimeMillis() + MS_PER_DAY);
 		memberRepo.save(dcMember);
@@ -89,5 +87,15 @@ class DailyCoins extends CommandImpl {
 		final DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
 		guildRepo.save(dcGuild);
 		return dcGuild;
+	}
+
+	private long getDailyAmount(final Member author, final DiscordGuild dcGuild) {
+		final long dailyCoinsAmount = dcGuild.getDailyCoins();
+		if(author.getTimeBoosted() != null) {
+			final long boosterDailyBonus = dcGuild.getBoosterDailyBonus();
+			return dailyCoinsAmount + boosterDailyBonus;
+		}
+
+		return dailyCoinsAmount;
 	}
 }

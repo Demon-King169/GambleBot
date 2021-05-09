@@ -14,7 +14,7 @@ import java.util.Optional;
 /**
  * Sets the amount of daily coins for boosters of the guild.
  */
-@Service("setdailybooster")
+@Service("setboosterbonus")
 class BoosterDailyCoinAmount extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
@@ -26,7 +26,7 @@ class BoosterDailyCoinAmount extends CommandImpl {
 
 	@Override
 	public String getName() {
-		return "setdailybooster";
+		return "setboosterbonus";
 	}
 
 	@Override
@@ -36,7 +36,7 @@ class BoosterDailyCoinAmount extends CommandImpl {
 
 	@Override
 	public String getDescription() {
-		return "Sets the amount of coins a booster can get each day.";
+		return "Sets the amount of bonus coins a booster can get with the daily coins command.";
 	}
 
 	@Override
@@ -64,8 +64,8 @@ class BoosterDailyCoinAmount extends CommandImpl {
 			return;
 		}
 
-		dcGuild.setBoosterDailyCoins(coinAmount);
+		dcGuild.setBoosterDailyBonus(coinAmount);
 		guildRepo.save(dcGuild);
-		answer(event.getChannel(), "Set the booster daily coins amount to **" + coinAmount + "** coins.");
+		answer(event.getChannel(), "Set the booster bonus coin amount to **" + coinAmount + "** coins.");
 	}
 }
