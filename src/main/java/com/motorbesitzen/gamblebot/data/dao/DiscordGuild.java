@@ -1,6 +1,7 @@
 package com.motorbesitzen.gamblebot.data.dao;
 
 import com.motorbesitzen.gamblebot.util.ParseUtil;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
@@ -24,6 +25,7 @@ public class DiscordGuild {
 	private long dailyCoins;
 
 	@Min(0)
+	@ColumnDefault("0")
 	private long boosterDailyBonus;
 
 	@OneToOne
