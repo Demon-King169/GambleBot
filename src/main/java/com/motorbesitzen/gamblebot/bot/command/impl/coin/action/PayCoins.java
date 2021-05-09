@@ -97,11 +97,11 @@ class PayCoins extends CommandImpl {
 			return;
 		}
 
-		if (coinAmount > author.getCoins()) {
-			final long authorCoins = author.getCoins();
+		final long authorCoins = author.getCoins();
+		if (coinAmount > authorCoins) {
 			final String errorMsg = authorCoins > 0 ?
 					"Please set a valid coin amount (1 - " + dcMember.getCoins() + ")!" :
-					"You do not have enough coins for that!\nYou only have **" + dcMember.getCoins() + "** coins right now.";
+					"You do not have enough coins for that!\nYou only have **" + authorCoins + "** coins right now.";
 			sendErrorMessage(event.getChannel(), errorMsg);
 			return;
 		}
