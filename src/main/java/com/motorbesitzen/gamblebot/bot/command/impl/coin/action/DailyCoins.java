@@ -15,7 +15,7 @@ import java.util.Optional;
 /**
  * Collect the daily coins.
  */
-@Service("dailycoins")
+@Service("daily")
 class DailyCoins extends CommandImpl {
 
 	private static final int MS_PER_DAY = 86400000;
@@ -30,7 +30,7 @@ class DailyCoins extends CommandImpl {
 
 	@Override
 	public String getName() {
-		return "dailycoins";
+		return "daily";
 	}
 
 	@Override
