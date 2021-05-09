@@ -13,6 +13,10 @@ public class RpsGame implements Game {
 
 	private final Random random;
 
+	private static final String RPS_ROCK = "Rock";
+	private static final String RPS_SCISSORS = "Scissors";
+	private static final String RPS_PAPER = "Paper";
+
 	@Autowired
 	private RpsGame(final Random random) {
 		this.random = random;
@@ -20,43 +24,45 @@ public class RpsGame implements Game {
 
 	@Override
 	public GameWinInfo play(final GameBet bet) {
-		final double result = random.nextDouble();
+		final int result = random.nextInt(3);
 		final String rps = getRps(result);
 		final long winAmount = getWin(bet, rps);
 		return new GameWinInfo(winAmount, rps);
 	}
 
-	private String getRps(final double result) {
-		if(Double.compare(result, 0.33) < 0) {
-			return "Rock";
-		} else if(Double.compare(result, 0.66) < 0) {
-			return "Scissors";
+	private String getRps(final int result) {
+		switch (result) {
+			case 0:
+				return RPS_ROCK;
+			case 1:
+				return RPS_SCISSORS;
+			case 2:
+			default:
+				return RPS_PAPER;
 		}
-
-		return "Paper";
 	}
 
-	private long getWin(final GameBet bet, final String headOrTail) {
-		if(isWin(bet.getBetInfo(), headOrTail)) {
+	private long getWin(final GameBet bet, final String rpsResult) {
+		if(isWin(bet.getBetInfo(), rpsResult)) {
 			return bet.getWager();
 		}
 
-		if(isDraw(bet.getBetInfo(), headOrTail)) {
+		if(isDraw(bet.getBetInfo(), rpsResult)) {
 			return 0L;
 		}
 
 		return -1L;
 	}
 
-	private boolean isWin(final String bet, final String headOrTail) {
-		return (bet.matches("(?i)R(ock)?") && headOrTail.equals("Scissors")) ||
-				(bet.matches("(?i)S(cissors?)?") && headOrTail.equals("Paper")) ||
-				(bet.matches("(?i)P(aper)?") && headOrTail.equals("Rock"));
+	private boolean isWin(final String bet, final String rpsResult) {
+		return (bet.matches("(?i)R(ock)?") && rpsResult.equals(RPS_SCISSORS)) ||
+				(bet.matches("(?i)S(cissors?)?") && rpsResult.equals(RPS_PAPER)) ||
+				(bet.matches("(?i)P(aper)?") && rpsResult.equals(RPS_ROCK));
 	}
 
-	private boolean isDraw(final String bet, final String headOrTail) {
-		char betChar = bet.toLowerCase().charAt(0);
-		char resChar = headOrTail.toLowerCase().charAt(0);
+	private boolean isDraw(final String bet, final String rpsResult) {
+		final char betChar = bet.toLowerCase().charAt(0);
+		final char resChar = rpsResult.toLowerCase().charAt(0);
 		return betChar == resChar;
 	}
 }
