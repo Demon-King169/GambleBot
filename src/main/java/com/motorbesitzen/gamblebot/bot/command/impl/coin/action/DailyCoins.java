@@ -69,7 +69,9 @@ class DailyCoins extends CommandImpl {
 			return;
 		}
 
-		final long dailyCoinsAmount = dcMember.getGuild().getDailyCoins();
+		final long dailyCoinsAmount = author.getTimeBoosted() == null ?
+				dcMember.getGuild().getDailyCoins() :
+				dcMember.getGuild().getBoosterDailyCoins();
 		dcMember.giveCoins(dailyCoinsAmount);
 		dcMember.setNextDailyCoinsMs(System.currentTimeMillis() + MS_PER_DAY);
 		memberRepo.save(dcMember);

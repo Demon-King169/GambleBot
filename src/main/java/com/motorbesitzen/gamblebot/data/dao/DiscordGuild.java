@@ -23,6 +23,9 @@ public class DiscordGuild {
 	@Min(0)
 	private long dailyCoins;
 
+	@Min(0)
+	private long boosterDailyCoins;
+
 	@OneToOne
 	private GambleSettings gambleSettings;
 
@@ -62,7 +65,7 @@ public class DiscordGuild {
 		return logChannelId;
 	}
 
-	public void setLogChannelId(long logChannelId) {
+	public void setLogChannelId(final long logChannelId) {
 		this.logChannelId = logChannelId;
 	}
 
@@ -70,7 +73,7 @@ public class DiscordGuild {
 		return coinChannelId;
 	}
 
-	public void setCoinChannelId(long coinChannelId) {
+	public void setCoinChannelId(final long coinChannelId) {
 		this.coinChannelId = coinChannelId;
 	}
 
@@ -78,15 +81,23 @@ public class DiscordGuild {
 		return dailyCoins;
 	}
 
-	public void setDailyCoins(long dailyCoins) {
+	public void setDailyCoins(final long dailyCoins) {
 		this.dailyCoins = dailyCoins;
+	}
+
+	public long getBoosterDailyCoins() {
+		return boosterDailyCoins;
+	}
+
+	public void setBoosterDailyCoins(final long boosterDailyCoins) {
+		this.boosterDailyCoins = boosterDailyCoins;
 	}
 
 	public GambleSettings getGambleSettings() {
 		return gambleSettings;
 	}
 
-	public void setGambleSettings(GambleSettings gambleSettings) {
+	public void setGambleSettings(final GambleSettings gambleSettings) {
 		this.gambleSettings = gambleSettings;
 	}
 
@@ -94,7 +105,7 @@ public class DiscordGuild {
 		return shopOffers;
 	}
 
-	public void setShopOffers(Set<CoinShopOffer> shopOffers) {
+	public void setShopOffers(final Set<CoinShopOffer> shopOffers) {
 		this.shopOffers = shopOffers;
 	}
 
