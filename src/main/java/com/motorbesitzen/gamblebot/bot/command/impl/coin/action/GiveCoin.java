@@ -72,6 +72,11 @@ class GiveCoin extends CommandImpl {
 	}
 
 	private void addCoins(final GuildMessageReceivedEvent event, final Member member) {
+		if(member.getUser().isBot()) {
+			sendErrorMessage(event.getChannel(), "You can not give coins to a bot!");
+			return;
+		}
+
 		final long guildId = event.getGuild().getIdLong();
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(member.getIdLong(), guildId);
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(member.getIdLong(), guildId));

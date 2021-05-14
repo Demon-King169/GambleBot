@@ -85,6 +85,11 @@ class PayCoins extends CommandImpl {
 	}
 
 	private void payCoins(final GuildMessageReceivedEvent event, final DiscordMember author, final Member member) {
+		if(member.getUser().isBot()) {
+			sendErrorMessage(event.getChannel(), "You can not pay coins to a bot!");
+			return;
+		}
+
 		final long guildId = event.getGuild().getIdLong();
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(member.getIdLong(), guildId);
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(member.getIdLong(), guildId));
