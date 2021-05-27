@@ -13,7 +13,7 @@ public class FlipGame implements Game {
 
 	private final Random random;
 
-	private static final String COIN_HEAD = "Head";
+	private static final String COIN_HEADS = "Heads";
 	private static final String COIN_TAILS = "Tails";
 
 	@Autowired
@@ -24,7 +24,7 @@ public class FlipGame implements Game {
 	@Override
 	public GameWinInfo play(final GameBet bet) {
 		final int result = random.nextInt(2);
-		final String headOrTail = result == 0 ? COIN_HEAD : COIN_TAILS;	// 0 = head, 1 = tail
+		final String headOrTail = result == 0 ? COIN_HEADS : COIN_TAILS;	// 0 = head, 1 = tail
 		final long winAmount = getWin(bet, headOrTail);
 		return new GameWinInfo(winAmount, headOrTail);
 	}
@@ -38,7 +38,7 @@ public class FlipGame implements Game {
 	}
 
 	private boolean isWin(final String bet, final String headOrTail) {
-		return (bet.matches("(?i)H(eads?)?") && headOrTail.equals(COIN_HEAD)) ||
+		return (bet.matches("(?i)H(eads?)?") && headOrTail.equals(COIN_HEADS)) ||
 				(bet.matches("(?i)T(ails?)?") && headOrTail.equals(COIN_TAILS));
 	}
 }
