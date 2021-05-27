@@ -45,7 +45,7 @@ public class RouletteGame implements Game {
 		final long winAmount = bet.getBetInfo().matches("(?i)[BREULH]") ?
 				getSectionWin(bet, result) :
 				getNumberWin(bet, result);
-		final String resultText = getColorEmote(result) + " Roulette result: " + result;
+		final String resultText = getColorEmote(result) + " (" + result + ")";
 		return new GameWinInfo(winAmount, resultText);
 	}
 

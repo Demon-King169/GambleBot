@@ -110,15 +110,15 @@ class PlayRoulette extends CommandImpl {
 			final long winAmount = winInfo.getWinAmount();
 			dcMember.wonGame(winAmount);
 			memberRepo.save(dcMember);
-			reply(event.getMessage(), "You won **" + winAmount + "** coins! Your balance: **" +
-					dcMember.getCoins() + "** coins.\n" + winInfo.getResultText());
+			reply(event.getMessage(), "**" + winInfo.getResultText() + "**\n" +
+					"You won **" + winAmount + "** coins! Your balance: **" + dcMember.getCoins() + "** coins.");
 			return;
 		}
 
 		dcMember.lostGame(wager);
 		memberRepo.save(dcMember);
-		reply(event.getMessage(), "You lost the bet. Your balance: **" +
-				dcMember.getCoins() + "** coins.\n" + winInfo.getResultText());
+		reply(event.getMessage(), "**" + winInfo.getResultText() + "**\n" +
+				"You lost the bet. Your balance: **" + dcMember.getCoins() + "** coins.");
 	}
 
 	private DiscordMember createNewMember(final long memberId, final long guildId) {
