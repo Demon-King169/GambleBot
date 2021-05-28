@@ -98,7 +98,7 @@ class PayCoins extends CommandImpl {
 		final String coinText = tokens[tokens.length - 1];
 		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
 		if (coinAmount < 1) {
-			sendErrorMessage(event.getChannel(), "Please choose a coin amount of at least 1!");
+			sendErrorMessage(event.getChannel(), "Please choose a valid coin amount of at least 1!");
 			return;
 		}
 

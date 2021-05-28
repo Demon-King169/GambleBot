@@ -80,7 +80,7 @@ class TakeCoin extends CommandImpl {
 		final String coinText = tokens[tokens.length - 1];
 		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
 		if (coinAmount < 1) {
-			sendErrorMessage(event.getChannel(), "Please set a valid coin amount (> 1)!");
+			sendErrorMessage(event.getChannel(), "Please set a valid coin amount (>= 1)!");
 			return;
 		}
 
