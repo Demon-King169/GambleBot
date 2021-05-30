@@ -67,7 +67,7 @@ public class Buy extends CommandImpl {
 		final String[] tokens = content.split(" ");
 		final String shopIdText = tokens[tokens.length - 1];
 		final int shopId = ParseUtil.safelyParseStringToInt(shopIdText) - 1; // adjust for index
-		if(shopId <= 0) {
+		if(shopId < 0) {
 			sendErrorMessage(event.getChannel(), "Please use a valid ID! Check the shop for a list of IDs.");
 			return;
 		}
