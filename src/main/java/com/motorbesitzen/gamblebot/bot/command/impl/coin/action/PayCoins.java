@@ -62,19 +62,19 @@ class PayCoins extends CommandImpl {
 		final long guildId = event.getGuild().getIdLong();
 		final Optional<DiscordMember> dcAuthorOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
 		if (dcAuthorOpt.isEmpty()) {
-			sendErrorMessage(event.getChannel(), "You do not have any coins!");
+			replyErrorMessage(event.getMessage(), "You do not have any coins!");
 			return;
 		}
 
 		final Message message = event.getMessage();
 		final long userId = DiscordMessageUtil.getMentionedMemberId(message);
 		if (userId == authorId) {
-			sendErrorMessage(event.getChannel(), "You can not pay coins to yourself!");
+			replyErrorMessage(event.getMessage(), "You can not pay coins to yourself!");
 			return;
 		}
 
 		if (userId <= 100000000000000L) {
-			sendErrorMessage(event.getChannel(), "That user seems to be invalid!");
+			replyErrorMessage(event.getMessage(), "That user seems to be invalid!");
 			return;
 		}
 
@@ -86,7 +86,7 @@ class PayCoins extends CommandImpl {
 
 	private void payCoins(final GuildMessageReceivedEvent event, final DiscordMember author, final Member member) {
 		if(member.getUser().isBot()) {
-			sendErrorMessage(event.getChannel(), "You can not pay coins to a bot!");
+			replyErrorMessage(event.getMessage(), "You can not pay coins to a bot!");
 			return;
 		}
 
@@ -98,7 +98,7 @@ class PayCoins extends CommandImpl {
 		final String coinText = tokens[tokens.length - 1];
 		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
 		if (coinAmount < 1) {
-			sendErrorMessage(event.getChannel(), "Please choose a valid coin amount of at least 1!");
+			replyErrorMessage(event.getMessage(), "Please choose a valid coin amount of at least 1!");
 			return;
 		}
 
@@ -107,7 +107,7 @@ class PayCoins extends CommandImpl {
 			final String errorMsg = authorCoins > 0 ?
 					"Please set a valid coin amount (1 - " + dcMember.getCoins() + ")!" :
 					"You do not have enough coins for that!\nYou only have **" + authorCoins + "** coins right now.";
-			sendErrorMessage(event.getChannel(), errorMsg);
+			replyErrorMessage(event.getMessage(), errorMsg);
 			return;
 		}
 

@@ -77,7 +77,7 @@ class Stats extends CommandImpl {
 					final String errorMsg = mentionedUserId <= 0 ?
 							"There are no stats for you yet!" :
 							"There are no stats for that user!";
-					sendErrorMessage(event.getChannel(), errorMsg);
+					replyErrorMessage(event.getMessage(), errorMsg);
 				}
 		);
 	}

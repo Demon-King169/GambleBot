@@ -58,7 +58,7 @@ public class Buy extends CommandImpl {
 		final long guildId = event.getGuild().getIdLong();
 		final Optional<DiscordMember> dcAuthorOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
 		if (dcAuthorOpt.isEmpty()) {
-			sendErrorMessage(event.getChannel(), "You do not have any coins!");
+			replyErrorMessage(event.getMessage(), "You do not have any coins!");
 			return;
 		}
 
@@ -68,20 +68,20 @@ public class Buy extends CommandImpl {
 		final String shopIdText = tokens[tokens.length - 1];
 		final int shopId = ParseUtil.safelyParseStringToInt(shopIdText) - 1; // adjust for index
 		if(shopId < 0) {
-			sendErrorMessage(event.getChannel(), "Please use a valid ID! Check the shop for a list of IDs.");
+			replyErrorMessage(event.getMessage(), "Please use a valid ID! Check the shop for a list of IDs.");
 			return;
 		}
 
 		final DiscordMember dcAuthor = dcAuthorOpt.get();
 		final List<CoinShopOffer> offers = offerRepo.findCoinShopOffersByGuild_GuildIdOrderByPriceAsc(guildId);
 		if(shopId >= offers.size()) {
-			sendErrorMessage(event.getChannel(), "Please use a valid ID! Check the shop for a list of IDs.");
+			replyErrorMessage(event.getMessage(), "Please use a valid ID! Check the shop for a list of IDs.");
 			return;
 		}
 
 		final CoinShopOffer boughtOffer = offers.get(shopId);
 		if(dcAuthor.getCoins() < boughtOffer.getPrice()) {
-			sendErrorMessage(event.getChannel(), "You do not have enough coins for that!\n" +
+			replyErrorMessage(event.getMessage(), "You do not have enough coins for that!\n" +
 					"You only have **" + dcAuthor.getCoins() + "** coins right now.");
 			return;
 		}

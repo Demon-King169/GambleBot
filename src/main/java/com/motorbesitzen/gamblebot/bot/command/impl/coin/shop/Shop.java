@@ -52,7 +52,7 @@ public class Shop extends CommandImpl {
 		final long guildId = event.getGuild().getIdLong();
 		final List<CoinShopOffer> offers = offerRepo.findCoinShopOffersByGuild_GuildIdOrderByPriceAsc(guildId);
 		if (offers.size() == 0) {
-			sendErrorMessage(event.getChannel(), "There are no offers in your guild shop yet!");
+			replyErrorMessage(event.getMessage(), "There are no offers in your guild shop yet!");
 			return;
 		}
 

@@ -68,7 +68,7 @@ class PlayRps extends CommandImpl {
 		final String content = message.getContentRaw();
 		final String prefix = EnvironmentUtil.getEnvironmentVariable("CMD_PREFIX");
 		if (!content.matches("(?i)" + prefix + getName() + " [0-9]+[kmb]? (R(ock)?|P(aper)?|S(cissors?)?)")) {
-			sendErrorMessage(event.getChannel(), "Please use the correct syntax! Use `" +
+			replyErrorMessage(event.getMessage(), "Please use the correct syntax! Use `" +
 					prefix + "help` for a list of valid bets.");
 			return;
 		}
@@ -77,13 +77,13 @@ class PlayRps extends CommandImpl {
 		final String wagerText = tokens[tokens.length - 2];
 		final long wager = ParseUtil.safelyParseStringToLong(wagerText);
 		if (wager <= 0) {
-			sendErrorMessage(event.getChannel(), "Please set a wager of at least 1 coin for your bet!");
+			replyErrorMessage(event.getMessage(), "Please set a wager of at least 1 coin for your bet!");
 			return;
 		}
 
 		final String betText = tokens[tokens.length - 1];
 		if (!betText.matches("(?i)(R(ock)?|P(aper)?|S(cissors?)?)")) {
-			sendErrorMessage(event.getChannel(), "Please choose a valid bet! Use `" +
+			replyErrorMessage(event.getMessage(), "Please choose a valid bet! Use `" +
 					prefix + "help` for a list of valid bets.");
 			return;
 		}
@@ -93,7 +93,7 @@ class PlayRps extends CommandImpl {
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(authorId, guildId));
 		if (dcMember.getCoins() < wager) {
-			sendErrorMessage(event.getChannel(), "You do not have enough coins for that bet.\n" +
+			replyErrorMessage(event.getMessage(), "You do not have enough coins for that bet.\n" +
 					"You only have **" + dcMember.getCoins() + "** coins right now.");
 			return;
 		}

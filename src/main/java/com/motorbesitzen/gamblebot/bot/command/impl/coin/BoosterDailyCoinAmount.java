@@ -60,7 +60,7 @@ class BoosterDailyCoinAmount extends CommandImpl {
 		final String coinText = tokens[tokens.length - 1];
 		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
 		if (coinAmount < 0) {
-			sendErrorMessage(event.getChannel(), "Please set a valid amount of booster daily coins (>= 0)!");
+			replyErrorMessage(event.getMessage(), "Please set a valid amount of booster daily coins (>= 0)!");
 			return;
 		}
 

@@ -75,12 +75,12 @@ class CoinChannel extends CommandImpl {
 		}
 
 		if(mentionedChannel == null) {
-			sendErrorMessage(event.getChannel(), "Invalid channel! Please select a valid channel.");
+			replyErrorMessage(event.getMessage(), "Invalid channel! Please select a valid channel.");
 			return;
 		}
 
 		if(!mentionedChannel.canTalk()) {
-			sendErrorMessage(event.getChannel(), "Invalid channel! Please select a channel where I can read and write in.");
+			replyErrorMessage(event.getMessage(), "Invalid channel! Please select a channel where I can read and write in.");
 			return;
 		}
 

@@ -59,7 +59,7 @@ public class DelShopOffer extends CommandImpl {
 		final String shopIdText = tokens[tokens.length - 1];
 		final int shopId = ParseUtil.safelyParseStringToInt(shopIdText);
 		if(shopId <= 0) {
-			sendErrorMessage(event.getChannel(), "Please use a valid ID! Check the shop for a list of IDs.");
+			replyErrorMessage(event.getMessage(), "Please use a valid ID! Check the shop for a list of IDs.");
 			return;
 		}
 

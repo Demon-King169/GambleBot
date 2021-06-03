@@ -136,18 +136,19 @@ public abstract class CommandImpl implements Command {
 	 * @param newMessage the content to reply with.
 	 */
 	protected void reply(final Message message, final String newMessage) {
-		if(!canReply(message)) {
+		if (!canReply(message)) {
 			sendMessage(message.getTextChannel(), message.getAuthor().getAsMention() + "\n" + newMessage);
 			return;
 		}
 
-		if(isValidMessage(message, newMessage)) {
+		if (isValidMessage(message, newMessage)) {
 			message.reply(newMessage).queue();
 		}
 	}
 
 	/**
 	 * Checks if the bot has the needed permissions to reply to a message.
+	 *
 	 * @param message The message to reply to.
 	 * @return {@code true} if the bod has the 'Read Message History' permission.
 	 */
@@ -156,6 +157,16 @@ public abstract class CommandImpl implements Command {
 		final Guild guild = channel.getGuild();
 		final Member self = guild.getSelfMember();
 		return self.hasPermission(Permission.MESSAGE_HISTORY);
+	}
+
+	/**
+	 * Used to clarify in the code that an error message is sent, doesn't do anything else than a normal reply message.
+	 *
+	 * @param message      the message to reply to.
+	 * @param errorMessage The error message to send.
+	 */
+	protected void replyErrorMessage(final Message message, final String errorMessage) {
+		reply(message, errorMessage);
 	}
 
 	protected MessageEmbed buildGambleInfoEmbed(final DiscordGuild dcGuild) {

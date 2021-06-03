@@ -67,7 +67,7 @@ class Balance extends CommandImpl {
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(mentionedUserId, guildId);
 		dcMemberOpt.ifPresentOrElse(
 				dcMember -> reply(event.getMessage(), "That user owns **" + dcMember.getCoins() + "** coins."),
-				() -> sendErrorMessage(event.getChannel(), "That user does not have any coins.")
+				() -> replyErrorMessage(event.getMessage(), "That user does not have any coins.")
 		);
 	}
 

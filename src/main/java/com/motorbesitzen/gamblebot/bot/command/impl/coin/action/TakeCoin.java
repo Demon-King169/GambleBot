@@ -61,7 +61,7 @@ class TakeCoin extends CommandImpl {
 		final Message message = event.getMessage();
 		final long userId = DiscordMessageUtil.getMentionedMemberId(message);
 		if (userId <= 100000000000000L) {
-			sendErrorMessage(event.getChannel(), "That user seems to be invalid!");
+			replyErrorMessage(event.getMessage(), "That user seems to be invalid!");
 			return;
 		}
 
@@ -80,12 +80,12 @@ class TakeCoin extends CommandImpl {
 		final String coinText = tokens[tokens.length - 1];
 		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
 		if (coinAmount < 1) {
-			sendErrorMessage(event.getChannel(), "Please set a valid coin amount (>= 1)!");
+			replyErrorMessage(event.getMessage(), "Please set a valid coin amount (>= 1)!");
 			return;
 		}
 
 		if(coinAmount > dcMember.getCoins()) {
-			sendErrorMessage(event.getChannel(), "That user does not have that many coins. <@" +
+			replyErrorMessage(event.getMessage(), "That user does not have that many coins. <@" +
 					dcMember.getDiscordId() + "> balance: " + dcMember.getCoins());
 			return;
 		}

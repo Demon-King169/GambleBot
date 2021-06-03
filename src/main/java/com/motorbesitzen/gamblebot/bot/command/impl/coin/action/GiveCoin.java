@@ -61,7 +61,7 @@ class GiveCoin extends CommandImpl {
 		final Message message = event.getMessage();
 		final long userId = DiscordMessageUtil.getMentionedMemberId(message);
 		if (userId <= 100000000000000L) {
-			sendErrorMessage(event.getChannel(), "That user seems to be invalid!");
+			replyErrorMessage(event.getMessage(), "That user seems to be invalid!");
 			return;
 		}
 
@@ -73,7 +73,7 @@ class GiveCoin extends CommandImpl {
 
 	private void addCoins(final GuildMessageReceivedEvent event, final Member member) {
 		if(member.getUser().isBot()) {
-			sendErrorMessage(event.getChannel(), "You can not give coins to a bot!");
+			replyErrorMessage(event.getMessage(), "You can not give coins to a bot!");
 			return;
 		}
 
@@ -85,7 +85,7 @@ class GiveCoin extends CommandImpl {
 		final String coinText = tokens[tokens.length - 1];
 		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
 		if (coinAmount < 1) {
-			sendErrorMessage(event.getChannel(), "Please set a valid coin amount (>= 1)!");
+			replyErrorMessage(event.getMessage(), "Please set a valid coin amount (>= 1)!");
 			return;
 		}
 

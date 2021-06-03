@@ -59,14 +59,14 @@ public class AddShopOffer extends CommandImpl {
 		final String content = message.getContentRaw();
 		final String prefix = EnvironmentUtil.getEnvironmentVariable("CMD_PREFIX");
 		if (!content.matches("(?i)" + prefix + getName() + " \".*\" [0-9]+[kmb]?")) {
-			sendErrorMessage(event.getChannel(), "Please use the correct syntax! Use `" +
+			replyErrorMessage(event.getMessage(), "Please use the correct syntax! Use `" +
 					prefix + "help` for a list of valid bets.");
 			return;
 		}
 
 		final List<String> offerNames = DiscordMessageUtil.getStringsInQuotationMarks(content);
 		if(offerNames.size() != 1) {
-			sendErrorMessage(event.getChannel(), "Please use the correct syntax! Use `" +
+			replyErrorMessage(event.getMessage(), "Please use the correct syntax! Use `" +
 					prefix + "help` for a list of valid bets.");
 			return;
 		}
@@ -79,7 +79,7 @@ public class AddShopOffer extends CommandImpl {
 		final DiscordGuild dcGuild = guildRepo.findById(guildId).orElseGet(() -> createNewGuild(guildId));
 		if(dcGuild.getShopOffers() != null) {
 			if(dcGuild.getShopOffers().size() >= 25) {
-				sendErrorMessage(event.getChannel(), "You can only set 25 offers in your shop!");
+				replyErrorMessage(event.getMessage(), "You can only set 25 offers in your shop!");
 				return;
 			}
 		}
