@@ -24,19 +24,46 @@ public final class DiscordMessageUtil {
 	 */
 	public static long getMentionedMemberId(final Message message) {
 		final List<Member> mentionedUsers = message.getMentionedMembers();
-		if(message.getReferencedMessage() != null && mentionedUsers.size() > 1) {
-			return message.getMentionedMembers().get(1).getIdLong();
-		}
-
-		if(message.getReferencedMessage() != null && mentionedUsers.size() == 1) {
+		if (mentionedUsers.size() == 0) {
 			return -1;
 		}
 
-		if (message.getMentionedMembers().size() != 0) {
-			return message.getMentionedMembers().get(0).getIdLong();
+		if (message.getReferencedMessage() != null) {
+			// if the message is a reply to another message there is no way to know who got mentioned at which position.
+			// the author of the referenced message is the mention on index 0 but if he also gets mentioned
+			// in the message content the author does not appear on index 1 so any user that also gets mentioned
+			// in the message content after the author of the referenced message will be the mentioned user
+			// on index 1 although the user should not be there.
+			// the only way to get around Discords limitation in that point is by ignoring mentions of a reply and
+			// to look for a user mention in the raw message content instead.
+			return getRawMention(message);
+		}
+
+		if (mentionedUsers.size() != 0) {
+			return mentionedUsers.get(0).getIdLong();
 		}
 
 		return getMentionedRawId(message);
+	}
+
+	/**
+	 * Searches the message for a 'raw' user mention ("<@...>" with "..." being the user ID).
+	 *
+	 * @param message The Discord message object.
+	 * @return If there is a raw mention found it returns the ID as a {@code long}, if not or if it exceeds the {@code Long}
+	 * limits it returns -1.
+	 */
+	public static long getRawMention(final Message message) {
+		final String rawMessage = message.getContentRaw();
+		final String[] tokens = rawMessage.split(" ");
+		for (String token : tokens) {
+			if (token.matches("<@!?[0-9]+>")) {
+				token = token.replaceAll("[^\\d+]", "");
+				return ParseUtil.safelyParseStringToLong(token);
+			}
+		}
+
+		return -1;
 	}
 
 	/**
