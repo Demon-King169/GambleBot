@@ -5,6 +5,11 @@ public class GameBet {
 	private final long wager;
 	private final String betInfo;
 
+	public GameBet(final long wager) {
+		this.wager = wager;
+		this.betInfo = null;
+	}
+
 	public GameBet(final long wager, final String betInfo) {
 		this.wager = wager;
 		this.betInfo = betInfo;
