@@ -15,6 +15,7 @@ public class FlipGame implements Game {
 
 	private static final String COIN_HEADS = "Heads";
 	private static final String COIN_TAILS = "Tails";
+	private static final double PAYOUT_RATE = 0.95;
 
 	@Autowired
 	private FlipGame(final Random random) {
@@ -31,7 +32,7 @@ public class FlipGame implements Game {
 
 	private long getWin(final GameBet bet, final String headOrTail) {
 		if(isWin(bet.getBetInfo(), headOrTail)) {
-			return bet.getWager();
+			return calcPayout(bet.getWager());
 		}
 
 		return -1L;
@@ -40,5 +41,10 @@ public class FlipGame implements Game {
 	private boolean isWin(final String bet, final String headOrTail) {
 		return (bet.matches("(?i)H(eads?)?") && headOrTail.equals(COIN_HEADS)) ||
 				(bet.matches("(?i)T(ails?)?") && headOrTail.equals(COIN_TAILS));
+	}
+
+	private long calcPayout(final long wager) {
+		final double payout = (double) wager * PAYOUT_RATE;
+		return Math.max(1, Math.round(payout));
 	}
 }

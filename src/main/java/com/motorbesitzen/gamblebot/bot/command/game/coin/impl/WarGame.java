@@ -13,6 +13,7 @@ public class WarGame implements Game {
 
 	private final Random random;
 
+	private static final double PAYOUT_RATE = 0.95;
 	private static final String[] DECK = {"2", "3", "4", "5", "6", "7", "8", "9", "J", "Q", "K", "A"};
 
 	@Autowired
@@ -25,7 +26,7 @@ public class WarGame implements Game {
 		int houseResult = random.nextInt(DECK.length);
 		int playerResult = random.nextInt(DECK.length);
 		if (playerResult > houseResult) {
-			return new GameWinInfo(bet.getWager(),
+			return new GameWinInfo(calcPayout(bet.getWager()),
 					"You: **" + DECK[playerResult] + "**, House: **" + DECK[houseResult] + "**");
 		} else if (playerResult < houseResult) {
 			return new GameWinInfo(-1,
@@ -43,7 +44,7 @@ public class WarGame implements Game {
 
 			sb.setLength(sb.length() - 1);
 			if (playerResult > houseResult) {
-				return new GameWinInfo(bet.getWager(), sb.toString());
+				return new GameWinInfo(calcPayout(bet.getWager()), sb.toString());
 			} else {
 				return new GameWinInfo(-1, sb.toString());
 			}
@@ -52,6 +53,11 @@ public class WarGame implements Game {
 
 	private void appendGameList(final StringBuilder sb, final int gameCounter, final int playerResult, final int houseResult) {
 		sb.append("**[Game #").append(gameCounter).append("]** You: **")
-				. append(DECK[playerResult]).append("**, House: **").append(DECK[houseResult]).append("**\n");
+				.append(DECK[playerResult]).append("**, House: **").append(DECK[houseResult]).append("**\n");
+	}
+
+	private long calcPayout(final long wager) {
+		final double payout = (double) wager * PAYOUT_RATE;
+		return Math.max(1, Math.round(payout));
 	}
 }

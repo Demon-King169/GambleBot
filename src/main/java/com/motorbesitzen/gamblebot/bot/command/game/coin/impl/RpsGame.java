@@ -16,6 +16,7 @@ public class RpsGame implements Game {
 	private static final String RPS_ROCK = "Rock";
 	private static final String RPS_SCISSORS = "Scissors";
 	private static final String RPS_PAPER = "Paper";
+	private static final double PAYOUT_RATE = 0.95;
 
 	@Autowired
 	private RpsGame(final Random random) {
@@ -44,7 +45,7 @@ public class RpsGame implements Game {
 
 	private long getWin(final GameBet bet, final String rpsResult) {
 		if(isWin(bet.getBetInfo(), rpsResult)) {
-			return bet.getWager();
+			return calcPayout(bet.getWager());
 		}
 
 		if(isDraw(bet.getBetInfo(), rpsResult)) {
@@ -64,5 +65,10 @@ public class RpsGame implements Game {
 		final char betChar = bet.toLowerCase().charAt(0);
 		final char resChar = rpsResult.toLowerCase().charAt(0);
 		return betChar == resChar;
+	}
+
+	private long calcPayout(final long wager) {
+		final double payout = (double) wager * PAYOUT_RATE;
+		return Math.max(1, Math.round(payout));
 	}
 }
