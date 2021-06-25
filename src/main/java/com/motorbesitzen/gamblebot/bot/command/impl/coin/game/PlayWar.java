@@ -44,7 +44,7 @@ class PlayWar extends CommandImpl {
 
 	@Override
 	public String getDescription() {
-		return "Whoever has the higher card wins. On a draw it continues until one side wins.";
+		return "Modified casino war game. Whoever has the higher card wins. On a draw it continues until one side wins.";
 	}
 
 	@Override
