@@ -32,7 +32,7 @@ dependencies {
 
     // runtime
     runtimeOnly 'com.h2database:h2'
-    implementation 'net.dv8tion:JDA:4.2.1_254'
+    implementation 'net.dv8tion:JDA:4.3.0_283'
     implementation 'com.jagrosh:jda-utilities-commons:3.0.5'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
