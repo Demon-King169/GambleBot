@@ -166,7 +166,7 @@ class StartGamble extends CommandImpl {
 		originalChannel.sendMessage(
 				"There are old settings available. Do you want to use them again? (Yes/No)\n" +
 						"*Answering `Yes` will start the gamble with your old settings!*"
-		).embed(getCurrentSettingsEmbed(dcGuild)).queue(
+		).setEmbeds(getCurrentSettingsEmbed(dcGuild)).queue(
 				msg -> eventWaiter.waitForEvent(
 						GuildMessageReceivedEvent.class,
 						newEvent -> {
@@ -476,7 +476,7 @@ class StartGamble extends CommandImpl {
 									(content.endsWith("everyone") ? "@everyone\n" : "") +
 											(content.endsWith("here") ? "@here\n" : "") +
 											"A wild gamble appears!"
-							).embed(buildGambleInfoEmbed(dcGuild)).queue();
+							).setEmbeds(buildGambleInfoEmbed(dcGuild)).queue();
 							answer(newEvent.getChannel(), "Started the gamble!");
 						},
 						TIMEOUT_MINS, TimeUnit.MINUTES,

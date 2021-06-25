@@ -110,7 +110,7 @@ public abstract class CommandImpl implements Command {
 	 *                to send as answer.
 	 */
 	private void sendMessage(final TextChannel channel, final MessageEmbed message) {
-		channel.sendMessage(message).queue();
+		channel.sendMessageEmbeds(message).queue();
 	}
 
 	/**
