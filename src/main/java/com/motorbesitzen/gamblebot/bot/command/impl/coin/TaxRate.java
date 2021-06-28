@@ -54,7 +54,6 @@ class TaxRate extends CommandImpl {
 		final String[] tokens = content.split(" ");
 		final String taxRateText = tokens[tokens.length - 1];
 		final int taxRate = ParseUtil.safelyParseStringToInt(taxRateText);
-		System.out.println("TAX: " + dcGuild.getTaxRate());
 		if (taxRate < 0 || taxRate > 100) {
 			replyErrorMessage(event.getMessage(), "Please set a valid integer amount of daily coins (0-100)!");
 			return;
