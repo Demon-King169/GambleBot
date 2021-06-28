@@ -144,36 +144,6 @@ A link to a stream, only needs to be set if the streaming activity is used. Has 
 standards, so it needs to include the "https(s)://" at the start. Discord only supports twitch and YouTube links at the
 moment.
 
-### Database
-
-#### Creation
-
-On the first start the program has to create the database which needs some action on your side. To perform that setup,
-add the following line to the `.env` file:
-
-```dotenv
-SPRING_PROFILES_ACTIVE=firststart
-```
-
-Afterwards start the bot as described in
-[starting and stopping the bot](#starting-and-stopping-the-bot). Wait until the bot is shown as online in Discord and
-stop the program as described in the same section. Now remove the line you added to the `.env` file. \
-Your database is now set up, and you can start and stop the program as you like. However, do not add the line back
-to `.env` as that will lead to the program creating the database again and thus deleting all your data!
-
-#### Update
-
-If you need to update the database at some point add the following line to the `.env` file:
-
-```dotenv
-SPRING_PROFILES_ACTIVE=updatedb
-```
-
-Afterwards start the bot as described in
-[starting and stopping the bot](#starting-and-stopping-the-bot). Wait until the bot is shown as online in Discord and
-stop the program as described in the same section. Now remove the line you added to the `.env` file. \
-Your database schema is now updated and you can start the bot like normal.
-
 ## Starting and stopping the bot
 
 To start the bot you can just run the provided `start.sh` file like this:
