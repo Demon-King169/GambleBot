@@ -94,7 +94,7 @@ class PlayWar extends CommandImpl {
 		final GameBet bet = new GameBet(wager);
 		final GameWinInfo winInfo = warGame.play(bet);
 		if (winInfo.isWin()) {
-			final long winAmount = winInfo.getWinAmount();
+			final long winAmount = calcTaxedValue(winInfo.getWinAmount());
 			dcMember.wonGame(winAmount);
 			memberRepo.save(dcMember);
 			reply(event.getMessage(), " You won **" + winAmount + "** coins!\n" + winInfo.getResultText() +

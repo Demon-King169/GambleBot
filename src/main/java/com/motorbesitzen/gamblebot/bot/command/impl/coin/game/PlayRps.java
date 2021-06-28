@@ -101,7 +101,7 @@ class PlayRps extends CommandImpl {
 		final GameBet bet = new GameBet(wager, betText);
 		final GameWinInfo winInfo = rpsGame.play(bet);
 		if (winInfo.isWin()) {
-			final long winAmount = winInfo.getWinAmount();
+			final long winAmount = calcTaxedValue(winInfo.getWinAmount());
 			dcMember.wonGame(winAmount);
 			memberRepo.save(dcMember);
 			reply(event.getMessage(), "I chose **" + winInfo.getResultText() + "**!\n" +

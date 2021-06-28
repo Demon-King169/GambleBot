@@ -111,12 +111,13 @@ class PayCoins extends CommandImpl {
 			return;
 		}
 
+		final long taxedAmount = calcTaxedValue(coinAmount);
 		author.spendCoins(coinAmount);
 		memberRepo.save(author);
-		dcMember.receiveCoins(coinAmount);
+		dcMember.receiveCoins(calcTaxedValue(taxedAmount));
 		memberRepo.save(dcMember);
-		answer(event.getChannel(), "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ".");
-		LogUtil.logDebug(author.getDiscordId() + " paid " + coinAmount + " coins to " + dcMember.getDiscordId());
+		answer(event.getChannel(), "Added **" + taxedAmount + "** coins to the balance of " + member.getAsMention() + ".");
+		LogUtil.logDebug(author.getDiscordId() + " paid " + taxedAmount + " coins to " + dcMember.getDiscordId());
 	}
 
 	private DiscordMember createNewMember(final long memberId, final long guildId) {

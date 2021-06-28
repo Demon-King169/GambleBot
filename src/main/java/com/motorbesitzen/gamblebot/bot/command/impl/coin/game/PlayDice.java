@@ -95,7 +95,7 @@ class PlayDice extends CommandImpl {
 		final GameBet bet = new GameBet(wager);
 		final GameWinInfo winInfo = diceGame.play(bet);
 		if (winInfo.isWin()) {
-			final long winAmount = winInfo.getWinAmount();
+			final long winAmount = calcTaxedValue(winInfo.getWinAmount());
 			dcMember.wonGame(winAmount);
 			memberRepo.save(dcMember);
 			reply(event.getMessage(), winInfo.getResultText() + " You won **" + winAmount + "** coins!\n" +

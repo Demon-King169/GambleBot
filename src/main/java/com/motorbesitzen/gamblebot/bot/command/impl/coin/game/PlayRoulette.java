@@ -107,7 +107,7 @@ class PlayRoulette extends CommandImpl {
 		final GameBet bet = new GameBet(wager, betText);
 		final GameWinInfo winInfo = rouletteGame.play(bet);
 		if (winInfo.isWin()) {
-			final long winAmount = winInfo.getWinAmount();
+			final long winAmount = calcTaxedValue(winInfo.getWinAmount());
 			dcMember.wonGame(winAmount);
 			memberRepo.save(dcMember);
 			reply(event.getMessage(), "**" + winInfo.getResultText() + "**\n" +

@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 @Service
 public abstract class CommandImpl implements Command {
 
+	private static final double TAX = 0.1;
+
 	/**
 	 * {@inheritDoc}
 	 * Default command implementation without command functionality. Declared as 'unknown command'.
@@ -266,5 +268,10 @@ public abstract class CommandImpl implements Command {
 		}
 
 		return content.isSendable();
+	}
+
+	protected long calcTaxedValue(final long value) {
+		final double payout = (double) value * TAX;
+		return Math.max(1, Math.round(payout));
 	}
 }
