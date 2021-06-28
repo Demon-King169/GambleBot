@@ -107,7 +107,7 @@ class PayCoins extends CommandImpl {
 		final long authorCoins = author.getCoins();
 		if (taxedCoins > authorCoins) {
 			final String errorMsg = authorCoins > 0 ?
-					"Please set a valid coin amount (1 - " + dcMember.getCoins() + ")!" :
+					"Please set a valid coin amount (1 - " + authorCoins + ")!" :
 					"You do not have enough coins for that after tax!\nYou only have **" + authorCoins + "** coins right now.";
 			replyErrorMessage(event.getMessage(), errorMsg);
 			return;
