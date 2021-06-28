@@ -85,14 +85,16 @@ class PayCoins extends CommandImpl {
 	}
 
 	private void payCoins(final GuildMessageReceivedEvent event, final DiscordMember author, final Member member) {
-		if(member.getUser().isBot()) {
+		if (member.getUser().isBot()) {
 			replyErrorMessage(event.getMessage(), "You can not pay coins to a bot!");
 			return;
 		}
 
 		final long guildId = event.getGuild().getIdLong();
+		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildId));
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(member.getIdLong(), guildId);
-		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(member.getIdLong(), guildId));
+		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(dcGuild, member.getIdLong()));
 		final String content = event.getMessage().getContentRaw();
 		final String[] tokens = content.split(" ");
 		final String coinText = tokens[tokens.length - 1];
@@ -102,13 +104,19 @@ class PayCoins extends CommandImpl {
 			return;
 		}
 
-		final long taxValue = calcTax(coinAmount);
+		final long taxValue = calcTax(dcGuild, coinAmount);
 		final long taxedCoins = coinAmount + taxValue;
 		final long authorCoins = author.getCoins();
 		if (taxedCoins > authorCoins) {
 			final String errorMsg = authorCoins > 0 ?
-					"Please set a valid coin amount (1 - " + authorCoins + ")!" :
-					"You do not have enough coins for that after tax!\nYou only have **" + authorCoins + "** coins right now.";
+					(dcGuild.getTaxRate() > 0 ?
+							"Please set a valid taxed coin amount (1 - " + (authorCoins - calcTax(dcGuild, authorCoins)) + ")!" :
+							"Please set a valid coin amount (1 - " + authorCoins + ")!"
+					) :
+					(dcGuild.getTaxRate() > 0 ?
+							"You do not have enough coins for that after tax!\nYou only have **" + authorCoins + "** coins right now. You need " + taxedCoins + " coins." :
+							"You do not have enough coins for that!\nYou only have **" + authorCoins + "** coins right now."
+					);
 			replyErrorMessage(event.getMessage(), errorMsg);
 			return;
 		}
@@ -118,13 +126,14 @@ class PayCoins extends CommandImpl {
 		dcMember.receiveCoins(coinAmount);
 		memberRepo.save(dcMember);
 		answer(event.getChannel(), "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ". " +
-				"Payment tax cost you an additional " + taxValue + " coins.");
+				(dcGuild.getTaxRate() > 0 ?
+						"Payment tax cost you an additional " + taxValue + " coins." :
+						""
+				));
 		LogUtil.logDebug(author.getDiscordId() + " paid " + coinAmount + " coins to " + dcMember.getDiscordId());
 	}
 
-	private DiscordMember createNewMember(final long memberId, final long guildId) {
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildId));
+	private DiscordMember createNewMember(final DiscordGuild dcGuild, final long memberId) {
 		return DiscordMember.createDefault(memberId, dcGuild);
 	}
 
@@ -134,8 +143,8 @@ class PayCoins extends CommandImpl {
 		return dcGuild;
 	}
 
-	private long calcTax(final long value) {
-		final double payout = (double) value * (1.0 - AFTER_TAX_RATE);
-		return Math.max(1, Math.round(payout));
+	private long calcTax(final DiscordGuild guild, final long value) {
+		final double tax = (double) value * guild.getTaxRate();
+		return Math.max(0, Math.round(tax));
 	}
 }

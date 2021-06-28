@@ -68,6 +68,7 @@ class Info extends CommandImpl {
 		final String coinChannelMention = coinChannel == null ? "-" : coinChannel.getAsMention();
 		final long dailyCoinsAmount = dcGuild.getDailyCoins();
 		final long boosterDailyCoinsAmount = dcGuild.getBoosterDailyBonus();
+		final int taxRate = (int)(dcGuild.getTaxRate() * 100);
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Info for \"" + guild.getName() + "\":")
 				.addField("Log channel:", logChannelMention, true)
@@ -75,6 +76,7 @@ class Info extends CommandImpl {
 				.addBlankField(true)
 				.addField("Daily coins:", dailyCoinsAmount + " coins", true)
 				.addField("Booster daily bonus:", boosterDailyCoinsAmount + " coins", true)
+				.addField("Tax rate:", taxRate + "%", true)
 				.setFooter("Coin related commands can be used everywhere if no coin channel is set!");
 		return eb.build();
 	}

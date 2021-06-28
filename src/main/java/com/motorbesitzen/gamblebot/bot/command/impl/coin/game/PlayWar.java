@@ -83,8 +83,10 @@ class PlayWar extends CommandImpl {
 
 		final long authorId = author.getIdLong();
 		final long guildId = event.getGuild().getIdLong();
+		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildId));
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
-		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(authorId, guildId));
+		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(dcGuild, authorId));
 		if (dcMember.getCoins() < wager) {
 			replyErrorMessage(event.getMessage(), "You do not have enough coins for that bet.\n" +
 					"You only have **" + dcMember.getCoins() + "** coins right now.");
@@ -94,7 +96,7 @@ class PlayWar extends CommandImpl {
 		final GameBet bet = new GameBet(wager);
 		final GameWinInfo winInfo = warGame.play(bet);
 		if (winInfo.isWin()) {
-			final long winAmount = calcTaxedValue(winInfo.getWinAmount());
+			final long winAmount = calcTaxedValue(dcGuild, winInfo.getWinAmount());
 			dcMember.wonGame(winAmount);
 			memberRepo.save(dcMember);
 			reply(event.getMessage(), " You won **" + winAmount + "** coins!\n" + winInfo.getResultText() +
@@ -108,9 +110,7 @@ class PlayWar extends CommandImpl {
 				"\nYour balance: **" + dcMember.getCoins() + "** coins.");
 	}
 
-	private DiscordMember createNewMember(final long memberId, final long guildId) {
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildId));
+	private DiscordMember createNewMember(final DiscordGuild dcGuild, final long memberId) {
 		return DiscordMember.createDefault(memberId, dcGuild);
 	}
 

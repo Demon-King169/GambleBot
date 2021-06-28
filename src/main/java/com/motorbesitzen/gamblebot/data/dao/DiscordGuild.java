@@ -4,6 +4,7 @@ import com.motorbesitzen.gamblebot.util.ParseUtil;
 import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,6 +28,11 @@ public class DiscordGuild {
 	@Min(0)
 	@ColumnDefault("0")
 	private long boosterDailyBonus;
+
+	@Min(0)
+	@Max(100)
+	@ColumnDefault("0")
+	private int taxRate;
 
 	@OneToOne
 	private GambleSettings gambleSettings;
@@ -93,6 +99,14 @@ public class DiscordGuild {
 
 	public void setBoosterDailyBonus(final long boosterDailyCoins) {
 		this.boosterDailyBonus = boosterDailyCoins;
+	}
+
+	public double getTaxRate() {
+		return (double) taxRate / 100;
+	}
+
+	public void setTaxRate(int taxRate) {
+		this.taxRate = taxRate;
 	}
 
 	public GambleSettings getGambleSettings() {

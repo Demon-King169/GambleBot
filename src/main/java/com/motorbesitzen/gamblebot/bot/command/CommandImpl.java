@@ -17,8 +17,6 @@ import org.springframework.stereotype.Service;
 @Service
 public abstract class CommandImpl implements Command {
 
-	protected static final double AFTER_TAX_RATE = 0.9;
-
 	/**
 	 * {@inheritDoc}
 	 * Default command implementation without command functionality. Declared as 'unknown command'.
@@ -270,8 +268,8 @@ public abstract class CommandImpl implements Command {
 		return content.isSendable();
 	}
 
-	protected long calcTaxedValue(final long value) {
-		final double payout = (double) value * AFTER_TAX_RATE;
-		return Math.max(1, Math.round(payout));
+	protected long calcTaxedValue(final DiscordGuild guild, final long value) {
+		final double taxedValue = (double) value - (value * guild.getTaxRate());
+		return Math.max(0, Math.round(taxedValue));
 	}
 }
