@@ -118,7 +118,7 @@ class PayCoins extends CommandImpl {
 		dcMember.receiveCoins(coinAmount);
 		memberRepo.save(dcMember);
 		answer(event.getChannel(), "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ". " +
-				"Tax took " + taxValue + " coins.");
+				"Payment tax cost you an additional " + taxValue + " coins.");
 		LogUtil.logDebug(author.getDiscordId() + " paid " + coinAmount + " coins to " + dcMember.getDiscordId());
 	}
 
