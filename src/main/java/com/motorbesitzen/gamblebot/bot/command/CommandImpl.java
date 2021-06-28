@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public abstract class CommandImpl implements Command {
 
-	private static final double AFTER_TAX_RATE = 0.9;
+	protected static final double AFTER_TAX_RATE = 0.9;
 
 	/**
 	 * {@inheritDoc}

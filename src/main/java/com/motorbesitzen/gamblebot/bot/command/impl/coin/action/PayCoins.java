@@ -102,22 +102,24 @@ class PayCoins extends CommandImpl {
 			return;
 		}
 
+		final long taxValue = calcTax(coinAmount);
+		final long taxedCoins = coinAmount + taxValue;
 		final long authorCoins = author.getCoins();
-		if (coinAmount > authorCoins) {
+		if (taxedCoins > authorCoins) {
 			final String errorMsg = authorCoins > 0 ?
 					"Please set a valid coin amount (1 - " + dcMember.getCoins() + ")!" :
-					"You do not have enough coins for that!\nYou only have **" + authorCoins + "** coins right now.";
+					"You do not have enough coins for that after tax!\nYou only have **" + authorCoins + "** coins right now.";
 			replyErrorMessage(event.getMessage(), errorMsg);
 			return;
 		}
 
-		final long taxedAmount = calcTaxedValue(coinAmount);
-		author.spendCoins(coinAmount);
+		author.spendCoins(taxedCoins);
 		memberRepo.save(author);
-		dcMember.receiveCoins(calcTaxedValue(taxedAmount));
+		dcMember.receiveCoins(coinAmount);
 		memberRepo.save(dcMember);
-		answer(event.getChannel(), "Added **" + taxedAmount + "** coins to the balance of " + member.getAsMention() + ".");
-		LogUtil.logDebug(author.getDiscordId() + " paid " + taxedAmount + " coins to " + dcMember.getDiscordId());
+		answer(event.getChannel(), "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ". " +
+				"Tax took " + taxValue + " coins.");
+		LogUtil.logDebug(author.getDiscordId() + " paid " + coinAmount + " coins to " + dcMember.getDiscordId());
 	}
 
 	private DiscordMember createNewMember(final long memberId, final long guildId) {
@@ -130,5 +132,10 @@ class PayCoins extends CommandImpl {
 		final DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
 		guildRepo.save(dcGuild);
 		return dcGuild;
+	}
+
+	private long calcTax(final long value) {
+		final double payout = (double) value * (1.0 - AFTER_TAX_RATE);
+		return Math.max(1, Math.round(payout));
 	}
 }
