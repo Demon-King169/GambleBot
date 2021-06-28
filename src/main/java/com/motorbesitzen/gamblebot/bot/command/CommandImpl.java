@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public abstract class CommandImpl implements Command {
 
-	private static final double TAX = 0.1;
+	private static final double AFTER_TAX_RATE = 0.9;
 
 	/**
 	 * {@inheritDoc}
@@ -271,7 +271,7 @@ public abstract class CommandImpl implements Command {
 	}
 
 	protected long calcTaxedValue(final long value) {
-		final double payout = (double) value * TAX;
+		final double payout = (double) value * AFTER_TAX_RATE;
 		return Math.max(1, Math.round(payout));
 	}
 }
