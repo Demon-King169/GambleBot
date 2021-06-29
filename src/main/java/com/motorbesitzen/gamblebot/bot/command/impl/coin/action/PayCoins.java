@@ -125,7 +125,7 @@ class PayCoins extends CommandImpl {
 		memberRepo.save(author);
 		dcMember.receiveCoins(coinAmount);
 		memberRepo.save(dcMember);
-		answer(event.getChannel(), "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ". " +
+		answerNoPing(event.getChannel(), "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ". " +
 				(dcGuild.getTaxRate() > 0 ?
 						"Payment tax cost you an additional " + taxValue + " coins." :
 						""

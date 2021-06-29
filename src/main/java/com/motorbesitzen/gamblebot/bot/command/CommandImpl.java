@@ -10,6 +10,8 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+
 /**
  * Basic implementation of a Command. Has all needed methods to send messages, answer to commands and log (debug) actions.
  * All subclasses (Commands) can use these functions.
@@ -91,6 +93,22 @@ public abstract class CommandImpl implements Command {
 	}
 
 	/**
+	 * Sends an answer to a channel. The difference to {@link #answer(TextChannel, String)} is that this message
+	 * will not ping any mentioned role or user. Does not do anything different than
+	 * {@link #sendMessageNoPing(TextChannel, String)} but clarifies that the message will be send as an answer to a
+	 * command in the caller channel.
+	 *
+	 * @param channel <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                to send the message in.
+	 * @param message The message content to send as answer.
+	 */
+	protected void answerNoPing(final TextChannel channel, final String message) {
+		if(isValidMessage(channel, message)) {
+			sendMessageNoPing(channel, message);
+		}
+	}
+
+	/**
 	 * Sends a message to a channel. Does not do anything if bot can not write in that channel.
 	 *
 	 * @param channel <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
@@ -111,6 +129,18 @@ public abstract class CommandImpl implements Command {
 	 */
 	private void sendMessage(final TextChannel channel, final MessageEmbed message) {
 		channel.sendMessageEmbeds(message).queue();
+	}
+
+	/**
+	 * Sends a message to a channel. Will not ping any mentioned users or roles.
+	 * Does not do anything if bot can not write in that channel.
+	 *
+	 * @param channel <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                to send the message in.
+	 * @param message The message content to send as answer.
+	 */
+	private void sendMessageNoPing(final TextChannel channel, final String message) {
+		channel.sendMessage(message).allowedMentions(Collections.emptyList()).queue();
 	}
 
 	/**

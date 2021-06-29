@@ -92,7 +92,7 @@ class TakeCoin extends CommandImpl {
 
 		dcMember.removeCoins(coinAmount);
 		memberRepo.save(dcMember);
-		answer(event.getChannel(), "Took **" + coinAmount + "** coins from the balance of " + member.getAsMention() + ".");
+		answerNoPing(event.getChannel(), "Took **" + coinAmount + "** coins from the balance of " + member.getAsMention() + ".");
 		LogUtil.logDebug(event.getAuthor().getIdLong() + " took " + coinAmount + " coins from " + dcMember.getDiscordId());
 	}
 
