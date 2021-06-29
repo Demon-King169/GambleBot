@@ -50,6 +50,7 @@ out/
 h2*.jar
 
 ### Logging ###
+/logs/
 GambleLog
 *.log
 *.part*

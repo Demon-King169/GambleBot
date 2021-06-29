@@ -18,7 +18,7 @@ spring:
       enabled: false
 logging:
   file:
-    name: "GambleLog"
+    name: "logs/GambleLog"
   level:
     org:
       apache: warn
