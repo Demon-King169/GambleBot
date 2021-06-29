@@ -16,12 +16,10 @@ configurations {
 
 repositories {
     mavenCentral()
+    jcenter()   // for JDA-Utilities, will shut down on feb 1st 2022
     maven {
         url 'https://m2.dv8tion.net/releases'
         name 'm2-dv8tion'
-    }
-    maven {
-        url 'https://dl.bintray.com/jagrosh/maven'
     }
 }
 
