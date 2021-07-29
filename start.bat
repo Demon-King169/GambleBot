@@ -11,6 +11,6 @@ for /F %%A in (.env) do SET %%A
 
 :: execute the program with java to avoid gradle overhead
 echo    Executing bot...
-start javaw -jar build\libs\messagewatcher.jar <nul >nul 2>&1
+start javaw -jar build\libs\gamblebot.jar <nul >nul 2>&1
 
 echo Started the bot. The bot will appear online in a few seconds.
