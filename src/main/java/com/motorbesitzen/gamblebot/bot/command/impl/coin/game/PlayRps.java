@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service("rps")
 class PlayRps extends CommandImpl {
@@ -67,7 +68,7 @@ class PlayRps extends CommandImpl {
 		final Message message = event.getMessage();
 		final String content = message.getContentRaw();
 		final String prefix = EnvironmentUtil.getEnvironmentVariable("CMD_PREFIX");
-		if (!content.matches("(?i)" + prefix + getName() + " [0-9]+[kmb]? (R(ock)?|P(aper)?|S(cissors?)?)")) {
+		if (!content.matches("(?i)" + Pattern.quote(prefix) + getName() + " [0-9]+[kmb]? (R(ock)?|P(aper)?|S(cissors?)?)")) {
 			replyErrorMessage(event.getMessage(), "Please use the correct syntax! Use `" +
 					prefix + "help` for a list of valid bets.");
 			return;

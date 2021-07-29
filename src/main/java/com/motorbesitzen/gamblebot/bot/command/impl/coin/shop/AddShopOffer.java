@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Service("addoffer")
 public class AddShopOffer extends CommandImpl {
@@ -58,7 +59,7 @@ public class AddShopOffer extends CommandImpl {
 		final Message message = event.getMessage();
 		final String content = message.getContentRaw();
 		final String prefix = EnvironmentUtil.getEnvironmentVariable("CMD_PREFIX");
-		if (!content.matches("(?i)" + prefix + getName() + " \".*\" [0-9]+[kmb]?")) {
+		if (!content.matches("(?i)" + Pattern.quote(prefix) + getName() + " \".*\" [0-9]+[kmb]?")) {
 			replyErrorMessage(event.getMessage(), "Please use the correct syntax! Use `" +
 					prefix + "help` for a list of valid bets.");
 			return;

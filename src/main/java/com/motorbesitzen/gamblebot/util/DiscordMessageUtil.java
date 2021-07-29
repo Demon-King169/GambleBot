@@ -25,7 +25,7 @@ public final class DiscordMessageUtil {
 	public static long getMentionedMemberId(final Message message) {
 		final List<Member> mentionedUsers = message.getMentionedMembers();
 		if (mentionedUsers.size() == 0) {
-			return -1;
+			return getRawMention(message);
 		}
 
 		if (message.getReferencedMessage() != null) {
