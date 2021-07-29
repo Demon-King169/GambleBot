@@ -8,6 +8,13 @@ This section only applies if you want to host the bot yourself. The following te
 Windows or Mac systems might need slightly different setup steps and a different startup and stop script. This bot runs
 on Java 11, so you need to install the Java 11 JDK for your system.
 
+### Windows
+
+There are batch (`.bat`) start and stop scripts available for Windows (tested only on Windows 10 Pro Version 21H1 Build 19043.1110), 
+**however**, currently the process can not be stopped gracefully. That means there is a possibility of data loss as 
+no shutdown hooks get executed. As of now I strongly recommend to **not** use Windows to host this bot with the given
+batch scripts.
+
 ### Tokens & APIs
 
 #### Discord bot token
