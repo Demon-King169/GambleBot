@@ -63,7 +63,7 @@ public final class DiscordMessageUtil {
 			}
 		}
 
-		return -1;
+		return getMentionedRawId(message);
 	}
 
 	/**
