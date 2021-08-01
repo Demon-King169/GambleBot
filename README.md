@@ -165,8 +165,7 @@ To stop the bot you can use:
 sh stop.sh
 ```
 
-For these scripts to work make sure to not delete the file `pid.txt` while the program is running. If `stop.sh` does not
-work for some reason you can also search for the `java` process and kill it manually.
+If `stop.sh` does not work for some reason you can also search for the `java` process and kill it manually.
 
 ---
 

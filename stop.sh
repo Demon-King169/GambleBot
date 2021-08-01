@@ -1,4 +1,3 @@
 echo Stopping the bot...
-value=$(cat pid.txt)
-kill "$value"
+kill "$(jps | grep "gamblebot.jar" | cut -d " " -f 1)"
 echo Stopped the bot.
