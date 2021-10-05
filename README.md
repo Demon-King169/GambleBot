@@ -1,6 +1,7 @@
-# MessageWatcher
+# Gambler
 
-This is a Discord bot that can start time limited gambles with custom prizes.
+This is a Discord bot that can start time limited gambles with custom prizes and coin based gambles like roulette,
+dice, or coin flip.
 
 ## Setup
 
