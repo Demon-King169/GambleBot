@@ -1,5 +1,6 @@
 package com.motorbesitzen.gamblebot.util;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
@@ -127,6 +128,28 @@ public final class ParseUtil {
 		}
 
 		final BigInteger upperLimit = BigInteger.valueOf(Long.MAX_VALUE);
+		if (number.compareTo(upperLimit) >= 0) {
+			return Long.MAX_VALUE;
+		}
+
+		return number.longValue();
+	}
+
+	/**
+	 * Tries to parse a {@code BigDecimal} to a {@code long}.
+	 *
+	 * @param number The {@code BigDecimal} representation of a number.
+	 * @return The number as {@code long}. If the {@param number} is greater than {@code Long.MAX_VALUE} it
+	 * returns {@code Long.MAX_VALUE}. If the {@param number} is smaller than {@code Long.MIN_VALUE} it
+	 * returns {@code Long.MIN_VALUE}.
+	 */
+	public static long safelyParseBigDecToLong(final BigDecimal number) {
+		final BigDecimal lowerLimit = BigDecimal.valueOf(Long.MIN_VALUE);
+		if (number.compareTo(lowerLimit) <= 0) {
+			return Long.MIN_VALUE;
+		}
+
+		final BigDecimal upperLimit = BigDecimal.valueOf(Long.MAX_VALUE);
 		if (number.compareTo(upperLimit) >= 0) {
 			return Long.MAX_VALUE;
 		}
