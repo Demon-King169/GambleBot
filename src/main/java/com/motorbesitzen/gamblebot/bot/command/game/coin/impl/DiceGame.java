@@ -23,19 +23,21 @@ public class DiceGame implements Game {
 		final int houseResult = random.nextInt(6) + 1;
 		final int playerResult = random.nextInt(6) + 1;
 		if (playerResult > houseResult) {
-			return new GameWinInfo(bet.getWager(),
-					"You: **" + playerResult + "**, House: **" + houseResult + "** -");
+			return GameWinInfo.won(bet.getWager(), "You: **" + playerResult + "**, House: **" + houseResult + "** -");
 		} else if (playerResult < houseResult) {
-			return new GameWinInfo(-1,
-					"You: **" + playerResult + "**, House: **" + houseResult + "** -");
+			return GameWinInfo.lost(-1, "You: **" + playerResult + "**, House: **" + houseResult + "** -");
 		} else {
 			final int secondPlayerResult = random.nextInt(6) + 1;
 			if (secondPlayerResult > playerResult) {
-				return new GameWinInfo(bet.getWager(),
-						"You: **" + playerResult + "**, House: **" + houseResult + "**, Second Throw: **" + secondPlayerResult + "** -");
+				return GameWinInfo.won(
+						bet.getWager(),
+						"You: **" + playerResult + "**, House: **" + houseResult + "**, Second Throw: **" + secondPlayerResult + "** -"
+				);
 			} else {
-				return new GameWinInfo(-1,
-						"You: **" + playerResult + "**, House: **" + houseResult + "**, Second Throw: **" + secondPlayerResult + "** -");
+				return GameWinInfo.lost(
+						-1,
+						"You: **" + playerResult + "**, House: **" + houseResult + "**, Second Throw: **" + secondPlayerResult + "** -"
+				);
 			}
 		}
 	}

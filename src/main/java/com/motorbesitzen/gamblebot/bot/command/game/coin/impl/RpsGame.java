@@ -27,8 +27,7 @@ public class RpsGame implements Game {
 	public GameWinInfo play(final GameBet bet) {
 		final int result = random.nextInt(3);
 		final String rps = getRps(result);
-		final long winAmount = getWin(bet, rps);
-		return new GameWinInfo(winAmount, rps);
+		return getWin(bet, rps);
 	}
 
 	private String getRps(final int result) {
@@ -43,16 +42,16 @@ public class RpsGame implements Game {
 		}
 	}
 
-	private long getWin(final GameBet bet, final String rpsResult) {
+	private GameWinInfo getWin(final GameBet bet, final String rpsResult) {
 		if(isWin(bet.getBetInfo(), rpsResult)) {
-			return calcPayout(bet.getWager());
+			return GameWinInfo.lost(calcPayout(bet.getWager()), rpsResult);
 		}
 
 		if(isDraw(bet.getBetInfo(), rpsResult)) {
-			return 0L;
+			return GameWinInfo.draw(0, rpsResult);
 		}
 
-		return -1L;
+		return GameWinInfo.lost(-1, rpsResult);
 	}
 
 	private boolean isWin(final String bet, final String rpsResult) {

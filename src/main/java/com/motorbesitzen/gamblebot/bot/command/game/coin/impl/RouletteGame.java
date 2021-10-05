@@ -42,11 +42,11 @@ public class RouletteGame implements Game {
 
 	public GameWinInfo play(final GameBet bet) {
 		final int result = random.nextInt(37);    // 0 -36
+		final String resultText = getColorEmote(result) + " (" + result + ")";
 		final long winAmount = bet.getBetInfo().matches("(?i)[BREULH]") ?
 				getSectionWin(bet, result) :
 				getNumberWin(bet, result);
-		final String resultText = getColorEmote(result) + " (" + result + ")";
-		return new GameWinInfo(winAmount, resultText);
+		return winAmount < 0 ? GameWinInfo.lost(winAmount, resultText) : GameWinInfo.won(winAmount, resultText);
 	}
 
 	private long getSectionWin(final GameBet bet, final int result) {

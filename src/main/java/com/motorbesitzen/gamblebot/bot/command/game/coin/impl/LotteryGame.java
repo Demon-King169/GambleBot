@@ -78,11 +78,11 @@ public class LotteryGame implements Game {
 		final boolean matchingSuperNumber = superNumber == winningSuperNumber;
 		final double winRate = getWinRate(hits, matchingSuperNumber);
 		if (winRate == 0.0) {
-			return new GameWinInfo(-1, summary);
+			return GameWinInfo.lost(-1, summary);
 		}
 
 		final long winAmount = Math.max(1, safelyMultiply(wager, winRate));
-		return new GameWinInfo(winAmount, summary);
+		return GameWinInfo.won(winAmount, summary);
 	}
 
 	private double getWinRate(final int hits, final boolean matchingSuperNumber) {
