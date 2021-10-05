@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.4.4'
+    id 'org.springframework.boot' version '2.5.5'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
 }
@@ -30,14 +30,11 @@ dependencies {
 
     // runtime
     runtimeOnly 'com.h2database:h2'
-    implementation 'net.dv8tion:JDA:4.3.0_283'
+    implementation 'net.dv8tion:JDA:4.3.0_333'
     implementation 'com.jagrosh:jda-utilities-commons:3.0.5'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 //    implementation 'org.springframework.boot:spring-boot-starter-web' // enable to be able to use the h2 web console
-
-    // test
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 test {
