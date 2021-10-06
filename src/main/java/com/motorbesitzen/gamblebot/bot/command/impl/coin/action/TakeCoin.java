@@ -65,16 +65,13 @@ class TakeCoin extends CommandImpl {
 			return;
 		}
 
-		event.getGuild().retrieveMemberById(userId).queue(
-				member -> addCoins(event, member),
-				throwable -> sendErrorMessage(event.getChannel(), "That user is not in this guild!")
-		);
+		takeCoins(event, userId);
 	}
 
-	private void addCoins(final GuildMessageReceivedEvent event, final Member member) {
+	private void takeCoins(final GuildMessageReceivedEvent event, final long userId) {
 		final long guildId = event.getGuild().getIdLong();
-		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(member.getIdLong(), guildId);
-		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(member.getIdLong(), guildId));
+		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(userId, guildId);
+		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(userId, guildId));
 		final String content = event.getMessage().getContentRaw();
 		final String[] tokens = content.split(" ");
 		final String coinText = tokens[tokens.length - 1];
@@ -92,7 +89,7 @@ class TakeCoin extends CommandImpl {
 
 		dcMember.removeCoins(coinAmount);
 		memberRepo.save(dcMember);
-		answerNoPing(event.getChannel(), "Took **" + coinAmount + "** coins from the balance of " + member.getAsMention() + ".");
+		answerNoPing(event.getChannel(), "Took **" + coinAmount + "** coins from their balance.");
 		LogUtil.logDebug(event.getAuthor().getIdLong() + " took " + coinAmount + " coins from " + dcMember.getDiscordId());
 	}
 
