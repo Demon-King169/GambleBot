@@ -166,12 +166,12 @@ public abstract class CommandImpl implements Command {
 	 * @param newMessage the content to reply with.
 	 */
 	protected void reply(final Message message, final String newMessage) {
-		if (!canReply(message)) {
-			sendMessage(message.getTextChannel(), message.getAuthor().getAsMention() + "\n" + newMessage);
-			return;
-		}
-
 		if (isValidMessage(message, newMessage)) {
+			if (!canReply(message)) {
+				sendMessage(message.getTextChannel(), message.getAuthor().getAsMention() + "\n" + newMessage);
+				return;
+			}
+
 			message.reply(newMessage).queue();
 		}
 	}
