@@ -6,6 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
+import java.util.Set;
 
 @Entity
 public class DiscordMember {
@@ -51,6 +52,9 @@ public class DiscordMember {
 	@ManyToOne
 	@JoinColumn(name = "guildId")
 	private DiscordGuild guild;
+
+	@OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL)
+	private Set<Purchase> purchases;
 
 	protected DiscordMember() {
 	}
@@ -119,6 +123,10 @@ public class DiscordMember {
 
 	public DiscordGuild getGuild() {
 		return guild;
+	}
+
+	public Set<Purchase> getPurchases() {
+		return purchases;
 	}
 
 	public boolean canPlay() {

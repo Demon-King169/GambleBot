@@ -43,6 +43,9 @@ public class DiscordGuild {
 	@OneToMany(mappedBy = "guild", cascade = CascadeType.ALL)
 	private Set<DiscordMember> members;
 
+	@OneToMany(mappedBy = "guild", cascade = CascadeType.ALL)
+	private Set<Purchase> purchases;
+
 	protected DiscordGuild() {
 	}
 
