@@ -61,14 +61,14 @@ public class AddShopOffer extends CommandImpl {
 		final String prefix = EnvironmentUtil.getEnvironmentVariable("CMD_PREFIX");
 		if (!content.matches("(?i)" + Pattern.quote(prefix) + getName() + " \".*\" [0-9]+[kmb]?")) {
 			replyErrorMessage(event.getMessage(), "Please use the correct syntax! Use `" +
-					prefix + "help` for a list of valid bets.");
+					prefix + "help` for the correct syntax.");
 			return;
 		}
 
 		final List<String> offerNames = DiscordMessageUtil.getStringsInQuotationMarks(content);
 		if(offerNames.size() != 1) {
 			replyErrorMessage(event.getMessage(), "Please use the correct syntax! Use `" +
-					prefix + "help` for a list of valid bets.");
+					prefix + "help` for the correct syntax.");
 			return;
 		}
 
