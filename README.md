@@ -7,7 +7,7 @@ dice, or coin flip.
 
 This section only applies if you want to host the bot yourself. The following text is written for linux based systems.
 Windows or Mac systems might need slightly different setup steps and a different startup and stop script. This bot runs
-on Java 11, so you need to install the Java 11 JDK for your system.
+on Java 11, so you need to install the Java 11 JDK (or higher) for your system.
 
 ### Windows
 
@@ -129,9 +129,8 @@ Discord bots can display an activity in the member list. Discord offers a few ac
 * **streaming** (xyz)
 * **competing** (in xyz)
 
-If you want to display an activity you can use one of the bold printed words. If you use an activity that is not in this
-list the activity will default to "**watching** user roles". If you do not want to set an activity just leave this field
-blank or remove it completely. \
+If you want to display an activity you can use one of the bold printed words. If you do not want to set an activity just 
+leave this field blank or remove it completely. \
 If you want to use an activity you also need to set a
 [BOT_ACTIVITY_TEXT](#bot_activity_text). Otherwise, no activity will be displayed. If you want to use the streaming
 activity make sure to also set the
@@ -221,14 +220,4 @@ public class SomeEventListener extends ListenerAdapter {
   // ...
 }
 ```
-
-### Decisions
-
-#### Why does this program use `Long` for the Discord IDs?
-
-The Java part of this program takes Discord IDs as `Long` so the maximum ID is 9223372036854775807. If Discord does not
-change its system and still uses the Twitter snowflake ID system then this ID will be reached around June 2084. If for
-whatever reason Discord, the used technologies or this code should still be around at that time the code has to be
-changed to accept `BigInteger` to avoid overflows while handling IDs as Discord uses the full 2<sup>64</sup>
-range while the Java `Long` only uses 2<sup>63</sup>-1. 
 
