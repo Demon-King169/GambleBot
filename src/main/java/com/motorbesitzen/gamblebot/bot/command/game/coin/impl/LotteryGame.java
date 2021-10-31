@@ -3,7 +3,6 @@ package com.motorbesitzen.gamblebot.bot.command.game.coin.impl;
 import com.motorbesitzen.gamblebot.bot.command.game.coin.Game;
 import com.motorbesitzen.gamblebot.bot.command.game.coin.GameBet;
 import com.motorbesitzen.gamblebot.bot.command.game.coin.GameWinInfo;
-import com.motorbesitzen.gamblebot.util.LogUtil;
 import com.motorbesitzen.gamblebot.util.ParseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,31 +22,23 @@ public class LotteryGame implements Game {
 	}
 
 	/*
-		6 + s 	-> wager * 250k
-		6 		-> wager * 100k
-		5 + s 	-> wager * 1400
-		5 		-> wager * 600
-		4 + s 	-> wager * 25
-		4 		-> wager * 6.5
-		3 + s 	-> wager * 2.5
-		3 		-> wager * 1.35
-		2 + s 	-> wager * 0.7
+		6 correct: chance of 1 in 14,000,000
+		6 		-> wager * 250k
+		5 		-> wager * 1400
+		4 		-> wager * 25
+		3 		-> wager * 2.5
+		2 	 	-> wager * 0.7
 		else 	-> loss
 	 */
 
 	public GameWinInfo play(final GameBet bet) {
 		final int[] betNumbers = getBetNumbers(bet);
-		final int superNumber = getSuperNumber();
-		return calcWin(bet.getWager(), betNumbers, superNumber);
+		return calcWin(bet.getWager(), betNumbers);
 	}
 
 	private int[] getBetNumbers(final GameBet bet) {
 		final String[] betNumbers = bet.getBetInfo().split(",");
 		return Arrays.stream(betNumbers).mapToInt(ParseUtil::safelyParseStringToInt).toArray();
-	}
-
-	private int getSuperNumber() {
-		return random.nextInt(10);
 	}
 
 	private int[] getWinningNumbers() {
@@ -59,9 +50,8 @@ public class LotteryGame implements Game {
 		return winningNumbers;
 	}
 
-	private GameWinInfo calcWin(long wager, int[] betNumbers, int superNumber) {
+	private GameWinInfo calcWin(long wager, int[] betNumbers) {
 		final int[] winningNumbers = getWinningNumbers();
-		final int winningSuperNumber = getSuperNumber();
 
 		int hits = 0;
 		for (int winningNumber : winningNumbers) {
@@ -74,9 +64,8 @@ public class LotteryGame implements Game {
 
 		final String winningNumbersText = Arrays.toString(winningNumbers);
 		final String summary = "Winning numbers: **" + winningNumbersText.substring(1, winningNumbersText.length() - 1) +
-				"**, your hits: **" + hits + "**\nSuper number: **" + winningSuperNumber + "**, your super number: **" + superNumber + "**";
-		final boolean matchingSuperNumber = superNumber == winningSuperNumber;
-		final double winRate = getWinRate(hits, matchingSuperNumber);
+				"**, your hits: **" + hits + "**";
+		final double winRate = getWinRate(hits);
 		if (winRate == 0.0) {
 			return GameWinInfo.lost(-1, summary);
 		}
@@ -85,23 +74,23 @@ public class LotteryGame implements Game {
 		return GameWinInfo.won(winAmount, summary);
 	}
 
-	private double getWinRate(final int hits, final boolean matchingSuperNumber) {
+	private double getWinRate(final int hits) {
 		final double winRate;
 		switch (hits) {
 			case 2:
-				winRate = matchingSuperNumber ? 0.7 : 0.0;
+				winRate = 0.7;
 				break;
 			case 3:
-				winRate = matchingSuperNumber ? 2.5 : 1.35;
+				winRate = 2.5;
 				break;
 			case 4:
-				winRate = matchingSuperNumber ? 25.0 : 6.5;
+				winRate = 25.0;
 				break;
 			case 5:
-				winRate = matchingSuperNumber ? 1400.0 : 600.0;
+				winRate = 1400.0;
 				break;
 			case 6:
-				winRate = matchingSuperNumber ? 250000.0 : 100000.0;
+				winRate = 250000.0;
 				break;
 			default:
 				winRate = 0.0;
