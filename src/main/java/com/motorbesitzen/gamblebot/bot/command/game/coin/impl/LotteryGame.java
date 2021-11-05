@@ -44,10 +44,28 @@ public class LotteryGame implements Game {
 	private int[] getWinningNumbers() {
 		final int[] winningNumbers = new int[6];
 		for (int i = 0; i < 6; i++) {
-			winningNumbers[i] = random.nextInt(49) + 1; // 1 to 49
+			final int number = random.nextInt(49) + 1; // 1 to 49
+			System.out.println(i);
+			if (isDuplicate(winningNumbers, number)) {
+				i--;
+				continue;
+			}
+
+			winningNumbers[i] = number;
 		}
 
 		return winningNumbers;
+	}
+
+	private boolean isDuplicate(final int[] winningNumbers, final int number) {
+		// uninitialized int is 0 which is not in [1,49] so uninitialized numbers do not matter
+		for (int winningNumber : winningNumbers) {
+			if (winningNumber == number) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private GameWinInfo calcWin(long wager, int[] betNumbers) {
