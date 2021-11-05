@@ -125,6 +125,7 @@ class PlayLottery extends CommandImpl {
 		final GameWinInfo winInfo = lotteryGame.play(bet);
 		if (winInfo.isWin()) {
 			final long winAmount = calcTaxedValue(dcGuild, winInfo.getWinAmount());
+			dcMember.spendCoins(wager);		// price needs to get paid no matter what
 			dcMember.wonGame(winAmount);
 			memberRepo.save(dcMember);
 			reply(event.getMessage(), winInfo.getResultText() + "\n" +
