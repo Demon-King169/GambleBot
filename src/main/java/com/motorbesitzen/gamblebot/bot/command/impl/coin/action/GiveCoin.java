@@ -5,12 +5,15 @@ import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
-import com.motorbesitzen.gamblebot.util.DiscordMessageUtil;
 import com.motorbesitzen.gamblebot.util.LogUtil;
-import com.motorbesitzen.gamblebot.util.ParseUtil;
+import com.motorbesitzen.gamblebot.util.SlashOptionUtil;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +24,9 @@ import java.util.Optional;
  */
 @Service("give")
 class GiveCoin extends CommandImpl {
+
+	private static final String USER_OPTION_NAME = "member";
+	private static final String AMOUNT_OPTION_NAME = "amount";
 
 	private final DiscordMemberRepo memberRepo;
 	private final DiscordGuildRepo guildRepo;
@@ -34,11 +40,6 @@ class GiveCoin extends CommandImpl {
 	@Override
 	public String getName() {
 		return "give";
-	}
-
-	@Override
-	public String getUsage() {
-		return getName() + " (@user|userid) <coins>";
 	}
 
 	@Override
@@ -57,42 +58,71 @@ class GiveCoin extends CommandImpl {
 	}
 
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
-		final Message message = event.getMessage();
-		final long userId = DiscordMessageUtil.getMentionedMemberId(message);
-		if (userId <= 100000000000000L) {
-			replyErrorMessage(event.getMessage(), "That user seems to be invalid!");
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), getDescription())
+				.addOptions(
+						new OptionData(
+								OptionType.USER,
+								USER_OPTION_NAME,
+								"The member you want to give coins to.",
+								true
+						),
+						new OptionData(
+								OptionType.INTEGER,
+								AMOUNT_OPTION_NAME,
+								"The amount of coins you want to give the user.",
+								true
+						).setRequiredRange(0, 9007199254740991L)
+				).queue();
+	}
+
+	@Override
+	public void execute(SlashCommandEvent event) {
+		User user = SlashOptionUtil.getUserOption(event, USER_OPTION_NAME);
+		if (user == null) {
+			reply(event, "Please provide a member you want to give coins to.");
 			return;
 		}
 
-		event.getGuild().retrieveMemberById(userId).queue(
+		Guild guild = event.getGuild();
+		if (guild == null) {
+			return;
+		}
+
+		event.getGuild().retrieveMember(user).queue(
 				member -> addCoins(event, member),
-				throwable -> sendErrorMessage(event.getChannel(), "That user is not in this guild!")
+				throwable -> reply(event, "That user is not in this guild!")
 		);
 	}
 
-	private void addCoins(final GuildMessageReceivedEvent event, final Member member) {
-		if(member.getUser().isBot()) {
-			replyErrorMessage(event.getMessage(), "You can not give coins to a bot!");
+	private void addCoins(final SlashCommandEvent event, final Member member) {
+		if (member.getUser().isBot()) {
+			reply(event, "You can not give coins to a bot!");
 			return;
 		}
 
-		final long guildId = event.getGuild().getIdLong();
+		final long coinAmount = getCoinAmount(event);
+		if (coinAmount < 1) {
+			reply(event, "Please set a valid coin amount (> 0)!");
+			return;
+		}
+
+		final long guildId = member.getGuild().getIdLong();
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(member.getIdLong(), guildId);
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(member.getIdLong(), guildId));
-		final String content = event.getMessage().getContentRaw();
-		final String[] tokens = content.split(" ");
-		final String coinText = tokens[tokens.length - 1];
-		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
-		if (coinAmount < 1) {
-			replyErrorMessage(event.getMessage(), "Please set a valid coin amount (>= 1)!");
-			return;
-		}
-
 		dcMember.giveCoins(coinAmount);
 		memberRepo.save(dcMember);
-		answerNoPing(event.getChannel(), "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ".");
-		LogUtil.logDebug(event.getAuthor().getIdLong() + " gave " + coinAmount + " coins to " + dcMember.getDiscordId());
+		replyNoPings(event, "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ".");
+		LogUtil.logInfo(event.getUser().getIdLong() + " gave " + coinAmount + " coins to " + dcMember.getDiscordId());
+	}
+
+	private long getCoinAmount(SlashCommandEvent event) {
+		Long coinAmount = SlashOptionUtil.getIntegerOption(event, AMOUNT_OPTION_NAME);
+		if (coinAmount == null) {
+			coinAmount = -1L;
+		}
+
+		return coinAmount;
 	}
 
 	private DiscordMember createNewMember(final long memberId, final long guildId) {

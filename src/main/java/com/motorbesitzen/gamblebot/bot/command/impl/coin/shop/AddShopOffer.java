@@ -5,20 +5,21 @@ import com.motorbesitzen.gamblebot.data.dao.CoinShopOffer;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.repo.CoinShopOfferRepo;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
-import com.motorbesitzen.gamblebot.util.DiscordMessageUtil;
-import com.motorbesitzen.gamblebot.util.EnvironmentUtil;
-import com.motorbesitzen.gamblebot.util.ParseUtil;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import com.motorbesitzen.gamblebot.util.SlashOptionUtil;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.util.List;
-import java.util.regex.Pattern;
-
 @Service("addoffer")
 public class AddShopOffer extends CommandImpl {
+
+	private static final String OFFER_NAME_OPTION_NAME = "offer_name";
+	private static final String PRIZE_OPTION_NAME = "prize";
+	private static final int SHOP_SIZE = 25;
 
 	private final DiscordGuildRepo guildRepo;
 	private final CoinShopOfferRepo offerRepo;
@@ -32,11 +33,6 @@ public class AddShopOffer extends CommandImpl {
 	@Override
 	public String getName() {
 		return "addoffer";
-	}
-
-	@Override
-	public String getUsage() {
-		return getName() + " \"name\" <prizeInCoins>";
 	}
 
 	@Override
@@ -55,39 +51,77 @@ public class AddShopOffer extends CommandImpl {
 	}
 
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
-		final Message message = event.getMessage();
-		final String content = message.getContentRaw();
-		final String prefix = EnvironmentUtil.getEnvironmentVariable("CMD_PREFIX");
-		if (!content.matches("(?i)" + Pattern.quote(prefix) + getName() + " \".*\" [0-9]+[kmb]?")) {
-			replyErrorMessage(event.getMessage(), "Please use the correct syntax! Use `" +
-					prefix + "help` for the correct syntax.");
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), getDescription())
+				.addOptions(
+						new OptionData(
+								OptionType.INTEGER,
+								PRIZE_OPTION_NAME,
+								"The prize (in coins) of the product you want to add to the shop.",
+								true
+						).setRequiredRange(0, 9007199254740991L),
+						new OptionData(
+								OptionType.STRING,
+								OFFER_NAME_OPTION_NAME,
+								"The name of the product you want to add to the shop.",
+								true
+						)
+				).queue();
+	}
+
+	@Override
+	public void execute(SlashCommandEvent event) {
+		Guild guild = event.getGuild();
+		if (guild == null) {
 			return;
 		}
 
-		final List<String> offerNames = DiscordMessageUtil.getStringsInQuotationMarks(content);
-		if(offerNames.size() != 1) {
-			replyErrorMessage(event.getMessage(), "Please use the correct syntax! Use `" +
-					prefix + "help` for the correct syntax.");
+		long offerPrice = getOfferPrice(event);
+		if (offerPrice <= 0) {
+			reply(event, "Please use a valid price (>= 0).");
 			return;
 		}
 
-		final String offerName = offerNames.get(0);
-		final String[] tokens = content.split(" ");
-		final String offerPriceText = tokens[tokens.length - 1];
-		final long offerPrice = ParseUtil.safelyParseStringToLong(offerPriceText);
-		final long guildId = event.getGuild().getIdLong();
+		String offerName = getOfferName(event);
+		if (offerName == null) {
+			reply(event, "Please use a valid name!");
+			return;
+		}
+
+		final long guildId = guild.getIdLong();
 		final DiscordGuild dcGuild = guildRepo.findById(guildId).orElseGet(() -> createNewGuild(guildId));
-		if(dcGuild.getShopOffers() != null) {
-			if(dcGuild.getShopOffers().size() >= 25) {
-				replyErrorMessage(event.getMessage(), "You can only set 25 offers in your shop!");
+		if (dcGuild.getShopOffers() != null) {
+			if (dcGuild.getShopOffers().size() >= SHOP_SIZE) {
+				reply(event, "You can only set " + SHOP_SIZE + " offers in your shop!");
 				return;
 			}
 		}
 
 		final CoinShopOffer offer = new CoinShopOffer(offerName, offerPrice, dcGuild);
 		offerRepo.save(offer);
-		answer(event.getChannel(), "Added offer to the shop!");
+		reply(event, "Added offer to the shop!");
+	}
+
+	private long getOfferPrice(SlashCommandEvent event) {
+		Long prize = SlashOptionUtil.getIntegerOption(event, PRIZE_OPTION_NAME);
+		if (prize == null) {
+			prize = -1L;
+		}
+
+		return prize;
+	}
+
+	private String getOfferName(SlashCommandEvent event) {
+		String name = SlashOptionUtil.getStringOption(event, OFFER_NAME_OPTION_NAME);
+		if (name == null) {
+			return null;
+		}
+
+		if (name.isBlank()) {
+			return null;
+		}
+
+		return name;
 	}
 
 	private DiscordGuild createNewGuild(final long guildId) {

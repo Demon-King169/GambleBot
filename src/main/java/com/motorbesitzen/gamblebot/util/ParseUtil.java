@@ -156,4 +156,17 @@ public final class ParseUtil {
 
 		return number.longValue();
 	}
+
+	public static double safelyParseStringToDouble(final String doubleString) {
+		if (doubleString == null) {
+			return -1;
+		}
+
+		final String numberString = parseUnitChars(doubleString);
+		try {
+			return Double.parseDouble(numberString);
+		} catch (NumberFormatException e) {
+			return -1;
+		}
+	}
 }

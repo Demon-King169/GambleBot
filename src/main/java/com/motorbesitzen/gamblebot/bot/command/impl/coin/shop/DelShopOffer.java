@@ -5,9 +5,12 @@ import com.motorbesitzen.gamblebot.data.dao.CoinShopOffer;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.repo.CoinShopOfferRepo;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
-import com.motorbesitzen.gamblebot.util.ParseUtil;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import com.motorbesitzen.gamblebot.util.SlashOptionUtil;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,8 @@ import java.util.Optional;
 
 @Service("deloffer")
 public class DelShopOffer extends CommandImpl {
+
+	private static final String SHOP_OPTION_NAME = "shop_id";
 
 	private final DiscordGuildRepo guildRepo;
 	private final CoinShopOfferRepo offerRepo;
@@ -29,11 +34,6 @@ public class DelShopOffer extends CommandImpl {
 	@Override
 	public String getName() {
 		return "deloffer";
-	}
-
-	@Override
-	public String getUsage() {
-		return getName() + " <shopID>";
 	}
 
 	@Override
@@ -52,29 +52,48 @@ public class DelShopOffer extends CommandImpl {
 	}
 
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
-		final Message message = event.getMessage();
-		final String content = message.getContentRaw();
-		final String[] tokens = content.split(" ");
-		final String shopIdText = tokens[tokens.length - 1];
-		final int shopId = ParseUtil.safelyParseStringToInt(shopIdText);
-		if(shopId <= 0) {
-			replyErrorMessage(event.getMessage(), "Please use a valid ID! Check the shop for a list of IDs.");
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), getDescription())
+				.addOptions(
+						new OptionData(
+								OptionType.INTEGER,
+								SHOP_OPTION_NAME,
+								"The ID of the product you want to delete from the shop.",
+								true
+						).setRequiredRange(1, 25)
+				).queue();
+	}
+
+	@Override
+	public void execute(SlashCommandEvent event) {
+		Guild guild = event.getGuild();
+		if (guild == null) {
 			return;
 		}
 
+		Long shopId = SlashOptionUtil.getIntegerOption(event, SHOP_OPTION_NAME);
+		if (shopId == null) {
+			shopId = -1L;
+		}
+
+		if (shopId <= 0 || shopId >= Integer.MAX_VALUE) {
+			reply(event, "Please use a valid ID! Check the shop for a list of IDs.");
+			return;
+		}
+
+		int shopIndex = shopId.intValue() - 1; // IDs in the shop start with 1, but we want 0 as first index
 		final long guildId = event.getGuild().getIdLong();
 		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
 		dcGuildOpt.ifPresentOrElse(
 				dcGuild -> {
 					final List<CoinShopOffer> offers = offerRepo.findCoinShopOffersByGuild_GuildIdOrderByPriceAsc(guildId);
-					final CoinShopOffer delOffer = offers.get(shopId - 1);
-					delOffer.setGuild(null);	// removing link to guild, otherwise cant delete
+					final CoinShopOffer delOffer = offers.get(shopIndex);
+					delOffer.setGuild(null);    // removing link to guild, otherwise cant delete
 					offerRepo.save(delOffer);
 					offerRepo.delete(delOffer);
-					answer(event.getChannel(), "Removed offer from shop!");
+					reply(event, "Removed offer from shop!");
 				},
-				() -> sendErrorMessage(event.getChannel(), "There is no shop for your guild yet!")
+				() -> reply(event, "There is no shop for your guild yet!")
 		);
 	}
 }

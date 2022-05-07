@@ -9,10 +9,11 @@ import com.motorbesitzen.gamblebot.data.dao.GambleSettings;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
 import com.motorbesitzen.gamblebot.util.LogUtil;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,11 +47,6 @@ class PlayGamble extends CommandImpl {
 	}
 
 	@Override
-	public String getUsage() {
-		return getName();
-	}
-
-	@Override
 	public String getDescription() {
 		return "Participate in the gamble.";
 	}
@@ -65,17 +61,26 @@ class PlayGamble extends CommandImpl {
 		return true;
 	}
 
+	@Override
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), getDescription()).queue();
+	}
+
 	@Transactional
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
+	public void execute(SlashCommandEvent event) {
 		final Guild guild = event.getGuild();
+		if (guild == null) {
+			return;
+		}
+
 		final long guildId = guild.getIdLong();
 		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
 		dcGuildOpt.ifPresentOrElse(
 				dcGuild -> {
 					if (!dcGuild.hasRunningGamble()) {
 						final String timeSinceEndText = dcGuild.getTimeSinceEndText();
-						reply(event.getMessage(), "The gamble ended " + timeSinceEndText + " ago.");
+						reply(event, "The gamble ended " + timeSinceEndText + " ago.", true);
 						return;
 					}
 
@@ -88,19 +93,19 @@ class PlayGamble extends CommandImpl {
 					final Optional<DiscordMember> memberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(memberId, guildId);
 					final DiscordMember player = memberOpt.orElseGet(() -> DiscordMember.createDefault(memberId, dcGuild));
 					if (!player.canPlay()) {
-						reply(event.getMessage(), "You are on cooldown. You can play again in " + player.getTimeToCooldownEndText() + ".");
+						reply(event, "You are on cooldown. You can play again in " + player.getTimeToCooldownEndText() + ".", true);
 						return;
 					}
 
 					player.setNextGambleMs(System.currentTimeMillis() + dcGuild.getGambleSettings().getCooldownMs());
 					memberRepo.save(player);
-					playGamble(event.getChannel(), player, member);
+					playGamble(event, player, member);
 				},
-				() -> reply(event.getMessage(), "There is no running gamble.")
+				() -> reply(event, "There is no running gamble.", true)
 		);
 	}
 
-	private void playGamble(final TextChannel channel, final DiscordMember player, final Member member) {
+	private void playGamble(final SlashCommandEvent event, final DiscordMember player, final Member member) {
 		final DiscordGuild dcGuild = player.getGuild();
 		final GambleSettings settings = dcGuild.getGambleSettings();
 		final GambleWinInfo gambleWinInfo = gambleGame.play(settings);
@@ -110,71 +115,26 @@ class PlayGamble extends CommandImpl {
 		);
 
 		final NumberFormat nf = generateNumberFormat();
-		final String playerMention = "<@" + player.getDiscordId() + ">";
+		final TextChannel logChannel = member.getGuild().getTextChannelById(dcGuild.getLogChannelId());
 		if (gambleWinInfo.getPriceName() == null) {
-			answer(
-					channel,
-					playerMention + ", you drew a blank! You did not win anything.\n" +
-							"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
-			);
+			handleBlank(event, member, nf, gambleWinInfo);
 			return;
 		}
 
-		final TextChannel logChannel = channel.getGuild().getTextChannelById(dcGuild.getLogChannelId());
 		if (gambleWinInfo.getPriceName().equalsIgnoreCase("ban") || gambleWinInfo.getPriceName().toLowerCase().startsWith("ban ")) {
-			final Member self = channel.getGuild().getSelfMember();
-			if (self.canInteract(member)) {
-				answer(
-						channel,
-						"Unlucky " + playerMention + "! You won a ban. Enforcing ban in a few seconds...\n" +
-								"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
-				);
-				member.ban(0, "'Won' a ban in the gamble.").queueAfter(
-						10, TimeUnit.SECONDS,
-						b -> answer(channel, "Enforced ban of " + playerMention + ". Rip in pieces :poop:")
-				);
-				sendLogMessage(logChannel, playerMention + " won a ban. Enforcing ban in the next 10 seconds.");
-			} else {
-				answer(
-						channel,
-						"Unlucky " + playerMention + "! You won a ban. Be glad that I can not ban you myself. Reporting to authorities...\n" +
-								"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
-				);
-				sendLogMessage(logChannel, playerMention + " won a ban. However, I can not ban that user.");
-			}
+			String banResult = handleBan(event, member, nf, gambleWinInfo);
+			logResult(logChannel, banResult);
 			return;
 		}
 
 		if (gambleWinInfo.getPriceName().equalsIgnoreCase("kick") || gambleWinInfo.getPriceName().toLowerCase().startsWith("kick ")) {
-			final Member self = channel.getGuild().getSelfMember();
-			if (self.canInteract(member)) {
-				answer(
-						channel,
-						"Unlucky " + playerMention + "! You won a kick. Enforcing kick in a few seconds...\n" +
-								"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
-				);
-				member.kick("'Won' a kick in the gamble.").queueAfter(
-						5, TimeUnit.SECONDS,
-						k -> answer(channel, "Enforced kick of " + playerMention + ". Hopefully it is a ban next time :smiling_imp:")
-				);
-				sendLogMessage(logChannel, playerMention + " won a kick. Enforcing kick in the next 5 seconds.");
-			} else {
-				answer(
-						channel,
-						"Unlucky " + playerMention + "! You won a kick. Be glad that I can not kick you myself. Reporting to authorities...\n" +
-								"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
-				);
-				sendLogMessage(logChannel, playerMention + " won a kick. However, I can not kick that user.");
-			}
+			String kickResult = handleKick(event, member, nf, gambleWinInfo);
+			logResult(logChannel, kickResult);
 			return;
 		}
 
-		answer(
-				channel,
-				playerMention + " you won \"" + gambleWinInfo.getPriceName() + "\"!\n" +
-						"Your (rounded) lucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
-		);
-		sendLogMessage(logChannel, playerMention + " won \"" + gambleWinInfo.getPriceName() + "\"!");
+		handleWin(event, member, nf, gambleWinInfo);
+		logResult(logChannel, member.getAsMention() + " won \"" + gambleWinInfo.getPriceName() + "\"!");
 	}
 
 	private NumberFormat generateNumberFormat() {
@@ -183,5 +143,71 @@ class PlayGamble extends CommandImpl {
 		nf.setMaximumFractionDigits(4);
 		nf.setRoundingMode(RoundingMode.HALF_UP);
 		return nf;
+	}
+
+	private void handleBlank(SlashCommandEvent event, Member member, NumberFormat nf, GambleWinInfo gambleWinInfo) {
+		reply(
+				event,
+				member.getAsMention() + ", you drew a blank! You did not win anything.\n" +
+						"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
+		);
+	}
+
+	private String handleBan(SlashCommandEvent event, Member member, NumberFormat nf, GambleWinInfo gambleWinInfo) {
+		final Member self = member.getGuild().getSelfMember();
+		if (self.canInteract(member)) {
+			reply(
+					event,
+					"Unlucky " + member.getAsMention() + "! You won a ban. Enforcing ban in a few seconds...\n" +
+							"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
+			);
+			member.ban(0, "'Won' a ban in the gamble.").queueAfter(
+					10, TimeUnit.SECONDS,
+					b -> event.getHook().sendMessage("Enforced ban of " + member.getAsMention() + ". Rip in pieces :poop:").queue()
+			);
+			return member.getAsMention() + " won a ban. Enforcing ban in the next 10 seconds.";
+		}
+
+		reply(
+				event,
+				"Unlucky " + member.getAsMention() + "! You won a ban. Be glad that I can not ban you myself. Reporting to authorities...\n" +
+						"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
+		);
+		return member.getAsMention() + " won a ban. However, I can not ban that user.";
+	}
+
+	private String handleKick(SlashCommandEvent event, Member member, NumberFormat nf, GambleWinInfo gambleWinInfo) {
+		final Member self = member.getGuild().getSelfMember();
+		if (self.canInteract(member)) {
+			reply(
+					event,
+					"Unlucky " + member.getAsMention() + "! You won a kick. Enforcing kick in a few seconds...\n" +
+							"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
+			);
+			member.kick("'Won' a kick in the gamble.").queueAfter(
+					5, TimeUnit.SECONDS,
+					k -> event.getHook().sendMessage("Enforced kick of " + member.getAsMention() + ". Hopefully it is a ban next time :smiling_imp:").queue()
+			);
+			return member.getAsMention() + " won a kick. Enforcing kick in the next 5 seconds.";
+		}
+
+		reply(
+				event,
+				"Unlucky " + member.getAsMention() + "! You won a kick. Be glad that I can not kick you myself. Reporting to authorities...\n" +
+						"Your (rounded) unlucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
+		);
+		return member.getAsMention() + " won a kick. However, I can not kick that user.";
+	}
+
+	private void handleWin(SlashCommandEvent event, Member member, NumberFormat nf, GambleWinInfo gambleWinInfo) {
+		reply(
+				event,
+				member.getAsMention() + " you won \"" + gambleWinInfo.getPriceName() + "\"!\n" +
+						"Your (rounded) lucky number: " + nf.format(gambleWinInfo.getLuckyNumber())
+		);
+	}
+
+	private void logResult(TextChannel logChannel, String message) {
+		sendLogMessage(logChannel, message);
 	}
 }

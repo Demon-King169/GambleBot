@@ -3,12 +3,15 @@ package com.motorbesitzen.gamblebot.bot.command.impl.coin.stats;
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
-import com.motorbesitzen.gamblebot.util.DiscordMessageUtil;
 import com.motorbesitzen.gamblebot.util.LogUtil;
+import com.motorbesitzen.gamblebot.util.SlashOptionUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,8 @@ import java.util.Optional;
  */
 @Service("stats")
 class Stats extends CommandImpl {
+
+	private static final String USER_OPTION_NAME = "member";
 
 	private final DiscordMemberRepo memberRepo;
 
@@ -33,13 +38,8 @@ class Stats extends CommandImpl {
 	}
 
 	@Override
-	public String getUsage() {
-		return getName();
-	}
-
-	@Override
 	public String getDescription() {
-		return "Request your stats.";
+		return "Request stats of members.";
 	}
 
 	@Override
@@ -53,32 +53,60 @@ class Stats extends CommandImpl {
 	}
 
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
-		final Message message = event.getMessage();
-		final long mentionedUserId = DiscordMessageUtil.getMentionedMemberId(message);
-		final long requestedUserId = mentionedUserId <= 0 ?
-				event.getAuthor().getIdLong() :
-				DiscordMessageUtil.getMentionedMemberId(message);
-		final long guildId = event.getGuild().getIdLong();
-		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(requestedUserId, guildId);
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), getDescription())
+				.addOption(
+						OptionType.USER,
+						USER_OPTION_NAME,
+						"The member you want to see the stats of. Do not provide a member to see your own stats."
+				).queue();
+	}
+
+	@Override
+	public void execute(SlashCommandEvent event) {
+		final Guild guild = event.getGuild();
+		if (guild == null) {
+			return;
+		}
+
+		User user = SlashOptionUtil.getUserOption(event, USER_OPTION_NAME);
+		if (user == null) {
+			displayOwnStats(event, guild);
+			return;
+		}
+
+		displayUserStats(event, guild, user);
+	}
+
+	private void displayOwnStats(SlashCommandEvent event, Guild guild) {
+		final User author = event.getUser();
+		final long guildId = guild.getIdLong();
+		final long authorId = author.getIdLong();
+		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
+		displayStats(event, dcMemberOpt);
+	}
+
+	private void displayUserStats(SlashCommandEvent event, Guild guild, User user) {
+		final long userId = user.getIdLong();
+		final long guildId = guild.getIdLong();
+		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(userId, guildId);
+		displayStats(event, dcMemberOpt);
+	}
+
+	private void displayStats(SlashCommandEvent event, Optional<DiscordMember> dcMemberOpt) {
 		dcMemberOpt.ifPresentOrElse(
-				dcMember -> event.getJDA().retrieveUserById(requestedUserId).queue(
+				dcMember -> event.getJDA().retrieveUserById(dcMember.getDiscordId()).queue(
 						requestedUser -> {
 							final MessageEmbed embed = buildStatsMessage(requestedUser.getAsTag(), dcMember);
-							answer(event.getChannel(), embed);
+							reply(event, embed);
 						},
 						throwable -> {
-							LogUtil.logDebug("Could not find user with ID: " + requestedUserId);
+							LogUtil.logDebug("Could not find user with ID: " + dcMember.getDiscordId());
 							final MessageEmbed embed = buildStatsMessage("Unknown User", dcMember);
-							answer(event.getChannel(), embed);
+							reply(event, embed);
 						}
 				),
-				() -> {
-					final String errorMsg = mentionedUserId <= 0 ?
-							"There are no stats for you yet!" :
-							"There are no stats for that user!";
-					replyErrorMessage(event.getMessage(), errorMsg);
-				}
+				() -> reply(event, "No stats available!")
 		);
 	}
 

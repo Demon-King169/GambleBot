@@ -5,7 +5,9 @@ import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.GambleSettings;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.data.repo.GambleSettingsRepo;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,11 +34,6 @@ public class StopGamble extends CommandImpl {
 	}
 
 	@Override
-	public String getUsage() {
-		return getName();
-	}
-
-	@Override
 	public String getDescription() {
 		return "Stops the currently running gamble.";
 	}
@@ -52,22 +49,32 @@ public class StopGamble extends CommandImpl {
 	}
 
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
-		final long guildId = event.getGuild().getIdLong();
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), getDescription()).queue();
+	}
+
+	@Override
+	public void execute(SlashCommandEvent event) {
+		final Guild guild = event.getGuild();
+		if (guild == null) {
+			return;
+		}
+
+		final long guildId = guild.getIdLong();
 		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
 		dcGuildOpt.ifPresentOrElse(
 				dcGuild -> {
 					if (!dcGuild.hasRunningGamble()) {
-						sendErrorMessage(event.getChannel(), "There is no running gamble.");
+						reply(event, "There is no running gamble.");
 						return;
 					}
 
 					final GambleSettings settings = dcGuild.getGambleSettings();
 					settings.setStartTimestampMs(System.currentTimeMillis() - settings.getDurationMs());
 					settingsRepo.save(settings);
-					answer(event.getChannel(), "Stopped the gamble.");
+					reply(event, "Stopped the gamble.");
 				},
-				() -> sendErrorMessage(event.getChannel(), "There is no running gamble.")
+				() -> reply(event, "There is no running gamble.")
 		);
 	}
 }

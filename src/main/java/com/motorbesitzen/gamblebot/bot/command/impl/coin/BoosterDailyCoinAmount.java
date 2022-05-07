@@ -3,9 +3,12 @@ package com.motorbesitzen.gamblebot.bot.command.impl.coin;
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
-import com.motorbesitzen.gamblebot.util.ParseUtil;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import com.motorbesitzen.gamblebot.util.SlashOptionUtil;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +20,8 @@ import java.util.Optional;
 @Service("setboosterbonus")
 class BoosterDailyCoinAmount extends CommandImpl {
 
+	private static final String AMOUNT_OPTION_NAME = "amount";
+
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
@@ -27,11 +32,6 @@ class BoosterDailyCoinAmount extends CommandImpl {
 	@Override
 	public String getName() {
 		return "setboosterbonus";
-	}
-
-	@Override
-	public String getUsage() {
-		return getName() + " <coins>";
 	}
 
 	@Override
@@ -50,22 +50,40 @@ class BoosterDailyCoinAmount extends CommandImpl {
 	}
 
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
-		final long guildId = event.getGuild().getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
-		final Message message = event.getMessage();
-		final String content = message.getContentRaw();
-		final String[] tokens = content.split(" ");
-		final String coinText = tokens[tokens.length - 1];
-		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
-		if (coinAmount < 0) {
-			replyErrorMessage(event.getMessage(), "Please set a valid amount of booster daily coins (>= 0)!");
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), getDescription())
+				.addOptions(
+						new OptionData(
+								OptionType.INTEGER,
+								AMOUNT_OPTION_NAME,
+								"The amount of coins a booster of the guild can get on top with the daily command.",
+								true
+						).setMinValue(0)
+				).queue();
+	}
+
+	@Override
+	public void execute(SlashCommandEvent event) {
+		final Guild guild = event.getGuild();
+		if (guild == null) {
 			return;
 		}
 
+		Long coinAmount = SlashOptionUtil.getIntegerOption(event, AMOUNT_OPTION_NAME);
+		if (coinAmount == null) {
+			coinAmount = -1L;
+		}
+
+		if (coinAmount < 0) {
+			reply(event, "Please set a valid amount of booster daily coins (>= 0)!");
+			return;
+		}
+
+		final long guildId = event.getGuild().getIdLong();
+		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
 		dcGuild.setBoosterDailyBonus(coinAmount);
 		guildRepo.save(dcGuild);
-		answer(event.getChannel(), "Set the booster bonus coin amount to **" + coinAmount + "** coins.");
+		reply(event, "Set the booster bonus coin amount to **" + coinAmount + "** coins.");
 	}
 }

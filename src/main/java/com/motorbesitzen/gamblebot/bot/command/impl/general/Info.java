@@ -4,10 +4,11 @@ import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,11 +33,6 @@ class Info extends CommandImpl {
 	}
 
 	@Override
-	public String getUsage() {
-		return getName();
-	}
-
-	@Override
 	public String getDescription() {
 		return "Shows some information about the guild settings.";
 	}
@@ -52,13 +48,22 @@ class Info extends CommandImpl {
 	}
 
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
+	public void register(final JDA jda) {
+		jda.upsertCommand(getName(), getDescription()).queue();
+	}
+
+	@Override
+	public void execute(SlashCommandEvent event) {
 		final Guild guild = event.getGuild();
+		if (guild == null) {
+			return;
+		}
+
 		final long guildId = guild.getIdLong();
 		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
 		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
 		final MessageEmbed infoEmbed = buildInfoEmbed(dcGuild, guild);
-		answer(event.getChannel(), infoEmbed);
+		reply(event, infoEmbed);
 	}
 
 	private MessageEmbed buildInfoEmbed(final DiscordGuild dcGuild, final Guild guild) {
@@ -68,7 +73,7 @@ class Info extends CommandImpl {
 		final String coinChannelMention = coinChannel == null ? "-" : coinChannel.getAsMention();
 		final long dailyCoinsAmount = dcGuild.getDailyCoins();
 		final long boosterDailyCoinsAmount = dcGuild.getBoosterDailyBonus();
-		final int taxRate = (int)(dcGuild.getTaxRate() * 100);
+		final int taxRate = (int) (dcGuild.getTaxRate() * 100);
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Info for \"" + guild.getName() + "\":")
 				.addField("Log channel:", logChannelMention, true)

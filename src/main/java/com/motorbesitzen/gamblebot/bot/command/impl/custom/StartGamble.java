@@ -1,7 +1,6 @@
 package com.motorbesitzen.gamblebot.bot.command.impl.custom;
 
 
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.GamblePrize;
@@ -9,20 +8,29 @@ import com.motorbesitzen.gamblebot.data.dao.GambleSettings;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.data.repo.GamblePrizeRepo;
 import com.motorbesitzen.gamblebot.data.repo.GambleSettingsRepo;
-import com.motorbesitzen.gamblebot.util.DiscordMessageUtil;
+import com.motorbesitzen.gamblebot.util.LogUtil;
 import com.motorbesitzen.gamblebot.util.ParseUtil;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import com.motorbesitzen.gamblebot.util.SlashOptionUtil;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Starts a custom gamble dialog.
@@ -30,16 +38,18 @@ import java.util.concurrent.TimeUnit;
 @Service("startgamble")
 class StartGamble extends CommandImpl {
 
-	private static final int TIMEOUT_MINS = 5;
-	private final EventWaiter eventWaiter;
+	private static final String DURATION_OPTION_NAME = "duration";
+	private static final String COOLDOWN_OPTION_NAME = "cooldown";
+	private static final String PRIZES_OPTION_NAME = "prize_list";
+	private static final String ANNOUNCEMENT_PING_OPTION_NAME = "ping";
+	private static final String ANNOUNCEMENT_CHANNEL_OPTION_NAME = "channel";
+
 	private final DiscordGuildRepo guildRepo;
 	private final GambleSettingsRepo settingsRepo;
 	private final GamblePrizeRepo prizeRepo;
 
 	@Autowired
-	StartGamble(final EventWaiter eventWaiter, final DiscordGuildRepo guildRepo, final GambleSettingsRepo settingsRepo,
-				final GamblePrizeRepo prizeRepo) {
-		this.eventWaiter = eventWaiter;
+	StartGamble(final DiscordGuildRepo guildRepo, final GambleSettingsRepo settingsRepo, final GamblePrizeRepo prizeRepo) {
 		this.guildRepo = guildRepo;
 		this.settingsRepo = settingsRepo;
 		this.prizeRepo = prizeRepo;
@@ -51,13 +61,8 @@ class StartGamble extends CommandImpl {
 	}
 
 	@Override
-	public String getUsage() {
-		return getName();
-	}
-
-	@Override
 	public String getDescription() {
-		return "Starts the dialog to start a gamble.";
+		return "Starts a gamble. Uses the last settings if options are left blank.\nThe list of prizes needs to be in the following format: `[price1name;percent],[price2name;percent], ...`\nAll percentages need to add up to 100 or lower. If they do not reach 100% the rest will be a blank (no win). Make sure to only use the semicolon as seperator and not in the name of your prize.\nExample: `[1000 coins:20.5],[Ban:5],[Kick:10.5]` would result in a 64% chance of a blank.";
 	}
 
 	@Override
@@ -70,326 +75,215 @@ class StartGamble extends CommandImpl {
 		return true;
 	}
 
+	@Override
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), "Starts a gamble. Uses the last settings if options are left blank.")
+				.addOptions(
+						new OptionData(
+								OptionType.INTEGER,
+								DURATION_OPTION_NAME,
+								"The duration in minutes."
+						).setRequiredRange(1, 525960),    // max 1 year
+						new OptionData(
+								OptionType.INTEGER,
+								COOLDOWN_OPTION_NAME,
+								"The cooldown until a user can participate again in seconds."
+						).setRequiredRange(0, 31536000),    // max 1 year
+						new OptionData(
+								OptionType.STRING,
+								PRIZES_OPTION_NAME,
+								"The list of prizes. Check the help command for the correct format."
+						),
+						new OptionData(
+								OptionType.CHANNEL,
+								ANNOUNCEMENT_CHANNEL_OPTION_NAME,
+								"The channel to announce the gamble in. Leave blank to post no announcement."
+						).setChannelTypes(ChannelType.TEXT),
+						new OptionData(
+								OptionType.STRING,
+								ANNOUNCEMENT_PING_OPTION_NAME,
+								"Use \"everyone\" or \"here\" to ping users in the announcement. Leave blank for no ping."
+						)
+				).queue();
+	}
+
 	@Transactional
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
+	public void execute(SlashCommandEvent event) {
 		final Guild guild = event.getGuild();
-		final long guildId = guild.getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
-		if (dcGuild.hasRunningGamble()) {
-			sendErrorMessage(event.getChannel(), "There is already a running gamble! It ends in " + dcGuild.getTimeToEndText() + ".");
+		if (guild == null) {
 			return;
 		}
 
-		final long logChannelId = dcGuild.getLogChannelId();
-		final TextChannel logChannel = guild.getTextChannelById(logChannelId);
 		final Member author = event.getMember();
 		if (author == null) {
 			return;
 		}
 
-		final long authorId = author.getIdLong();
-		final TextChannel senderChannel = event.getChannel();
+		final long guildId = guild.getIdLong();
+		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
+		if (dcGuild.hasRunningGamble()) {
+			reply(event, "There is already a running gamble! It ends in " + dcGuild.getTimeToEndText() + ".");
+			return;
+		}
+
+		final long logChannelId = dcGuild.getLogChannelId();
+		final TextChannel logChannel = guild.getTextChannelById(logChannelId);
 		if (logChannel == null) {
-			requestLogChannel(dcGuild, senderChannel, authorId);
+			reply(event, "Please set a log channel before starting a gamble!");
 			return;
 		}
 
 		if (!logChannel.canTalk()) {
-			requestLogChannel(dcGuild, senderChannel, authorId);
+			reply(event, "Please make sure I can send messages in the log channel!");
 			return;
 		}
 
-		final GambleSettings settings = dcGuild.getGambleSettings();
-		if (settings != null) {
-			requestOldSettings(dcGuild, senderChannel, authorId);
+		GambleSettings settings = createSettings(event, dcGuild);
+		if (settings == null) {
+			reply(event, "Invalid settings!");
 			return;
 		}
 
-		final GambleSettings newSettings = GambleSettings.createDefault(dcGuild);
-		dcGuild.setGambleSettings(newSettings);
-		settingsRepo.save(newSettings);
-		requestDuration(dcGuild, senderChannel, authorId);
-	}
-
-	private void requestLogChannel(final DiscordGuild dcGuild, final TextChannel originalChannel, final long originalAuthorId) {
-		final long originalChannelId = originalChannel.getIdLong();
-		originalChannel.sendMessage("Please mention the channel to log gamble events in:").queue(
-				msg -> eventWaiter.waitForEvent(
-						GuildMessageReceivedEvent.class,
-						newEvent -> {
-							if (isWrongDialog(newEvent, originalChannelId, originalAuthorId)) {
-								return false;
-							}
-
-							final Message message = newEvent.getMessage();
-							final List<TextChannel> mentionedChannels = message.getMentionedChannels();
-							if (mentionedChannels.size() != 1) {
-								sendErrorMessage(newEvent.getChannel(), "Please mention exactly one channel! (ID or name does not work)");
-								return false;
-							}
-
-							if (!mentionedChannels.get(0).canTalk()) {
-								sendErrorMessage(newEvent.getChannel(), "Can not talk in that channel! (read/send messages)");
-								return false;
-							}
-
-							return true;
-						},
-						newEvent -> {
-							final Message message = newEvent.getMessage();
-							final List<TextChannel> mentionedChannels = message.getMentionedChannels();
-							final TextChannel logChannel = mentionedChannels.get(0);
-							final long logChannelId = logChannel.getIdLong();
-							dcGuild.setLogChannelId(logChannelId);
-							guildRepo.save(dcGuild);
-
-							GambleSettings settings = dcGuild.getGambleSettings();
-							if (settings == null) {
-								final GambleSettings newSettings = GambleSettings.createDefault(dcGuild);
-								dcGuild.setGambleSettings(newSettings);
-								settingsRepo.save(newSettings);
-								requestDuration(dcGuild, newEvent.getChannel(), originalAuthorId);
-							} else {
-								requestOldSettings(dcGuild, newEvent.getChannel(), originalAuthorId);
-							}
-						},
-						TIMEOUT_MINS, TimeUnit.MINUTES,
-						() -> sendErrorMessage(originalChannel, "Timeout exceeded. Please start the command again.")
-				)
-		);
-	}
-
-	private void requestOldSettings(final DiscordGuild dcGuild, final TextChannel originalChannel, final long originalAuthorId) {
-		final long originalChannelId = originalChannel.getIdLong();
-		originalChannel.sendMessage(
-				"There are old settings available. Do you want to use them again? (Yes/No)\n" +
-						"*Answering `Yes` will start the gamble with your old settings!*"
-		).setEmbeds(getCurrentSettingsEmbed(dcGuild)).queue(
-				msg -> eventWaiter.waitForEvent(
-						GuildMessageReceivedEvent.class,
-						newEvent -> {
-							if (isWrongDialog(newEvent, originalChannelId, originalAuthorId)) {
-								return false;
-							}
-
-							final Message message = newEvent.getMessage();
-							final String content = message.getContentRaw();
-							if (!content.matches("(?i)[yn].*")) {
-								sendErrorMessage(newEvent.getChannel(), "Please answer with `Yes` or `No`!");
-								return false;
-							}
-
-							return true;
-						},
-						newEvent -> {
-							final Message message = newEvent.getMessage();
-							final String content = message.getContentRaw();
-							if (content.startsWith("n")) {
-								requestDuration(dcGuild, newEvent.getChannel(), originalAuthorId);
-							} else {
-								requestStart(dcGuild, newEvent.getChannel(), originalAuthorId);
-							}
-						},
-						TIMEOUT_MINS, TimeUnit.MINUTES,
-						() -> sendErrorMessage(originalChannel, "Timeout exceeded. Please start the command again.")
-				)
-		);
-	}
-
-	private MessageEmbed getCurrentSettingsEmbed(final DiscordGuild dcGuild) {
-		final GambleSettings settings = dcGuild.getGambleSettings();
-		final EmbedBuilder eb = new EmbedBuilder();
-		final String prizeText = settings.getPrizeText();
-		eb.setTitle("Current settings:")
-				.addField("Duration:", ParseUtil.parseMillisecondsToText(settings.getDurationMs()), true)
-				.addField("Cooldown:", ParseUtil.parseMillisecondsToText(settings.getCooldownMs()), true)
-				.addBlankField(false)
-				.addField("Prizes:", prizeText.substring(0, Math.min(1999, prizeText.length())), false);
-		return eb.build();
-	}
-
-	private void requestDuration(final DiscordGuild dcGuild, final TextChannel originalChannel, final long originalAuthorId) {
-		final GambleSettings settings = GambleSettings.createDefault(dcGuild);
-		dcGuild.setGambleSettings(settings);
-		settings.setPrizes(new HashSet<>());
 		settingsRepo.save(settings);
-		final long originalChannelId = originalChannel.getIdLong();
-		originalChannel.sendMessage("How long should the gamble last (**d**ays **h**ours, **m**inutes, **s**econds)? Example: `3h 15s`").queue(
-				msg -> eventWaiter.waitForEvent(
-						GuildMessageReceivedEvent.class,
-						newEvent -> {
-							if (isWrongDialog(newEvent, originalChannelId, originalAuthorId)) {
-								return false;
-							}
+		Set<GamblePrize> prizes;
+		try {
+			prizes = createPrizes(event, settings);
+		} catch (IllegalArgumentException e) {
+			reply(event, e.getMessage());
+			return;
+		}
 
-							final Message message = newEvent.getMessage();
-							final String content = message.getContentRaw();
-							if (content.isBlank()) {
-								sendErrorMessage(newEvent.getChannel(), "Please insert a valid duration like `1d 12h 30m 55s`!");
-								return false;
-							}
-
-							if (!content.matches("(?i)([0-9]+d *)?([0-9]+h *)?([0-9]+m *)?([0-9]+s)?")) {
-								sendErrorMessage(newEvent.getChannel(), "Please insert a valid duration like `1d 12h 30m 55s`!");
-								return false;
-							}
-
-							final long durationMs = ParseUtil.parseTextToMilliseconds(content);
-							if (durationMs < 1000 || durationMs > 31556952000L) {
-								sendErrorMessage(newEvent.getChannel(), "Please choose a duration above 1 second and below 1 year!");
-								return false;
-							}
-
-							return true;
-						},
-						newEvent -> {
-							final Message message = newEvent.getMessage();
-							final String content = message.getContentRaw();
-							final long durationMs = ParseUtil.parseTextToMilliseconds(content);
-							final GambleSettings settingsUpdate = dcGuild.getGambleSettings();
-							settingsUpdate.setDurationMs(durationMs);
-							requestCooldown(dcGuild, newEvent.getChannel(), originalAuthorId);
-						},
-						TIMEOUT_MINS, TimeUnit.MINUTES,
-						() -> sendErrorMessage(originalChannel, "Timeout exceeded. Please start the command again.")
-				)
-		);
+		settings.setPrizes(prizes);
+		startGamble(dcGuild, settings);
+		reply(event, "Started the gamble!");
+		if (shouldAnnounce(event)) {
+			announce(event, dcGuild);
+		}
 	}
 
-	private void requestCooldown(final DiscordGuild dcGuild, final TextChannel originalChannel, final long originalAuthorId) {
-		final long originalChannelId = originalChannel.getIdLong();
-		originalChannel.sendMessage(
-				"How long should the cooldown last until a user can participate again (**d**ays, **h**ours, **m**inutes, **s**econds)?\n" +
-						"*If a high cooldown is chosen and a new gamble starts in the meantime the cooldown will **not** be reset!*"
-		).queue(
-				msg -> eventWaiter.waitForEvent(
-						GuildMessageReceivedEvent.class,
-						newEvent -> {
-							if (isWrongDialog(newEvent, originalChannelId, originalAuthorId)) {
-								return false;
-							}
+	private GambleSettings createSettings(SlashCommandEvent event, DiscordGuild dcGuild) {
+		GambleSettings settings = dcGuild.getGambleSettings();
+		Long durationValue = SlashOptionUtil.getIntegerOption(event, DURATION_OPTION_NAME);
+		long durationMs = getDuration(settings, durationValue) * 60 * 1000;
+		if (durationMs <= 0) {
+			reply(event, "Please set a valid duration!");
+			return null;
+		}
 
-							final Message message = newEvent.getMessage();
-							final String content = message.getContentRaw();
-							if (!content.matches("(?i)([0-9]+d *)?([0-9]+h *)?([0-9]+m *)?([0-9]+s)?")) {
-								sendErrorMessage(newEvent.getChannel(), "Please insert a valid cooldown like `1d 12h 30m 55s`!");
-								return false;
-							}
+		Long cooldownValue = SlashOptionUtil.getIntegerOption(event, COOLDOWN_OPTION_NAME);
+		long cooldownMs = getCooldown(settings, cooldownValue) * 1000;
+		if (cooldownMs < 0) {
+			reply(event, "Please set a valid cooldown!");
+			return null;
+		}
 
-							final long cooldownMs = ParseUtil.parseTextToMilliseconds(content);
-							if (cooldownMs < 1000 || cooldownMs > 31556952000L) {
-								sendErrorMessage(newEvent.getChannel(), "Please choose a cooldown above 1 second and below 1 year!");
-								return false;
-							}
-
-							return true;
-						},
-						newEvent -> {
-							final Message message = newEvent.getMessage();
-							final String content = message.getContentRaw();
-							final long cooldownMs = ParseUtil.parseTextToMilliseconds(content);
-							final GambleSettings settings = dcGuild.getGambleSettings();
-							settings.setCooldownMs(cooldownMs);
-							requestPrize(dcGuild, newEvent.getChannel(), originalAuthorId);
-						},
-						TIMEOUT_MINS, TimeUnit.MINUTES,
-						() -> sendErrorMessage(originalChannel, "Timeout exceeded. Please start the command again.")
-				)
-		);
+		return new GambleSettings(durationMs, cooldownMs, dcGuild);
 	}
 
-	private void requestPrize(final DiscordGuild dcGuild, final TextChannel originalChannel, final long originalAuthorId) {
-		final long originalChannelId = originalChannel.getIdLong();
-		final Set<GamblePrize> prizes = dcGuild.getGambleSettings().getPrizes();
-		final String request = prizes.size() == 0 ?
-				"Add prizes with their chances. A chance has to be greater than 0 but smaller or equal to 100. " +
-						"All chances combined are not allowed to surpass 100%!\nTo add a win with its chance " +
-						"type `\"win description\" <number>%`.\nReplace <number> with the desired percentage " +
-						"(e.g. `\"Fortnite Gift Card $19\" 15.3%`).\n" +
-						"If your prize starts with add \"ban\" or \"kick\" the 'winner' will get kicked or banned if the bot has the needed permissions.\n" +
-						"*To start the gamble type `start`. If your wins do not add up to 100% the free space will be a loss (a blank)!*" :
-				"Entered " + prizes.size() + " prize(s), totaling to " + getTotalPercent(prizes) + "%. To start the gamble type `start`.";
+	private long getDuration(GambleSettings settings, Long duration) {
+		if (settings == null) {
+			return duration;
+		}
 
-		originalChannel.sendMessage(request).queue(
-				msg -> eventWaiter.waitForEvent(
-						GuildMessageReceivedEvent.class,
-						newEvent -> {
-							if (isWrongDialog(newEvent, originalChannelId, originalAuthorId)) {
-								return false;
-							}
+		if (settings.getDurationMs() == 0) {
+			return duration;
+		}
 
-							final Message message = newEvent.getMessage();
-							final String content = message.getContentRaw();
-							if (content.equalsIgnoreCase("start")) {
-								return true;
-							}
+		if (duration == null) {
+			return settings.getDurationMs();
+		}
 
-							if (!content.matches("\".*\" [0-9]{1,3}(\\.[0-9]+)?%")) {
-								sendErrorMessage(newEvent.getChannel(), "Please use the correct syntax!");
-								return false;
-							}
+		return duration;
+	}
 
-							final List<String> wins = DiscordMessageUtil.getStringsInQuotationMarks(content);
-							if (wins.size() != 1) {
-								sendErrorMessage(newEvent.getChannel(), "Please only define one win per message!");
-								return false;
-							}
+	private long getCooldown(GambleSettings settings, Long cooldown) {
+		if (settings == null) {
+			return cooldown;
+		}
 
-							if (isDuplicatePrize(prizes, wins.get(0))) {
-								sendErrorMessage(newEvent.getChannel(), "Please only define one win per message!");
-								return false;
-							}
+		if (settings.getCooldownMs() == 0) {
+			return cooldown;
+		}
 
-							final double chance = getChance(content);
-							if (Double.compare(0d, chance) >= 0) {
-								sendErrorMessage(newEvent.getChannel(), "Please select a chance greater than 0%!");
-								return false;
-							}
+		if (cooldown == null) {
+			return settings.getCooldownMs();
+		}
 
-							if (Double.compare(100d, chance) < 0) {
-								sendErrorMessage(newEvent.getChannel(), "Please select a chance smaller than 100%!");
-								return false;
-							}
+		return cooldown;
+	}
 
-							final double current = getTotalPercent(prizes);
-							if (Double.compare(100d, current + chance) < 0) {
-								sendErrorMessage(newEvent.getChannel(), "You are not allowed to surpass 100%! You have " + (100.0 - current) + "% left.");
-								return false;
-							}
+	private Set<GamblePrize> createPrizes(SlashCommandEvent event, GambleSettings settings) {
+		String prizeText = SlashOptionUtil.getStringOption(event, PRIZES_OPTION_NAME);
+		if (prizeText == null) {
+			return settings.getPrizes();
+		}
 
-							return true;
-						},
-						newEvent -> {
-							final GambleSettings settings = dcGuild.getGambleSettings();
-							final Message message = newEvent.getMessage();
-							final String content = message.getContentRaw();
-							if (content.equalsIgnoreCase("start")) {
-								settingsRepo.save(settings);
-								requestStart(dcGuild, newEvent.getChannel(), originalAuthorId);
-								return;
-							}
+		if (prizeText.isBlank()) {
+			return settings.getPrizes();
+		}
 
-							final List<String> wins = DiscordMessageUtil.getStringsInQuotationMarks(content);
-							final String prizeName = wins.get(0);
-							final double chance = getChance(content);
-							final GamblePrize prize = new GamblePrize(prizeName, chance, settings);
-							prizeRepo.save(prize);
-							settings.getPrizes().add(prize);
-							if (Double.compare(100d, getTotalPercent(prizes)) == 0) {
-								answer(newEvent.getChannel(), "Reached 100%! Starting gamble...");
-								settingsRepo.save(settings);
-								requestStart(dcGuild, newEvent.getChannel(), originalAuthorId);
-								return;
-							}
+		prizeText = prizeText.trim();
+		if (!prizeText.matches("(\\[.+;\\d{1,3}(\\.\\d+)?%?],?)+")) {
+			LogUtil.logDebug("Prize list does not match regex!");
+			throw new IllegalArgumentException("Please follow the exact syntax! Check the help command for further information.");
+		}
 
-							requestPrize(dcGuild, newEvent.getChannel(), originalAuthorId);
-						},
-						TIMEOUT_MINS, TimeUnit.MINUTES,
-						() -> sendErrorMessage(originalChannel, "Timeout exceeded. Please start the command again.")
-				)
-		);
+		List<String> prizeInfos = filterPrizeInfo(prizeText);
+		Set<GamblePrize> prizes = buildPrizes(settings, prizeInfos);
+		if (hasInvalidChances(prizes)) {
+			throw new IllegalArgumentException("The sum of chances cannot be higher than 100!");
+		}
+
+		return prizes;
+	}
+
+	private List<String> filterPrizeInfo(String prizeText) {
+		List<String> prizeInfos = new ArrayList<>();
+		Pattern pattern = Pattern.compile("\\[[^]]+;\\d{0,3}(\\.\\d+)?%?]");
+		Matcher matcher = pattern.matcher(prizeText);
+		while (matcher.find()) {
+			prizeInfos.add(matcher.group());
+		}
+
+		return prizeInfos;
+	}
+
+	private Set<GamblePrize> buildPrizes(GambleSettings settings, List<String> prizeInfos) {
+		Set<GamblePrize> prizes = new HashSet<>();
+		for (String prizeInfo : prizeInfos) {
+			if (hasInvalidSeparation(prizeInfo)) {
+				throw new IllegalArgumentException("Please follow the exact syntax! Check the help command for further information.");
+			}
+
+			String prizeText = prizeInfo.substring(1, prizeInfo.length() - 1);    // remove [ and ]
+			String prizeName = prizeText.split(";")[0];
+			if (prizeName.isBlank()) {
+				throw new IllegalArgumentException("Please set valid names for your prizes!");
+			}
+
+			String prizeChanceText = prizeText.split(";")[1].replace("%", "");
+			double prizeChance = ParseUtil.safelyParseStringToDouble(prizeChanceText);
+			if (Double.compare(0d, prizeChance) >= 0) {
+				throw new IllegalArgumentException("All chances need to be greater than 0!");
+			}
+
+			GamblePrize prize = new GamblePrize(prizeName, prizeChance, settings);
+			prizeRepo.save(prize);
+			prizes.add(prize);
+		}
+
+		return prizes;
+	}
+
+	private boolean hasInvalidSeparation(String prizeInfo) {
+		String noSeparator = prizeInfo.replaceAll(";", "");
+		return prizeInfo.length() - 1 != noSeparator.length();
+	}
+
+	private boolean hasInvalidChances(Set<GamblePrize> prizes) {
+		return Double.compare(100d, getTotalPercent(prizes)) < 0;
 	}
 
 	private double getTotalPercent(final Set<GamblePrize> prizes) {
@@ -401,87 +295,43 @@ class StartGamble extends CommandImpl {
 		return total;
 	}
 
-	private boolean isDuplicatePrize(final Set<GamblePrize> prizes, final String prizeName) {
-		for (GamblePrize prize : prizes) {
-			if (prize.getPrizeName().equalsIgnoreCase(prizeName)) {
-				return true;
-			}
-		}
-
-		return false;
+	private void startGamble(DiscordGuild dcGuild, GambleSettings settings) {
+		settings.setStartTimestampMs(System.currentTimeMillis());
+		settingsRepo.save(settings);
+		dcGuild.setGambleSettings(settings);
+		guildRepo.save(dcGuild);
 	}
 
-	private double getChance(String content) {
-		final String[] tokens = content.split(" ");
-		double chance = -1d;
-		for (int i = tokens.length - 1; i >= 0; i--) {
-			if (tokens[i].matches("[0-9]{1,3}(\\.[0-9]+)?%")) {
-				chance = Double.parseDouble(tokens[i].replace("%", ""));
-				break;
-			}
-		}
-
-		return chance;
+	private boolean shouldAnnounce(SlashCommandEvent event) {
+		GuildChannel channel = SlashOptionUtil.getGuildChannelOption(event, ANNOUNCEMENT_CHANNEL_OPTION_NAME);
+		return channel != null;
 	}
 
-	private void requestStart(final DiscordGuild dcGuild, final TextChannel originalChannel, final long originalAuthorId) {
-		final long originalChannelId = originalChannel.getIdLong();
-		originalChannel.sendMessage(
-				"If you want to announce the gamble mention a channel to announce the gamble in. If you want to " +
-						"ping users append `everyone` or `here` to your message.\n" +
-						"*To start the gamble without an announcement just reply with `exit`.*"
-		).queue(
-				msg -> eventWaiter.waitForEvent(
-						GuildMessageReceivedEvent.class,
-						newEvent -> {
-							if (isWrongDialog(newEvent, originalChannelId, originalAuthorId)) {
-								return false;
-							}
+	private void announce(SlashCommandEvent event, DiscordGuild dcGuild) {
+		TextChannel channel = (TextChannel) SlashOptionUtil.getGuildChannelOption(event, ANNOUNCEMENT_CHANNEL_OPTION_NAME);
+		if (channel == null) {
+			return;
+		}
 
-							final Message message = newEvent.getMessage();
-							final String content = message.getContentRaw();
-							if (content.equalsIgnoreCase("exit")) {
-								return true;
-							}
+		if (!channel.canTalk()) {
+			event.getChannel().sendMessage("I cannot send an announcement in the given channel! The gamble started anyway, but you need to post the announcement yourself.").queue();
+			return;
+		}
 
-							final List<TextChannel> mentionedChannels = message.getMentionedChannels();
-							if (mentionedChannels.size() != 1) {
-								sendErrorMessage(newEvent.getChannel(), "Please mention exactly one channel!");
-								return false;
-							}
+		String ping = SlashOptionUtil.getStringOption(event, ANNOUNCEMENT_PING_OPTION_NAME);
+		String text = getFittingMention(ping) + "A wild gamble appears!";
+		channel.sendMessage(text).setEmbeds(buildGambleInfoEmbed(dcGuild)).queue();
+	}
 
-							final TextChannel announcementChannel = mentionedChannels.get(0);
-							if (!announcementChannel.canTalk()) {
-								sendErrorMessage(newEvent.getChannel(), "Can not send an announcement in that channel! Update my permissions or choose another channel.");
-								return false;
-							}
+	private String getFittingMention(String ping) {
+		if (ping == null) {
+			return "";
+		}
 
-							return true;
-						},
-						newEvent -> {
-							final GambleSettings settings = dcGuild.getGambleSettings();
-							settings.setStartTimestampMs(System.currentTimeMillis());
-							settingsRepo.save(settings);
-							guildRepo.save(dcGuild);
-							final Message message = newEvent.getMessage();
-							final String content = message.getContentRaw();
-							if (content.equalsIgnoreCase("exit")) {
-								answer(newEvent.getChannel(), "Started the gamble!");
-								return;
-							}
+		if (ping.equalsIgnoreCase("everyone") || ping.equalsIgnoreCase("here")) {
+			return "@" + ping + "\n";
+		}
 
-							final List<TextChannel> mentionedChannels = message.getMentionedChannels();
-							final TextChannel announcementChannel = mentionedChannels.get(0);
-							announcementChannel.sendMessage(
-									(content.endsWith("everyone") ? "@everyone\n" : "") +
-											(content.endsWith("here") ? "@here\n" : "") +
-											"A wild gamble appears!"
-							).setEmbeds(buildGambleInfoEmbed(dcGuild)).queue();
-							answer(newEvent.getChannel(), "Started the gamble!");
-						},
-						TIMEOUT_MINS, TimeUnit.MINUTES,
-						() -> sendErrorMessage(originalChannel, "Timeout exceeded. Please start the command again.")
-				)
-		);
+		return "";
 	}
 }

@@ -11,10 +11,10 @@ on Java 11, so you need to install the Java 11 JDK (or higher) for your system.
 
 ### Windows
 
-There are batch (`.bat`) start and stop scripts available for Windows (tested only on Windows 10 Pro Version 21H1 Build 19043.1110), 
-**however**, currently the process can not be stopped gracefully. That means there is a possibility of data loss as 
-no shutdown hooks get executed. As of now I strongly recommend to **not** use Windows to host this bot with the given
-batch scripts.
+There are batch (`.bat`) start and stop scripts available for Windows (tested only on Windows 10 Pro Version 21H1 Build
+19043.1110), **however**, currently the process can not be stopped gracefully. That means there is a possibility of data
+loss as no shutdown hooks get executed. As of now I strongly recommend to **not** use Windows to host this bot with the
+given batch scripts.
 
 ### Tokens & APIs
 
@@ -28,27 +28,28 @@ application in the list of applications. Now switch to the "Bot" tab on the left
 "Add Bot" button that shows up. \
 You should now see information about the bot you created, and a button called "Copy" under a header that says "Token".
 Click that button to copy the token of your bot. You will need this token in the [Environment section](#environment). \
-Never give this token to anyone as that is all one needs to control your bot!
+Never give this token to anyone as that is all one needs to control your bot! \
+Make sure the "Interactions Endpoint URL" in the "General Information" area is **not** set. Otherwise, the slash
+commands will not work!
 
 #### Adding the bot to your server
 
 Once more in the
 [Discord Developer Portal](https://discord.com/developers/applications)
-select your application. Now switch to the "OAuth2" tab on the left and in the list of scopes select "bot". Now scroll
-down and select all needed permissions:
+select your application. Now switch to the "OAuth2" tab on the left and select "URL Generator". In the list of scopes
+select "bot" and "applications.command". Now scroll down and select all needed permissions:
 
 ```text
-Kick Members
-Ban Members
-View Channels
+Kick Members (only needed if you want the bot to automatically kick in gambles)
+Ban Members (only needed if you want the bot to automatically ban in gambles)
 Send Messages
 Embed Links
-Read Message History
 Mention everyone
 Use External Emojis
+Use Slash Commands
 ```
 
-Back up in the scopes section on that site there is now a link you can use to add the bot to your server with the
+On the bottom of that site there is now a link you can use to add the bot to your server with the
 selected permissions. To use that link just copy and paste it into a new browser tab or window. \
 You can give the bot the administrator permission to decrease the amount of permissions to update but keep in mind that
 it literally means the bot can do anything. That means if anyone has access to your token to control the bot he can do
@@ -61,6 +62,7 @@ your token very secure.
 * Not granting the bot the needed permissions might lead to unknown behaviour.
 * Most of the commands can only be used by users with the Administrator permission.
 * Any command can only be used in a channel the bot has access to.
+* Discord might take up to an hour to register the bot commands on their end.
 
 ### Environment
 
@@ -74,7 +76,6 @@ DB_USER=
 DB_PASSWORD=
 
 DC_TOKEN=
-CMD_PREFIX=
 BOT_ACTIVITY=
 BOT_ACTIVITY_TEXT=
 BOT_ACTIVITY_STREAMING_URL=
@@ -112,13 +113,6 @@ values, so your new credentials are not correct, and the connection will be refu
 This is the place for the Discord token mentioned in
 [Discord bot token](#discord-bot-token). Never share this token with anyone!
 
-#### CMD_PREFIX
-
-This is the prefix the bot needs to react to a command. If this value is set to `?` the bot will only perform the "help"
-command if a user writes
-`?help`. If no value is set the bot has no prefix, so it only reacts to a message that starts with the actual command
-like `help`. Do not use spaces in the prefix!
-
 #### BOT_ACTIVITY
 
 Discord bots can display an activity in the member list. Discord offers a few activities a bot can use which are:
@@ -129,7 +123,7 @@ Discord bots can display an activity in the member list. Discord offers a few ac
 * **streaming** (xyz)
 * **competing** (in xyz)
 
-If you want to display an activity you can use one of the bold printed words. If you do not want to set an activity just 
+If you want to display an activity you can use one of the bold printed words. If you do not want to set an activity just
 leave this field blank or remove it completely. \
 If you want to use an activity you also need to set a
 [BOT_ACTIVITY_TEXT](#bot_activity_text). Otherwise, no activity will be displayed. If you want to use the streaming
@@ -201,7 +195,7 @@ following:
 
 @Service("help")
 public class Help extends CommandImpl {
-  // ...
+	// ...
 }
 ```
 
@@ -217,7 +211,7 @@ actually does something.
 
 @Service
 public class SomeEventListener extends ListenerAdapter {
-  // ...
+	// ...
 }
 ```
 

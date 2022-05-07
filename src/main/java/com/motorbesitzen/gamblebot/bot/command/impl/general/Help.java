@@ -2,12 +2,12 @@ package com.motorbesitzen.gamblebot.bot.command.impl.general;
 
 import com.motorbesitzen.gamblebot.bot.command.Command;
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
-import com.motorbesitzen.gamblebot.util.EnvironmentUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,11 +35,6 @@ class Help extends CommandImpl {
 	}
 
 	@Override
-	public String getUsage() {
-		return getName();
-	}
-
-	@Override
 	public boolean isAdminCommand() {
 		return false;
 	}
@@ -54,30 +49,34 @@ class Help extends CommandImpl {
 		return "Shows a list of commands that can be used.";
 	}
 
+	@Override
+	public void register(final JDA jda) {
+		jda.upsertCommand(getName(), getDescription()).queue();
+	}
+
 	/**
 	 * Sends a help message.
 	 *
 	 * @param event The event provided by JDA that a guild message got received.
 	 */
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
-		final TextChannel channel = event.getChannel();
+	public void execute(SlashCommandEvent event) {
 		final Member author = event.getMember();
 		if (author != null) {
-			sendHelpMessage(channel, author);
+			sendHelpMessage(event, author);
 		}
 	}
 
 	/**
 	 * Sends the help message in the channel where the help got requested.
 	 *
-	 * @param channel The channel in which the command got used.
-	 * @param author  The author of the command.
+	 * @param event  The slash command event.
+	 * @param author The author of the command.
 	 */
-	private void sendHelpMessage(final TextChannel channel, final Member author) {
+	private void sendHelpMessage(final SlashCommandEvent event, final Member author) {
 		final List<Command> commands = new ArrayList<>(commandMap.values());
 		if (commands.size() == 0) {
-			sendErrorMessage(channel, "No commands found!");
+			reply(event, "No commands found!");
 			return;
 		}
 
@@ -91,15 +90,21 @@ class Help extends CommandImpl {
 		}
 
 		if (fittingCommands.size() == 0) {
-			sendErrorMessage(channel, "No commands found!");
+			reply(event, "No commands found!");
 			return;
 		}
 
 		final int pages = (fittingCommands.size() / FIELDS_PER_EMBED) + 1;
+		List<MessageEmbed> embeds = buildPages(pages, fittingCommands);
+		replyMultipleEmbeds(event, embeds);
+	}
+
+	private List<MessageEmbed> buildPages(int pages, List<Command> fittingCommands) {
+		List<MessageEmbed> embeds = new ArrayList<>();
 		EmbedBuilder eb = buildEmbedPage(1, pages);
 		for (int i = 0; i < fittingCommands.size(); i++) {
 			if (i > 0 && i % 25 == 0) {
-				answer(channel, eb.build());
+				embeds.add(eb.build());
 				eb = buildEmbedPage((i / FIELDS_PER_EMBED) + 1, pages);
 			}
 
@@ -107,7 +112,8 @@ class Help extends CommandImpl {
 			addHelpEntry(eb, command);
 		}
 
-		answer(channel, eb.build());
+		embeds.add(eb.build());
+		return embeds;
 	}
 
 	/**
@@ -136,8 +142,7 @@ class Help extends CommandImpl {
 	 * @param command The command to add to the help page.
 	 */
 	private void addHelpEntry(final EmbedBuilder eb, final Command command) {
-		final String prefix = EnvironmentUtil.getEnvironmentVariableOrDefault("CMD_PREFIX", "");
-		final String title = prefix + command.getUsage();
+		final String title = "/" + command.getName();
 		eb.addField(title, command.getDescription(), false);
 	}
 }

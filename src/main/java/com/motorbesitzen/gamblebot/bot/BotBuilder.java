@@ -1,6 +1,5 @@
 package com.motorbesitzen.gamblebot.bot;
 
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.motorbesitzen.gamblebot.util.EnvironmentUtil;
 import com.motorbesitzen.gamblebot.util.LogUtil;
 import net.dv8tion.jda.api.JDA;
@@ -24,14 +23,11 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 
 	private final ApplicationContext applicationContext;
 	private final Map<String, ? extends ListenerAdapter> eventListeners;
-	private final EventWaiter eventWaiter;
 
 	@Autowired
-	private BotBuilder(final ApplicationContext applicationContext, final Map<String, ? extends ListenerAdapter> eventListeners,
-					   final EventWaiter eventWaiter) {
+	private BotBuilder(final ApplicationContext applicationContext, final Map<String, ? extends ListenerAdapter> eventListeners) {
 		this.applicationContext = applicationContext;
 		this.eventListeners = eventListeners;
-		this.eventWaiter = eventWaiter;
 	}
 
 	/**
@@ -81,8 +77,7 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 		final Activity activity = getBotActivity();
 		final JDABuilder builder = JDABuilder.createDefault(discordToken)
 				.setStatus(OnlineStatus.ONLINE)
-				.setActivity(activity)
-				.addEventListeners(eventWaiter);
+				.setActivity(activity);
 
 		for (Map.Entry<String, ? extends ListenerAdapter> entry : eventListeners.entrySet()) {
 			builder.addEventListeners(entry.getValue());

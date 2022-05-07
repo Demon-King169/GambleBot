@@ -1,9 +1,19 @@
 package com.motorbesitzen.gamblebot.data.dao;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 public class GambleSettings {
@@ -33,6 +43,14 @@ public class GambleSettings {
 
 	public GambleSettings(@Min(0) long startTimestampMs, @Min(0) long durationMs, @Min(0) long cooldownMs, @NotNull DiscordGuild guild) {
 		this.startTimestampMs = startTimestampMs;
+		this.durationMs = durationMs;
+		this.cooldownMs = cooldownMs;
+		this.prizes = new HashSet<>();
+		this.guild = guild;
+	}
+
+	public GambleSettings(@Min(0) long durationMs, @Min(0) long cooldownMs, @NotNull DiscordGuild guild) {
+		this.startTimestampMs = 0;
 		this.durationMs = durationMs;
 		this.cooldownMs = cooldownMs;
 		this.prizes = new HashSet<>();

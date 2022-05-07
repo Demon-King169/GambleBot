@@ -3,7 +3,9 @@ package com.motorbesitzen.gamblebot.bot.command.impl.custom;
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,13 +31,8 @@ class GambleInfo extends CommandImpl {
 	}
 
 	@Override
-	public String getUsage() {
-		return getName();
-	}
-
-	@Override
 	public String getDescription() {
-		return "Prints information about the current giveaway. If none is running it prints information about the last one.";
+		return "Prints information about the current giveaway (about the last one if none running).";
 	}
 
 	@Override
@@ -48,21 +45,31 @@ class GambleInfo extends CommandImpl {
 		return true;
 	}
 
+	@Override
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), getDescription()).queue();
+	}
+
 	@Transactional
 	@Override
-	public void execute(GuildMessageReceivedEvent event) {
-		final long guildId = event.getGuild().getIdLong();
+	public void execute(SlashCommandEvent event) {
+		final Guild guild = event.getGuild();
+		if (guild == null) {
+			return;
+		}
+
+		final long guildId = guild.getIdLong();
 		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
 		dcGuildOpt.ifPresentOrElse(
 				dcGuild -> {
 					if (!dcGuild.hasRunningGamble()) {
-						sendErrorMessage(event.getChannel(), "There is no running gamble.");
+						reply(event, "There is no running gamble.");
 						return;
 					}
 
-					answer(event.getChannel(), buildGambleInfoEmbed(dcGuild));
+					reply(event, buildGambleInfoEmbed(dcGuild));
 				},
-				() -> sendErrorMessage(event.getChannel(), "There is no running gamble.")
+				() -> reply(event, "There is no running gamble.")
 		);
 	}
 

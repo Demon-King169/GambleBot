@@ -5,8 +5,9 @@ import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ import java.util.Optional;
 class DailyCoins extends CommandImpl {
 
 	private static final int MS_PER_DAY = 86400000;
+
 	private final DiscordMemberRepo memberRepo;
 	private final DiscordGuildRepo guildRepo;
 
@@ -31,11 +33,6 @@ class DailyCoins extends CommandImpl {
 	@Override
 	public String getName() {
 		return "daily";
-	}
-
-	@Override
-	public String getUsage() {
-		return getName();
 	}
 
 	@Override
@@ -54,18 +51,23 @@ class DailyCoins extends CommandImpl {
 	}
 
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), getDescription()).queue();
+	}
+
+	@Override
+	public void execute(SlashCommandEvent event) {
 		final Member author = event.getMember();
 		if (author == null) {
 			return;
 		}
 
 		final long memberId = author.getIdLong();
-		final long guildId = event.getGuild().getIdLong();
+		final long guildId = author.getGuild().getIdLong();
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(memberId, guildId);
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(memberId, guildId));
 		if (dcMember.getNextDailyCoinsMs() >= System.currentTimeMillis()) {
-			reply(event.getMessage(), "You can collect your next daily coins in " + dcMember.getTimeToNextDailyText() + ".");
+			reply(event, "You can collect your next daily coins in " + dcMember.getTimeToNextDailyText() + ".", true);
 			return;
 		}
 
@@ -73,8 +75,8 @@ class DailyCoins extends CommandImpl {
 		dcMember.giveCoins(dailyCoinsAmount);
 		dcMember.setNextDailyCoinsMs(System.currentTimeMillis() + MS_PER_DAY);
 		memberRepo.save(dcMember);
-		reply(event.getMessage(), "Added **" + dailyCoinsAmount + "** coins to your balance!\n" +
-				"You now have **" + dcMember.getCoins() + "** coins.");
+		reply(event, "Added **" + dailyCoinsAmount + "** coins to your balance!\n" +
+				"You now have **" + dcMember.getCoins() + "** coins.", true);
 	}
 
 	private DiscordMember createNewMember(final long memberId, final long guildId) {
@@ -91,7 +93,7 @@ class DailyCoins extends CommandImpl {
 
 	private long getDailyAmount(final Member author, final DiscordGuild dcGuild) {
 		final long dailyCoinsAmount = dcGuild.getDailyCoins();
-		if(author.getTimeBoosted() != null) {
+		if (author.getTimeBoosted() != null) {
 			final long boosterDailyBonus = dcGuild.getBoosterDailyBonus();
 			return dailyCoinsAmount + boosterDailyBonus;
 		}

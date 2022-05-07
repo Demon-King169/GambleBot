@@ -4,9 +4,10 @@ import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -33,11 +34,6 @@ class TopCoin extends CommandImpl {
 	}
 
 	@Override
-	public String getUsage() {
-		return getName();
-	}
-
-	@Override
 	public String getDescription() {
 		return "Shows the top 10 of users (sorted by coins).";
 	}
@@ -53,18 +49,27 @@ class TopCoin extends CommandImpl {
 	}
 
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), getDescription()).queue();
+	}
+
+	@Override
+	public void execute(SlashCommandEvent event) {
 		final Guild guild = event.getGuild();
+		if (guild == null) {
+			return;
+		}
+
 		final long guildId = guild.getIdLong();
 		final PageRequest pageRequest = PageRequest.of(0, TOP_LIST_LENGTH);
 		final List<DiscordMember> topMembers = memberRepo.findAllByGuild_GuildIdOrderByCoinsDesc(guildId, pageRequest);
 		if (topMembers.size() == 0) {
-			sendErrorMessage(event.getChannel(), "There is not enough data for a top list yet!");
+			reply(event, "There is not enough data for a top list yet!");
 			return;
 		}
 
 		final MessageEmbed embed = buildTopMessage(guild, topMembers);
-		answer(event.getChannel(), embed);
+		reply(event, embed);
 	}
 
 	private MessageEmbed buildTopMessage(final Guild guild, final List<DiscordMember> topMembers) {

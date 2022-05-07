@@ -3,15 +3,20 @@ package com.motorbesitzen.gamblebot.bot.command.impl.coin;
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
-import com.motorbesitzen.gamblebot.util.ParseUtil;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import com.motorbesitzen.gamblebot.util.SlashOptionUtil;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service("taxrate")
 class TaxRate extends CommandImpl {
+
+	private static final String TAX_OPTION_NAME = "tax_percent";
 
 	private final DiscordGuildRepo guildRepo;
 
@@ -22,11 +27,6 @@ class TaxRate extends CommandImpl {
 	@Override
 	public String getName() {
 		return "taxrate";
-	}
-
-	@Override
-	public String getUsage() {
-		return getName() + " <rateInPercent>";
 	}
 
 	@Override
@@ -45,22 +45,39 @@ class TaxRate extends CommandImpl {
 	}
 
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
-		final long guildId = event.getGuild().getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
-		final Message message = event.getMessage();
-		final String content = message.getContentRaw();
-		final String[] tokens = content.split(" ");
-		final String taxRateText = tokens[tokens.length - 1];
-		final int taxRate = ParseUtil.safelyParseStringToInt(taxRateText);
-		if (taxRate < 0 || taxRate > 100) {
-			replyErrorMessage(event.getMessage(), "Please set a valid integer amount of daily coins (0-100)!");
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), getDescription())
+				.addOptions(
+						new OptionData(
+								OptionType.INTEGER,
+								TAX_OPTION_NAME,
+								"The tax in percent (0-100)."
+						).setRequiredRange(0, 100)
+				).queue();
+	}
+
+	@Override
+	public void execute(SlashCommandEvent event) {
+		final Guild guild = event.getGuild();
+		if (guild == null) {
 			return;
 		}
 
-		dcGuild.setTaxRate(taxRate);
+		Long taxRate = SlashOptionUtil.getIntegerOption(event, TAX_OPTION_NAME);
+		if (taxRate == null) {
+			taxRate = -1L;
+		}
+
+		if (taxRate < 0 || taxRate > 100) {
+			reply(event, "Please set a valid tax percentage (0-100)!");
+			return;
+		}
+
+		final long guildId = event.getGuild().getIdLong();
+		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
+		dcGuild.setTaxRate(taxRate.intValue());
 		guildRepo.save(dcGuild);
-		answer(event.getChannel(), "Set the tax rate to **" + taxRate + "**%.");
+		reply(event, "Set the tax rate to **" + taxRate + "**%.");
 	}
 }

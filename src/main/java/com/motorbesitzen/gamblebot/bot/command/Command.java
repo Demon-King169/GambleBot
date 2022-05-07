@@ -1,6 +1,7 @@
 package com.motorbesitzen.gamblebot.bot.command;
 
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 /**
  * The interface for any Command the bot can handle.
@@ -13,13 +14,6 @@ public interface Command {
 	 * @return The name of the command.
 	 */
 	String getName();
-
-	/**
-	 * Displays the syntax for the command by defining the name and any additionally needed parameters.
-	 *
-	 * @return a representation on how to use the command
-	 */
-	String getUsage();
 
 	/**
 	 * Describes what the command does and includes any information that may be needed.
@@ -43,10 +37,14 @@ public interface Command {
 	boolean isGlobalCommand();
 
 	/**
+	 * Registers the command to Discord.
+	 */
+	void register(JDA jda);
+
+	/**
 	 * A method that performs the necessary actions for the given command.
 	 *
-	 * @param event The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/events/message/guild/GuildMessageReceivedEvent.html">Discord event</a>
-	 *              when a message (possible command) is received.
+	 * @param event The Discord event when a slash command (possible command) is received.
 	 */
-	void execute(final GuildMessageReceivedEvent event);
+	void execute(SlashCommandEvent event);
 }

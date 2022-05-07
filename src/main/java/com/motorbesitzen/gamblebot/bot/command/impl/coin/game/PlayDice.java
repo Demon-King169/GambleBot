@@ -1,6 +1,5 @@
 package com.motorbesitzen.gamblebot.bot.command.impl.coin.game;
 
-import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.bot.command.game.coin.GameBet;
 import com.motorbesitzen.gamblebot.bot.command.game.coin.GameWinInfo;
 import com.motorbesitzen.gamblebot.bot.command.game.coin.impl.DiceGame;
@@ -8,19 +7,20 @@ import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
-import com.motorbesitzen.gamblebot.util.EnvironmentUtil;
-import com.motorbesitzen.gamblebot.util.ParseUtil;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Service("dice")
-class PlayDice extends CommandImpl {
+class PlayDice extends PlayCommandImpl {
+
+	private static final String WAGER_OPTION_NAME = "wager";
 
 	private final DiscordGuildRepo guildRepo;
 	private final DiscordMemberRepo memberRepo;
@@ -36,11 +36,6 @@ class PlayDice extends CommandImpl {
 	@Override
 	public String getName() {
 		return "dice";
-	}
-
-	@Override
-	public String getUsage() {
-		return getName() + " <wager>";
 	}
 
 	@Override
@@ -60,37 +55,39 @@ class PlayDice extends CommandImpl {
 	}
 
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), "Throws a dice against the house, whoever has the higher result wins.")
+				.addOptions(
+						new OptionData(
+								OptionType.INTEGER,
+								WAGER_OPTION_NAME,
+								"The wager (in coins) you want to bet.",
+								true
+						).setRequiredRange(0, Integer.MAX_VALUE)
+				).queue();
+	}
+
+	@Override
+	public void execute(SlashCommandEvent event) {
+		long wager = getWager(event, WAGER_OPTION_NAME);
+		if (wager <= 0) {
+			reply(event, "Please set a valid wager (> 0).");
+			return;
+		}
+
 		final Member author = event.getMember();
 		if (author == null) {
 			return;
 		}
 
-		final Message message = event.getMessage();
-		final String content = message.getContentRaw();
-		final String prefix = EnvironmentUtil.getEnvironmentVariable("CMD_PREFIX");
-		if (!content.matches("(?i)" + Pattern.quote(prefix) + getName() + " [0-9]+[kmb]?")) {
-			replyErrorMessage(event.getMessage(), "Please use the correct syntax! Use `" +
-					prefix + "help` for a list of valid bets.");
-			return;
-		}
-
-		final String[] tokens = content.split(" ");
-		final String wagerText = tokens[tokens.length - 1];
-		final long wager = ParseUtil.safelyParseStringToLong(wagerText);
-		if (wager <= 0) {
-			replyErrorMessage(event.getMessage(), "Please set a wager of at least 1 coin for your bet!");
-			return;
-		}
-
 		final long authorId = author.getIdLong();
-		final long guildId = event.getGuild().getIdLong();
+		final long guildId = author.getGuild().getIdLong();
 		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildId));
+		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildRepo, guildId));
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(dcGuild, authorId));
 		if (dcMember.getCoins() < wager) {
-			replyErrorMessage(event.getMessage(), "You do not have enough coins for that bet.\n" +
+			reply(event, "You do not have enough coins for that bet.\n" +
 					"You only have **" + dcMember.getCoins() + "** coins right now.");
 			return;
 		}
@@ -101,24 +98,14 @@ class PlayDice extends CommandImpl {
 			final long winAmount = calcTaxedValue(dcGuild, winInfo.getWinAmount());
 			dcMember.wonGame(winAmount);
 			memberRepo.save(dcMember);
-			reply(event.getMessage(), winInfo.getResultText() + " You won **" + winAmount + "** coins!\n" +
+			reply(event, winInfo.getResultText() + " You won **" + winAmount + "** coins!\n" +
 					"Your balance: **" + dcMember.getCoins() + "** coins.");
 			return;
 		}
 
 		dcMember.lostGame(wager);
 		memberRepo.save(dcMember);
-		reply(event.getMessage(), winInfo.getResultText() + " You lost the bet.\n" +
+		reply(event, winInfo.getResultText() + " You lost the bet.\n" +
 				"Your balance: **" + dcMember.getCoins() + "** coins.");
-	}
-
-	private DiscordMember createNewMember(final DiscordGuild dcGuild, final long memberId) {
-		return DiscordMember.createDefault(memberId, dcGuild);
-	}
-
-	private DiscordGuild createNewGuild(final long guildId) {
-		final DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
-		guildRepo.save(dcGuild);
-		return dcGuild;
 	}
 }

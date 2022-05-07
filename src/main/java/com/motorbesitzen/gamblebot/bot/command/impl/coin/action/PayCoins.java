@@ -5,12 +5,15 @@ import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
-import com.motorbesitzen.gamblebot.util.DiscordMessageUtil;
 import com.motorbesitzen.gamblebot.util.LogUtil;
-import com.motorbesitzen.gamblebot.util.ParseUtil;
+import com.motorbesitzen.gamblebot.util.SlashOptionUtil;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +24,9 @@ import java.util.Optional;
  */
 @Service("pay")
 class PayCoins extends CommandImpl {
+
+	private static final String USER_OPTION_NAME = "member";
+	private static final String AMOUNT_OPTION_NAME = "amount";
 
 	private final DiscordMemberRepo memberRepo;
 	private final DiscordGuildRepo guildRepo;
@@ -34,11 +40,6 @@ class PayCoins extends CommandImpl {
 	@Override
 	public String getName() {
 		return "pay";
-	}
-
-	@Override
-	public String getUsage() {
-		return getName() + " (@user|id) <amount>";
 	}
 
 	@Override
@@ -57,50 +58,70 @@ class PayCoins extends CommandImpl {
 	}
 
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
-		final long authorId = event.getAuthor().getIdLong();
-		final long guildId = event.getGuild().getIdLong();
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), getDescription())
+				.addOptions(
+						new OptionData(
+								OptionType.USER,
+								USER_OPTION_NAME,
+								"The member you want to pay coins to.",
+								true
+						),
+						new OptionData(
+								OptionType.INTEGER,
+								AMOUNT_OPTION_NAME,
+								"The amount of coins you want to pay the user.",
+								true
+						).setRequiredRange(0, 9007199254740991L)
+				).queue();
+	}
+
+	@Override
+	public void execute(SlashCommandEvent event) {
+		Guild guild = event.getGuild();
+		if (guild == null) {
+			return;
+		}
+
+		User user = SlashOptionUtil.getUserOption(event, USER_OPTION_NAME);
+		if (user == null) {
+			reply(event, "Please provide a member you want to pay coins to.");
+			return;
+		}
+
+		final long authorId = event.getUser().getIdLong();
+		if (user.getIdLong() == authorId) {
+			reply(event, "You can not pay coins to yourself!");
+			return;
+		}
+
+		final long guildId = guild.getIdLong();
 		final Optional<DiscordMember> dcAuthorOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
 		if (dcAuthorOpt.isEmpty()) {
-			replyErrorMessage(event.getMessage(), "You do not have any coins!");
+			reply(event, "You do not have any coins!");
 			return;
 		}
 
-		final Message message = event.getMessage();
-		final long userId = DiscordMessageUtil.getMentionedMemberId(message);
-		if (userId == authorId) {
-			replyErrorMessage(event.getMessage(), "You can not pay coins to yourself!");
-			return;
-		}
-
-		if (userId <= 100000000000000L) {
-			replyErrorMessage(event.getMessage(), "That user seems to be invalid!");
-			return;
-		}
-
-		event.getGuild().retrieveMemberById(userId).queue(
+		guild.retrieveMember(user).queue(
 				member -> payCoins(event, dcAuthorOpt.get(), member),
-				throwable -> sendErrorMessage(event.getChannel(), "That user is not in this guild!")
+				throwable -> reply(event, "That user is not in this guild!")
 		);
 	}
 
-	private void payCoins(final GuildMessageReceivedEvent event, final DiscordMember author, final Member member) {
+	private void payCoins(final SlashCommandEvent event, final DiscordMember author, final Member member) {
 		if (member.getUser().isBot()) {
-			replyErrorMessage(event.getMessage(), "You can not pay coins to a bot!");
+			reply(event, "You can not pay coins to a bot!");
 			return;
 		}
 
-		final long guildId = event.getGuild().getIdLong();
+		final long guildId = member.getGuild().getIdLong();
 		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
 		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildId));
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(member.getIdLong(), guildId);
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(dcGuild, member.getIdLong()));
-		final String content = event.getMessage().getContentRaw();
-		final String[] tokens = content.split(" ");
-		final String coinText = tokens[tokens.length - 1];
-		final long coinAmount = ParseUtil.safelyParseStringToLong(coinText);
-		if (coinAmount < 1) {
-			replyErrorMessage(event.getMessage(), "Please choose a valid coin amount of at least 1!");
+		final long coinAmount = getCoinAmount(event);
+		if (coinAmount <= 0) {
+			reply(event, "Please choose a valid coin amount of at least 1!");
 			return;
 		}
 
@@ -117,7 +138,7 @@ class PayCoins extends CommandImpl {
 							"You do not have enough coins for that after tax!\nYou only have **" + authorCoins + "** coins right now. You need " + taxedCoins + " coins." :
 							"You do not have enough coins for that!\nYou only have **" + authorCoins + "** coins right now."
 					);
-			replyErrorMessage(event.getMessage(), errorMsg);
+			reply(event, errorMsg);
 			return;
 		}
 
@@ -125,12 +146,21 @@ class PayCoins extends CommandImpl {
 		memberRepo.save(author);
 		dcMember.receiveCoins(coinAmount);
 		memberRepo.save(dcMember);
-		answerNoPing(event.getChannel(), "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ". " +
+		replyNoPings(event, "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ". " +
 				(dcGuild.getTaxRate() > 0 ?
 						"Payment tax cost you an additional " + taxValue + " coins." :
 						""
 				));
-		LogUtil.logDebug(author.getDiscordId() + " paid " + coinAmount + " coins to " + dcMember.getDiscordId());
+		LogUtil.logInfo(author.getDiscordId() + " paid " + coinAmount + " coins to " + dcMember.getDiscordId());
+	}
+
+	private long getCoinAmount(SlashCommandEvent event) {
+		Long coinAmount = SlashOptionUtil.getIntegerOption(event, AMOUNT_OPTION_NAME);
+		if (coinAmount == null) {
+			coinAmount = -1L;
+		}
+
+		return coinAmount;
 	}
 
 	private DiscordMember createNewMember(final DiscordGuild dcGuild, final long memberId) {

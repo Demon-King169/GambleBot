@@ -3,10 +3,12 @@ package com.motorbesitzen.gamblebot.bot.command.impl.coin;
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
-import com.motorbesitzen.gamblebot.util.DiscordMessageUtil;
-import net.dv8tion.jda.api.entities.Message;
+import com.motorbesitzen.gamblebot.util.SlashOptionUtil;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,8 @@ import java.util.Optional;
 @Service("balance")
 class Balance extends CommandImpl {
 
+	private static final String USER_OPTION_NAME = "member";
+
 	private final DiscordMemberRepo memberRepo;
 
 	@Autowired
@@ -28,11 +32,6 @@ class Balance extends CommandImpl {
 	@Override
 	public String getName() {
 		return "balance";
-	}
-
-	@Override
-	public String getUsage() {
-		return getName() + " (@user|id)";
 	}
 
 	@Override
@@ -51,34 +50,53 @@ class Balance extends CommandImpl {
 	}
 
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
-		final Message message = event.getMessage();
-		final long mentionedUserId = DiscordMessageUtil.getMentionedMemberId(message);
-		if (mentionedUserId <= 0) {
+	public void register(JDA jda) {
+		jda.upsertCommand(getName(), getDescription())
+				.addOption(
+						OptionType.USER,
+						USER_OPTION_NAME,
+						"The member you want to request the balance of. Do not provide a member to see your own balance."
+				).queue();
+	}
+
+	@Override
+	public void execute(SlashCommandEvent event) {
+		User user = SlashOptionUtil.getUserOption(event, USER_OPTION_NAME);
+		if (user == null) {
 			displayOwnBalance(event);
 			return;
 		}
 
-		displayUserBalance(event, mentionedUserId);
+		displayUserBalance(event, user.getIdLong());
 	}
 
-	private void displayUserBalance(final GuildMessageReceivedEvent event, final long mentionedUserId) {
-		final long guildId = event.getGuild().getIdLong();
+	private void displayUserBalance(final SlashCommandEvent event, final long mentionedUserId) {
+		final Guild guild = event.getGuild();
+		if (guild == null) {
+			return;
+		}
+
+		final long guildId = guild.getIdLong();
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(mentionedUserId, guildId);
 		dcMemberOpt.ifPresentOrElse(
-				dcMember -> reply(event.getMessage(), "That user owns **" + dcMember.getCoins() + "** coins."),
-				() -> replyErrorMessage(event.getMessage(), "That user does not have any coins.")
+				dcMember -> reply(event, "That user owns **" + dcMember.getCoins() + "** coins.", true),
+				() -> reply(event, "That user does not have any coins.", true)
 		);
 	}
 
-	private void displayOwnBalance(final GuildMessageReceivedEvent event) {
-		final User author = event.getAuthor();
-		final long guildId = event.getGuild().getIdLong();
+	private void displayOwnBalance(final SlashCommandEvent event) {
+		final Guild guild = event.getGuild();
+		if (guild == null) {
+			return;
+		}
+
+		final User author = event.getUser();
+		final long guildId = guild.getIdLong();
 		final long authorId = author.getIdLong();
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
 		dcMemberOpt.ifPresentOrElse(
-				dcMember -> reply(event.getMessage(), "You own **" + dcMember.getCoins() + "** coins."),
-				() -> sendErrorMessage(event.getChannel(), "You do not own any coins at the moment.")
+				dcMember -> reply(event, "You own **" + dcMember.getCoins() + "** coins.", true),
+				() -> reply(event, "You do not own any coins at the moment.", true)
 		);
 	}
 }
