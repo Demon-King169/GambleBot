@@ -62,7 +62,7 @@ class StartGamble extends CommandImpl {
 
 	@Override
 	public String getDescription() {
-		return "Starts a gamble. Uses the last settings if options are left blank.\nThe list of prizes needs to be in the following format: `[price1name;percent],[price2name;percent], ...`\nAll percentages need to add up to 100 or lower. If they do not reach 100% the rest will be a blank (no win). Make sure to only use the semicolon as seperator and not in the name of your prize.\nExample: `[1000 coins:20.5],[Ban:5],[Kick:10.5]` would result in a 64% chance of a blank.";
+		return "Starts a gamble. Uses the last settings if options are left blank.\nThe list of prizes needs to be in the following format: `[price1name;percent],[price2name;percent], ...`\nAll percentages need to add up to 100 or lower. If they do not reach 100% the rest will be a blank (no win). Make sure to only use the semicolon as seperator and not in the name of your prize.\nExample: `[1000 coins;20.5],[Ban;5],[Kick;10.5]` would result in a 64% chance of a blank.";
 	}
 
 	@Override
