@@ -49,7 +49,7 @@ class StartGamble extends CommandImpl {
 	private final GamblePrizeRepo prizeRepo;
 
 	@Autowired
-	StartGamble(final DiscordGuildRepo guildRepo, final GambleSettingsRepo settingsRepo, final GamblePrizeRepo prizeRepo) {
+	StartGamble(DiscordGuildRepo guildRepo, GambleSettingsRepo settingsRepo, GamblePrizeRepo prizeRepo) {
 		this.guildRepo = guildRepo;
 		this.settingsRepo = settingsRepo;
 		this.prizeRepo = prizeRepo;
@@ -110,26 +110,26 @@ class StartGamble extends CommandImpl {
 	@Transactional
 	@Override
 	public void execute(SlashCommandEvent event) {
-		final Guild guild = event.getGuild();
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
 
-		final Member author = event.getMember();
+		Member author = event.getMember();
 		if (author == null) {
 			return;
 		}
 
-		final long guildId = guild.getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
+		long guildId = guild.getIdLong();
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
 		if (dcGuild.hasRunningGamble()) {
 			reply(event, "There is already a running gamble! It ends in " + dcGuild.getTimeToEndText() + ".");
 			return;
 		}
 
-		final long logChannelId = dcGuild.getLogChannelId();
-		final TextChannel logChannel = guild.getTextChannelById(logChannelId);
+		long logChannelId = dcGuild.getLogChannelId();
+		TextChannel logChannel = guild.getTextChannelById(logChannelId);
 		if (logChannel == null) {
 			reply(event, "Please set a log channel before starting a gamble!");
 			return;
@@ -286,7 +286,7 @@ class StartGamble extends CommandImpl {
 		return Double.compare(100d, getTotalPercent(prizes)) < 0;
 	}
 
-	private double getTotalPercent(final Set<GamblePrize> prizes) {
+	private double getTotalPercent(Set<GamblePrize> prizes) {
 		double total = 0.0;
 		for (GamblePrize prize : prizes) {
 			total += prize.getPrizeChance();

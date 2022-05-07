@@ -57,7 +57,7 @@ public class GambleSettings {
 		this.guild = guild;
 	}
 
-	public static GambleSettings createDefault(final DiscordGuild guild) {
+	public static GambleSettings createDefault(DiscordGuild guild) {
 		return new GambleSettings(0, 0, 0, guild);
 	}
 
@@ -93,17 +93,17 @@ public class GambleSettings {
 		this.prizes = prizes;
 	}
 
-	public void addPrize(final String prizeName, final double prizeChance) {
+	public void addPrize(String prizeName, double prizeChance) {
 		addPrize(new GamblePrize(prizeName, prizeChance, this));
 	}
 
-	public void addPrize(final GamblePrize prize) {
+	public void addPrize(GamblePrize prize) {
 		prizes.add(prize);
 	}
 
 	public String getPrizeText() {
-		final StringBuilder sb = new StringBuilder();
-		final List<GamblePrize> prizeList = new ArrayList<>(prizes);
+		StringBuilder sb = new StringBuilder();
+		List<GamblePrize> prizeList = new ArrayList<>(prizes);
 		prizeList.sort(Comparator.comparingLong(GamblePrize::getPrizeId));
 		for (GamblePrize prize : prizeList) {
 			sb.append("**").append(prize.getPrizeName()).append("** - ").append(prize.getPrizeChance()).append("%\n");

@@ -32,7 +32,7 @@ class PayCoins extends CommandImpl {
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	private PayCoins(final DiscordMemberRepo memberRepo, final DiscordGuildRepo guildRepo) {
+	private PayCoins(DiscordMemberRepo memberRepo, DiscordGuildRepo guildRepo) {
 		this.memberRepo = memberRepo;
 		this.guildRepo = guildRepo;
 	}
@@ -89,14 +89,14 @@ class PayCoins extends CommandImpl {
 			return;
 		}
 
-		final long authorId = event.getUser().getIdLong();
+		long authorId = event.getUser().getIdLong();
 		if (user.getIdLong() == authorId) {
 			reply(event, "You can not pay coins to yourself!");
 			return;
 		}
 
-		final long guildId = guild.getIdLong();
-		final Optional<DiscordMember> dcAuthorOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
+		long guildId = guild.getIdLong();
+		Optional<DiscordMember> dcAuthorOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
 		if (dcAuthorOpt.isEmpty()) {
 			reply(event, "You do not have any coins!");
 			return;
@@ -108,28 +108,28 @@ class PayCoins extends CommandImpl {
 		);
 	}
 
-	private void payCoins(final SlashCommandEvent event, final DiscordMember author, final Member member) {
+	private void payCoins(SlashCommandEvent event, DiscordMember author, Member member) {
 		if (member.getUser().isBot()) {
 			reply(event, "You can not pay coins to a bot!");
 			return;
 		}
 
-		final long guildId = member.getGuild().getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildId));
-		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(member.getIdLong(), guildId);
-		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(dcGuild, member.getIdLong()));
-		final long coinAmount = getCoinAmount(event);
+		long guildId = member.getGuild().getIdLong();
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildId));
+		Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(member.getIdLong(), guildId);
+		DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(dcGuild, member.getIdLong()));
+		long coinAmount = getCoinAmount(event);
 		if (coinAmount <= 0) {
 			reply(event, "Please choose a valid coin amount of at least 1!");
 			return;
 		}
 
-		final long taxValue = calcTax(dcGuild, coinAmount);
-		final long taxedCoins = coinAmount + taxValue;
-		final long authorCoins = author.getCoins();
+		long taxValue = calcTax(dcGuild, coinAmount);
+		long taxedCoins = coinAmount + taxValue;
+		long authorCoins = author.getCoins();
 		if (taxedCoins > authorCoins) {
-			final String errorMsg = authorCoins > 0 ?
+			String errorMsg = authorCoins > 0 ?
 					(dcGuild.getTaxRate() > 0 ?
 							"Please set a valid taxed coin amount (1 - " + (authorCoins - calcTax(dcGuild, authorCoins)) + ")!" :
 							"Please set a valid coin amount (1 - " + authorCoins + ")!"
@@ -163,18 +163,18 @@ class PayCoins extends CommandImpl {
 		return coinAmount;
 	}
 
-	private DiscordMember createNewMember(final DiscordGuild dcGuild, final long memberId) {
+	private DiscordMember createNewMember(DiscordGuild dcGuild, long memberId) {
 		return DiscordMember.createDefault(memberId, dcGuild);
 	}
 
-	private DiscordGuild createNewGuild(final long guildId) {
-		final DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
+	private DiscordGuild createNewGuild(long guildId) {
+		DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
 		guildRepo.save(dcGuild);
 		return dcGuild;
 	}
 
-	private long calcTax(final DiscordGuild guild, final long value) {
-		final double tax = (double) value * guild.getTaxRate();
+	private long calcTax(DiscordGuild guild, long value) {
+		double tax = (double) value * guild.getTaxRate();
 		return Math.max(0, Math.round(tax));
 	}
 }

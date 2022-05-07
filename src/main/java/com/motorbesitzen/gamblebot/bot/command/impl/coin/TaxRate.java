@@ -20,7 +20,7 @@ class TaxRate extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 
-	private TaxRate(final DiscordGuildRepo guildRepo) {
+	private TaxRate(DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 
@@ -58,7 +58,7 @@ class TaxRate extends CommandImpl {
 
 	@Override
 	public void execute(SlashCommandEvent event) {
-		final Guild guild = event.getGuild();
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
@@ -73,9 +73,9 @@ class TaxRate extends CommandImpl {
 			return;
 		}
 
-		final long guildId = event.getGuild().getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
+		long guildId = event.getGuild().getIdLong();
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
 		dcGuild.setTaxRate(taxRate.intValue());
 		guildRepo.save(dcGuild);
 		reply(event, "Set the tax rate to **" + taxRate + "**%.");

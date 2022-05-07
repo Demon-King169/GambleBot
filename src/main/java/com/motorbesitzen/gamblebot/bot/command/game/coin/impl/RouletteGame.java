@@ -19,7 +19,7 @@ public class RouletteGame implements Game {
 	private static final int[] RED_FIELDS = {32, 19, 21, 25, 34, 27, 36, 30, 23, 5, 16, 1, 14, 9, 18, 7, 12, 3};
 
 	@Autowired
-	private RouletteGame(final Random random) {
+	private RouletteGame(Random random) {
 		this.random = random;
 	}
 
@@ -40,16 +40,16 @@ public class RouletteGame implements Game {
 		0-36 - set on 6 numbers			-> 5*wager
 	*/
 
-	public GameWinInfo play(final GameBet bet) {
-		final int result = random.nextInt(37);    // 0 -36
-		final String resultText = getColorEmote(result) + " (" + result + ")";
-		final long winAmount = bet.getBetInfo().matches("(?i)[BREULH]") ?
+	public GameWinInfo play(GameBet bet) {
+		int result = random.nextInt(37);    // 0 -36
+		String resultText = getColorEmote(result) + " (" + result + ")";
+		long winAmount = bet.getBetInfo().matches("(?i)[BREULH]") ?
 				getSectionWin(bet, result) :
 				getNumberWin(bet, result);
 		return winAmount < 0 ? GameWinInfo.lost(winAmount, resultText) : GameWinInfo.won(winAmount, resultText);
 	}
 
-	private long getSectionWin(final GameBet bet, final int result) {
+	private long getSectionWin(GameBet bet, int result) {
 		switch (bet.getBetInfo().toLowerCase()) {
 			case "b":
 				if (isBlackField(result)) {
@@ -86,7 +86,7 @@ public class RouletteGame implements Game {
 		return -1;
 	}
 
-	private boolean isBlackField(final int field) {
+	private boolean isBlackField(int field) {
 		for (int number : BLACK_FIELDS) {
 			if (number == field) {
 				return true;
@@ -96,7 +96,7 @@ public class RouletteGame implements Game {
 		return false;
 	}
 
-	private boolean isRedField(final int field) {
+	private boolean isRedField(int field) {
 		for (int number : RED_FIELDS) {
 			if (number == field) {
 				return true;
@@ -106,8 +106,8 @@ public class RouletteGame implements Game {
 		return false;
 	}
 
-	private long getNumberWin(final GameBet bet, final int result) {
-		final String[] bets = bet.getBetInfo().split(",");
+	private long getNumberWin(GameBet bet, int result) {
+		String[] bets = bet.getBetInfo().split(",");
 		for (String singleBet : bets) {
 			if (singleBet.equals(String.valueOf(result))) {
 				return getMultiBetWin(bets.length, bet.getWager());
@@ -117,7 +117,7 @@ public class RouletteGame implements Game {
 		return -1;
 	}
 
-	private long getMultiBetWin(final int betSize, final long wager) {
+	private long getMultiBetWin(int betSize, long wager) {
 		switch (betSize) {
 			case 1:
 				return safelyMultiply(wager, 35);
@@ -136,14 +136,14 @@ public class RouletteGame implements Game {
 		}
 	}
 
-	private long safelyMultiply(final long a, final long b) {
-		final BigInteger bigA = BigInteger.valueOf(a);
-		final BigInteger bigB = BigInteger.valueOf(b);
-		final BigInteger result = bigA.multiply(bigB);
+	private long safelyMultiply(long a, long b) {
+		BigInteger bigA = BigInteger.valueOf(a);
+		BigInteger bigB = BigInteger.valueOf(b);
+		BigInteger result = bigA.multiply(bigB);
 		return ParseUtil.safelyParseBigIntToLong(result);
 	}
 
-	private String getColorEmote(final int field) {
+	private String getColorEmote(int field) {
 		if (field == 0) {
 			return ":green_square:";
 		}

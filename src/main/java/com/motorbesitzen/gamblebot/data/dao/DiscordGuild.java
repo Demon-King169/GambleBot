@@ -3,7 +3,12 @@ package com.motorbesitzen.gamblebot.data.dao;
 import com.motorbesitzen.gamblebot.util.ParseUtil;
 import org.hibernate.annotations.ColumnDefault;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.HashSet;
@@ -37,7 +42,8 @@ public class DiscordGuild {
 	@OneToOne
 	private GambleSettings gambleSettings;
 
-	@OneToMany(mappedBy = "guild", cascade = CascadeType.ALL, fetch = FetchType.EAGER)	// eager as it is limited to 25 anyway
+	@OneToMany(mappedBy = "guild", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	// eager as it is limited to 25 anyway
 	private Set<CoinShopOffer> shopOffers;
 
 	@OneToMany(mappedBy = "guild", cascade = CascadeType.ALL)
@@ -49,22 +55,22 @@ public class DiscordGuild {
 	protected DiscordGuild() {
 	}
 
-	private DiscordGuild(@Min(10000000000000000L) final long guildId) {
+	private DiscordGuild(@Min(10000000000000000L) long guildId) {
 		this.guildId = guildId;
 		this.members = new HashSet<>();
 	}
 
-	private DiscordGuild(@Min(10000000000000000L) final long guildId, @Min(0) final long logChannelId) {
+	private DiscordGuild(@Min(10000000000000000L) long guildId, @Min(0) long logChannelId) {
 		this.guildId = guildId;
 		this.logChannelId = logChannelId;
 		this.members = new HashSet<>();
 	}
 
-	public static DiscordGuild createDefault(final long guildId, final long logChannelId) {
+	public static DiscordGuild createDefault(long guildId, long logChannelId) {
 		return new DiscordGuild(guildId, logChannelId);
 	}
 
-	public static DiscordGuild withGuildId(final long guildId) {
+	public static DiscordGuild withGuildId(long guildId) {
 		return new DiscordGuild(guildId);
 	}
 
@@ -76,7 +82,7 @@ public class DiscordGuild {
 		return logChannelId;
 	}
 
-	public void setLogChannelId(final long logChannelId) {
+	public void setLogChannelId(long logChannelId) {
 		this.logChannelId = logChannelId;
 	}
 
@@ -84,7 +90,7 @@ public class DiscordGuild {
 		return coinChannelId;
 	}
 
-	public void setCoinChannelId(final long coinChannelId) {
+	public void setCoinChannelId(long coinChannelId) {
 		this.coinChannelId = coinChannelId;
 	}
 
@@ -92,7 +98,7 @@ public class DiscordGuild {
 		return dailyCoins;
 	}
 
-	public void setDailyCoins(final long dailyCoins) {
+	public void setDailyCoins(long dailyCoins) {
 		this.dailyCoins = dailyCoins;
 	}
 
@@ -100,7 +106,7 @@ public class DiscordGuild {
 		return boosterDailyBonus;
 	}
 
-	public void setBoosterDailyBonus(final long boosterDailyCoins) {
+	public void setBoosterDailyBonus(long boosterDailyCoins) {
 		this.boosterDailyBonus = boosterDailyCoins;
 	}
 
@@ -116,7 +122,7 @@ public class DiscordGuild {
 		return gambleSettings;
 	}
 
-	public void setGambleSettings(final GambleSettings gambleSettings) {
+	public void setGambleSettings(GambleSettings gambleSettings) {
 		this.gambleSettings = gambleSettings;
 	}
 
@@ -124,7 +130,7 @@ public class DiscordGuild {
 		return shopOffers;
 	}
 
-	public void setShopOffers(final Set<CoinShopOffer> shopOffers) {
+	public void setShopOffers(Set<CoinShopOffer> shopOffers) {
 		this.shopOffers = shopOffers;
 	}
 
@@ -133,8 +139,8 @@ public class DiscordGuild {
 			return false;
 		}
 
-		final long startMs = gambleSettings.getStartTimestampMs();
-		final long endMs = startMs + gambleSettings.getDurationMs();
+		long startMs = gambleSettings.getStartTimestampMs();
+		long endMs = startMs + gambleSettings.getDurationMs();
 		return System.currentTimeMillis() < endMs;
 	}
 
@@ -143,9 +149,9 @@ public class DiscordGuild {
 			return "∞";
 		}
 
-		final long startMs = gambleSettings.getStartTimestampMs();
-		final long endMs = startMs + gambleSettings.getDurationMs();
-		final long toEndMs = endMs - System.currentTimeMillis();
+		long startMs = gambleSettings.getStartTimestampMs();
+		long endMs = startMs + gambleSettings.getDurationMs();
+		long toEndMs = endMs - System.currentTimeMillis();
 		if (toEndMs <= 0) {
 			return "0s";
 		}
@@ -158,9 +164,9 @@ public class DiscordGuild {
 			return "∞";
 		}
 
-		final long startMs = gambleSettings.getStartTimestampMs();
-		final long endMs = startMs + gambleSettings.getDurationMs();
-		final long toEndMs = System.currentTimeMillis() - endMs;
+		long startMs = gambleSettings.getStartTimestampMs();
+		long endMs = startMs + gambleSettings.getDurationMs();
+		long toEndMs = System.currentTimeMillis() - endMs;
 		if (toEndMs <= 0) {
 			return "0s";
 		}

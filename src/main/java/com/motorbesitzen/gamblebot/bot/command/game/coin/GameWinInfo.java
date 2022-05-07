@@ -6,21 +6,21 @@ public class GameWinInfo {
 	private final long winAmount;
 	private final String resultText;
 
-	private GameWinInfo(final GameState gameState, final long winAmount, final String resultText) {
+	private GameWinInfo(GameState gameState, long winAmount, String resultText) {
 		this.gameState = gameState;
 		this.winAmount = winAmount;
 		this.resultText = resultText;
 	}
 
-	public static GameWinInfo won(final long winAmount, final String resultText) {
+	public static GameWinInfo won(long winAmount, String resultText) {
 		return new GameWinInfo(GameState.WIN, winAmount, resultText);
 	}
 
-	public static GameWinInfo lost(final long winAmount, final String resultText) {
+	public static GameWinInfo lost(long winAmount, String resultText) {
 		return new GameWinInfo(GameState.LOST, winAmount, resultText);
 	}
 
-	public static GameWinInfo draw(final long winAmount, final String resultText) {
+	public static GameWinInfo draw(long winAmount, String resultText) {
 		return new GameWinInfo(GameState.DRAW, winAmount, resultText);
 	}
 

@@ -5,7 +5,11 @@ import com.motorbesitzen.gamblebot.data.dao.GambleSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 @Service
 public class GambleGame {
@@ -13,14 +17,14 @@ public class GambleGame {
 	private final Random random;
 
 	@Autowired
-	private GambleGame(final Random random) {
+	private GambleGame(Random random) {
 		this.random = random;
 	}
 
-	public GambleWinInfo play(final GambleSettings settings) {
-		final double randomNumber = random.nextDouble() * 100;
-		final Set<GamblePrize> prizes = settings.getPrizes();
-		final List<GamblePrize> prizeList = new ArrayList<>(prizes);
+	public GambleWinInfo play(GambleSettings settings) {
+		double randomNumber = random.nextDouble() * 100;
+		Set<GamblePrize> prizes = settings.getPrizes();
+		List<GamblePrize> prizeList = new ArrayList<>(prizes);
 		prizeList.sort(Comparator.comparingLong(GamblePrize::getPrizeId));
 
 		double currentPos = 0.0;
@@ -35,8 +39,8 @@ public class GambleGame {
 		return new GambleWinInfo(null, randomNumber);
 	}
 
-	private boolean hitsPrize(final GamblePrize prize, final double startPos, final double value) {
-		final double rangeEnd = startPos + prize.getPrizeChance();
+	private boolean hitsPrize(GamblePrize prize, double startPos, double value) {
+		double rangeEnd = startPos + prize.getPrizeChance();
 		return Double.compare(startPos, value) <= 0 && Double.compare(value, rangeEnd) < 0;
 	}
 }

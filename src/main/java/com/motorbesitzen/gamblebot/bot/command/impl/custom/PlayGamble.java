@@ -35,7 +35,7 @@ class PlayGamble extends CommandImpl {
 	private final GambleGame gambleGame;
 
 	@Autowired
-	PlayGamble(final DiscordGuildRepo guildRepo, final GambleGame gambleGame, final DiscordMemberRepo memberRepo) {
+	PlayGamble(DiscordGuildRepo guildRepo, GambleGame gambleGame, DiscordMemberRepo memberRepo) {
 		this.guildRepo = guildRepo;
 		this.gambleGame = gambleGame;
 		this.memberRepo = memberRepo;
@@ -69,29 +69,29 @@ class PlayGamble extends CommandImpl {
 	@Transactional
 	@Override
 	public void execute(SlashCommandEvent event) {
-		final Guild guild = event.getGuild();
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
 
-		final long guildId = guild.getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		long guildId = guild.getIdLong();
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
 		dcGuildOpt.ifPresentOrElse(
 				dcGuild -> {
 					if (!dcGuild.hasRunningGamble()) {
-						final String timeSinceEndText = dcGuild.getTimeSinceEndText();
+						String timeSinceEndText = dcGuild.getTimeSinceEndText();
 						reply(event, "The gamble ended " + timeSinceEndText + " ago.", true);
 						return;
 					}
 
-					final Member member = event.getMember();
+					Member member = event.getMember();
 					if (member == null) {
 						return;
 					}
 
-					final long memberId = member.getIdLong();
-					final Optional<DiscordMember> memberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(memberId, guildId);
-					final DiscordMember player = memberOpt.orElseGet(() -> DiscordMember.createDefault(memberId, dcGuild));
+					long memberId = member.getIdLong();
+					Optional<DiscordMember> memberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(memberId, guildId);
+					DiscordMember player = memberOpt.orElseGet(() -> DiscordMember.createDefault(memberId, dcGuild));
 					if (!player.canPlay()) {
 						reply(event, "You are on cooldown. You can play again in " + player.getTimeToCooldownEndText() + ".", true);
 						return;
@@ -105,17 +105,17 @@ class PlayGamble extends CommandImpl {
 		);
 	}
 
-	private void playGamble(final SlashCommandEvent event, final DiscordMember player, final Member member) {
-		final DiscordGuild dcGuild = player.getGuild();
-		final GambleSettings settings = dcGuild.getGambleSettings();
-		final GambleWinInfo gambleWinInfo = gambleGame.play(settings);
+	private void playGamble(SlashCommandEvent event, DiscordMember player, Member member) {
+		DiscordGuild dcGuild = player.getGuild();
+		GambleSettings settings = dcGuild.getGambleSettings();
+		GambleWinInfo gambleWinInfo = gambleGame.play(settings);
 		LogUtil.logInfo(
 				player.getDiscordId() + " got a " + gambleWinInfo.getLuckyNumber() + " in " +
 						Arrays.toString(settings.getPrizes().toArray()) + " -> " + gambleWinInfo.getPriceName()
 		);
 
-		final NumberFormat nf = generateNumberFormat();
-		final TextChannel logChannel = member.getGuild().getTextChannelById(dcGuild.getLogChannelId());
+		NumberFormat nf = generateNumberFormat();
+		TextChannel logChannel = member.getGuild().getTextChannelById(dcGuild.getLogChannelId());
 		if (gambleWinInfo.getPriceName() == null) {
 			handleBlank(event, member, nf, gambleWinInfo);
 			return;
@@ -138,7 +138,7 @@ class PlayGamble extends CommandImpl {
 	}
 
 	private NumberFormat generateNumberFormat() {
-		final NumberFormat nf = NumberFormat.getNumberInstance();
+		NumberFormat nf = NumberFormat.getNumberInstance();
 		nf.setMinimumFractionDigits(1);
 		nf.setMaximumFractionDigits(4);
 		nf.setRoundingMode(RoundingMode.HALF_UP);
@@ -154,7 +154,7 @@ class PlayGamble extends CommandImpl {
 	}
 
 	private String handleBan(SlashCommandEvent event, Member member, NumberFormat nf, GambleWinInfo gambleWinInfo) {
-		final Member self = member.getGuild().getSelfMember();
+		Member self = member.getGuild().getSelfMember();
 		if (self.canInteract(member)) {
 			reply(
 					event,
@@ -177,7 +177,7 @@ class PlayGamble extends CommandImpl {
 	}
 
 	private String handleKick(SlashCommandEvent event, Member member, NumberFormat nf, GambleWinInfo gambleWinInfo) {
-		final Member self = member.getGuild().getSelfMember();
+		Member self = member.getGuild().getSelfMember();
 		if (self.canInteract(member)) {
 			reply(
 					event,

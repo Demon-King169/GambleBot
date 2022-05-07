@@ -24,7 +24,7 @@ class TopCoin extends CommandImpl {
 	private final DiscordMemberRepo memberRepo;
 
 	@Autowired
-	private TopCoin(final DiscordMemberRepo memberRepo) {
+	private TopCoin(DiscordMemberRepo memberRepo) {
 		this.memberRepo = memberRepo;
 	}
 
@@ -55,32 +55,32 @@ class TopCoin extends CommandImpl {
 
 	@Override
 	public void execute(SlashCommandEvent event) {
-		final Guild guild = event.getGuild();
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
 
-		final long guildId = guild.getIdLong();
-		final PageRequest pageRequest = PageRequest.of(0, TOP_LIST_LENGTH);
-		final List<DiscordMember> topMembers = memberRepo.findAllByGuild_GuildIdOrderByCoinsDesc(guildId, pageRequest);
+		long guildId = guild.getIdLong();
+		PageRequest pageRequest = PageRequest.of(0, TOP_LIST_LENGTH);
+		List<DiscordMember> topMembers = memberRepo.findAllByGuild_GuildIdOrderByCoinsDesc(guildId, pageRequest);
 		if (topMembers.size() == 0) {
 			reply(event, "There is not enough data for a top list yet!");
 			return;
 		}
 
-		final MessageEmbed embed = buildTopMessage(guild, topMembers);
+		MessageEmbed embed = buildTopMessage(guild, topMembers);
 		reply(event, embed);
 	}
 
-	private MessageEmbed buildTopMessage(final Guild guild, final List<DiscordMember> topMembers) {
-		final EmbedBuilder eb = new EmbedBuilder();
+	private MessageEmbed buildTopMessage(Guild guild, List<DiscordMember> topMembers) {
+		EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Top " + topMembers.size() + " of " + guild.getName() + ":");
 		addMemberFields(eb, topMembers);
 
 		return eb.build();
 	}
 
-	private void addMemberFields(final EmbedBuilder eb, final List<DiscordMember> dcMembers) {
+	private void addMemberFields(EmbedBuilder eb, List<DiscordMember> dcMembers) {
 		int pos = 1;
 		for (DiscordMember dcMember : dcMembers) {
 			eb.addField("",

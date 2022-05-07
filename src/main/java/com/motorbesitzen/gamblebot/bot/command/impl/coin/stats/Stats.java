@@ -28,7 +28,7 @@ class Stats extends CommandImpl {
 	private final DiscordMemberRepo memberRepo;
 
 	@Autowired
-	private Stats(final DiscordMemberRepo memberRepo) {
+	private Stats(DiscordMemberRepo memberRepo) {
 		this.memberRepo = memberRepo;
 	}
 
@@ -64,7 +64,7 @@ class Stats extends CommandImpl {
 
 	@Override
 	public void execute(SlashCommandEvent event) {
-		final Guild guild = event.getGuild();
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
@@ -79,17 +79,17 @@ class Stats extends CommandImpl {
 	}
 
 	private void displayOwnStats(SlashCommandEvent event, Guild guild) {
-		final User author = event.getUser();
-		final long guildId = guild.getIdLong();
-		final long authorId = author.getIdLong();
-		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
+		User author = event.getUser();
+		long guildId = guild.getIdLong();
+		long authorId = author.getIdLong();
+		Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
 		displayStats(event, dcMemberOpt);
 	}
 
 	private void displayUserStats(SlashCommandEvent event, Guild guild, User user) {
-		final long userId = user.getIdLong();
-		final long guildId = guild.getIdLong();
-		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(userId, guildId);
+		long userId = user.getIdLong();
+		long guildId = guild.getIdLong();
+		Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(userId, guildId);
 		displayStats(event, dcMemberOpt);
 	}
 
@@ -97,12 +97,12 @@ class Stats extends CommandImpl {
 		dcMemberOpt.ifPresentOrElse(
 				dcMember -> event.getJDA().retrieveUserById(dcMember.getDiscordId()).queue(
 						requestedUser -> {
-							final MessageEmbed embed = buildStatsMessage(requestedUser.getAsTag(), dcMember);
+							MessageEmbed embed = buildStatsMessage(requestedUser.getAsTag(), dcMember);
 							reply(event, embed);
 						},
 						throwable -> {
 							LogUtil.logDebug("Could not find user with ID: " + dcMember.getDiscordId());
-							final MessageEmbed embed = buildStatsMessage("Unknown User", dcMember);
+							MessageEmbed embed = buildStatsMessage("Unknown User", dcMember);
 							reply(event, embed);
 						}
 				),
@@ -110,8 +110,8 @@ class Stats extends CommandImpl {
 		);
 	}
 
-	private MessageEmbed buildStatsMessage(final String tag, final DiscordMember dcMember) {
-		final EmbedBuilder eb = new EmbedBuilder();
+	private MessageEmbed buildStatsMessage(String tag, DiscordMember dcMember) {
+		EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Stats of " + tag + ":")
 				.addField("Coins:", String.valueOf(dcMember.getCoins()), true)
 				.addField("Coins won: ", String.valueOf(dcMember.getCoinsWon()), true)

@@ -33,8 +33,8 @@ class Buy extends CommandImpl {
 	private final PurchaseRepo purchaseRepo;
 
 	@Autowired
-	private Buy(final DiscordGuildRepo guildRepo, final DiscordMemberRepo memberRepo,
-				final CoinShopOfferRepo offerRepo, final PurchaseRepo purchaseRepo) {
+	private Buy(DiscordGuildRepo guildRepo, DiscordMemberRepo memberRepo, CoinShopOfferRepo offerRepo,
+				PurchaseRepo purchaseRepo) {
 		this.guildRepo = guildRepo;
 		this.memberRepo = memberRepo;
 		this.offerRepo = offerRepo;
@@ -81,11 +81,11 @@ class Buy extends CommandImpl {
 			return;
 		}
 
-		final long guildId = event.getGuild().getIdLong();
-		final long authorId = event.getUser().getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createDiscordGuild(guildId));
-		final Optional<DiscordMember> dcAuthorOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
+		long guildId = event.getGuild().getIdLong();
+		long authorId = event.getUser().getIdLong();
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createGuild(guildRepo, guildId));
+		Optional<DiscordMember> dcAuthorOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
 		if (dcAuthorOpt.isEmpty()) {
 			reply(event, "You do not have any coins!");
 			return;
@@ -102,33 +102,27 @@ class Buy extends CommandImpl {
 		}
 
 		int shopIndex = shopId.intValue() - 1; // IDs in the shop start with 1, but we want 0 as first index
-		final DiscordMember dcAuthor = dcAuthorOpt.get();
-		final List<CoinShopOffer> offers = offerRepo.findCoinShopOffersByGuild_GuildIdOrderByPriceAsc(guildId);
+		DiscordMember dcAuthor = dcAuthorOpt.get();
+		List<CoinShopOffer> offers = offerRepo.findCoinShopOffersByGuild_GuildIdOrderByPriceAsc(guildId);
 		if (shopIndex >= offers.size()) {
 			reply(event, "Please use a valid ID! Check the shop for a list of IDs.");
 			return;
 		}
 
-		final CoinShopOffer boughtOffer = offers.get(shopIndex);
+		CoinShopOffer boughtOffer = offers.get(shopIndex);
 		if (dcAuthor.getCoins() < boughtOffer.getPrice()) {
 			reply(event, "You do not have enough coins for that!\n" +
 					"You only have **" + dcAuthor.getCoins() + "** coins right now.");
 			return;
 		}
 
-		final Purchase purchase = new Purchase(boughtOffer.getPrice(), boughtOffer.getName(), dcAuthor, dcGuild);
+		Purchase purchase = new Purchase(boughtOffer.getPrice(), boughtOffer.getName(), dcAuthor, dcGuild);
 		purchaseRepo.save(purchase);
 		dcAuthor.spendCoins(boughtOffer.getPrice());
 		memberRepo.save(dcAuthor);
 		reply(event, "Thanks for your purchase! Your order will be completed as soon as possible.");
-		final TextChannel logChannel = event.getGuild().getTextChannelById(dcAuthor.getGuild().getLogChannelId());
+		TextChannel logChannel = event.getGuild().getTextChannelById(dcAuthor.getGuild().getLogChannelId());
 		sendLogMessage(logChannel, "<@" + dcAuthor.getDiscordId() + "> bought \"" + boughtOffer.getName() +
 				"\" for " + boughtOffer.getPrice() + " coins.");
-	}
-
-	private DiscordGuild createDiscordGuild(final long guildId) {
-		final DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
-		guildRepo.save(dcGuild);
-		return dcGuild;
 	}
 }

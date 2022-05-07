@@ -29,7 +29,7 @@ public class GamblePrize {
 	protected GamblePrize() {
 	}
 
-	public GamblePrize(@NotNull final String prizeName, @NotNull final double prizeChance, @NotNull final GambleSettings settings) {
+	public GamblePrize(@NotNull String prizeName, @NotNull double prizeChance, @NotNull GambleSettings settings) {
 		this.prizeName = prizeName;
 		this.prizeChance = prizeChance;
 		this.settings = settings;

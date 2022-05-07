@@ -17,7 +17,7 @@ public class LotteryGame implements Game {
 	private final Random random;
 
 	@Autowired
-	private LotteryGame(final Random random) {
+	private LotteryGame(Random random) {
 		this.random = random;
 	}
 
@@ -31,20 +31,20 @@ public class LotteryGame implements Game {
 		else 	-> loss
 	 */
 
-	public GameWinInfo play(final GameBet bet) {
-		final int[] betNumbers = getBetNumbers(bet);
+	public GameWinInfo play(GameBet bet) {
+		int[] betNumbers = getBetNumbers(bet);
 		return calcWin(bet.getWager(), betNumbers);
 	}
 
-	private int[] getBetNumbers(final GameBet bet) {
-		final String[] betNumbers = bet.getBetInfo().split(",");
+	private int[] getBetNumbers(GameBet bet) {
+		String[] betNumbers = bet.getBetInfo().split(",");
 		return Arrays.stream(betNumbers).mapToInt(ParseUtil::safelyParseStringToInt).toArray();
 	}
 
 	private int[] getWinningNumbers() {
-		final int[] winningNumbers = new int[6];
+		int[] winningNumbers = new int[6];
 		for (int i = 0; i < 6; i++) {
-			final int number = random.nextInt(49) + 1; // 1 to 49
+			int number = random.nextInt(49) + 1; // 1 to 49
 			System.out.println(i);
 			if (isDuplicate(winningNumbers, number)) {
 				i--;
@@ -57,7 +57,7 @@ public class LotteryGame implements Game {
 		return winningNumbers;
 	}
 
-	private boolean isDuplicate(final int[] winningNumbers, final int number) {
+	private boolean isDuplicate(int[] winningNumbers, int number) {
 		// uninitialized int is 0 which is not in [1,49] so uninitialized numbers do not matter
 		for (int winningNumber : winningNumbers) {
 			if (winningNumber == number) {
@@ -69,8 +69,7 @@ public class LotteryGame implements Game {
 	}
 
 	private GameWinInfo calcWin(long wager, int[] betNumbers) {
-		final int[] winningNumbers = getWinningNumbers();
-
+		int[] winningNumbers = getWinningNumbers();
 		int hits = 0;
 		for (int winningNumber : winningNumbers) {
 			for (int betNumber : betNumbers) {
@@ -80,20 +79,20 @@ public class LotteryGame implements Game {
 			}
 		}
 
-		final String winningNumbersText = Arrays.toString(winningNumbers);
-		final String summary = "Winning numbers: **" + winningNumbersText.substring(1, winningNumbersText.length() - 1) +
+		String winningNumbersText = Arrays.toString(winningNumbers);
+		String summary = "Winning numbers: **" + winningNumbersText.substring(1, winningNumbersText.length() - 1) +
 				"**, your hits: **" + hits + "**";
-		final double winRate = getWinRate(hits);
+		double winRate = getWinRate(hits);
 		if (winRate == 0.0) {
 			return GameWinInfo.lost(-1, summary);
 		}
 
-		final long winAmount = Math.max(1, safelyMultiply(wager, winRate));
+		long winAmount = Math.max(1, safelyMultiply(wager, winRate));
 		return GameWinInfo.won(winAmount, summary);
 	}
 
-	private double getWinRate(final int hits) {
-		final double winRate;
+	private double getWinRate(int hits) {
+		double winRate;
 		switch (hits) {
 			case 2:
 				winRate = 0.7;
@@ -117,10 +116,10 @@ public class LotteryGame implements Game {
 		return winRate;
 	}
 
-	private long safelyMultiply(final long a, final double b) {
-		final BigDecimal bigA = BigDecimal.valueOf(a);
-		final BigDecimal bigB = BigDecimal.valueOf(b);
-		final BigDecimal result = bigA.multiply(bigB);
+	private long safelyMultiply(long a, double b) {
+		BigDecimal bigA = BigDecimal.valueOf(a);
+		BigDecimal bigB = BigDecimal.valueOf(b);
+		BigDecimal result = bigA.multiply(bigB);
 		return ParseUtil.safelyParseBigDecToLong(result);
 	}
 }

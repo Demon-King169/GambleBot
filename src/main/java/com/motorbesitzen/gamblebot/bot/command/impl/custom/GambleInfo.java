@@ -21,7 +21,7 @@ class GambleInfo extends CommandImpl {
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	GambleInfo(final DiscordGuildRepo guildRepo) {
+	GambleInfo(DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 
@@ -53,13 +53,13 @@ class GambleInfo extends CommandImpl {
 	@Transactional
 	@Override
 	public void execute(SlashCommandEvent event) {
-		final Guild guild = event.getGuild();
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
 
-		final long guildId = guild.getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		long guildId = guild.getIdLong();
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
 		dcGuildOpt.ifPresentOrElse(
 				dcGuild -> {
 					if (!dcGuild.hasRunningGamble()) {

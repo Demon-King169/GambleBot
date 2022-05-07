@@ -25,7 +25,7 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 	private final Map<String, ? extends ListenerAdapter> eventListeners;
 
 	@Autowired
-	private BotBuilder(final ApplicationContext applicationContext, final Map<String, ? extends ListenerAdapter> eventListeners) {
+	private BotBuilder(ApplicationContext applicationContext, Map<String, ? extends ListenerAdapter> eventListeners) {
 		this.applicationContext = applicationContext;
 		this.eventListeners = eventListeners;
 	}
@@ -37,15 +37,15 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 	 * @param event Provided by Spring when the Spring application is ready.
 	 */
 	@Override
-	public void onApplicationEvent(final @NotNull ApplicationReadyEvent event) {
+	public void onApplicationEvent(@NotNull ApplicationReadyEvent event) {
 		LogUtil.logInfo("Application ready, starting bot...");
 		startBot();
 	}
 
 	private void startBot() {
-		final String discordToken = getToken();
-		final JDABuilder jdaBuilder = buildBot(discordToken);
-		final JDA jda = botLogin(jdaBuilder);
+		String discordToken = getToken();
+		JDABuilder jdaBuilder = buildBot(discordToken);
+		JDA jda = botLogin(jdaBuilder);
 		if (jda == null) {
 			shutdown();
 		}
@@ -57,7 +57,7 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 	 * @return The token as a {@code String}.
 	 */
 	private String getToken() {
-		final String discordToken = EnvironmentUtil.getEnvironmentVariable("DC_TOKEN");
+		String discordToken = EnvironmentUtil.getEnvironmentVariable("DC_TOKEN");
 		if (discordToken == null) {
 			LogUtil.logError("Discord token is null! Please check the environment variables and add a token.");
 			shutdown();
@@ -73,9 +73,9 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 		return discordToken;
 	}
 
-	private JDABuilder buildBot(final String discordToken) {
-		final Activity activity = getBotActivity();
-		final JDABuilder builder = JDABuilder.createDefault(discordToken)
+	private JDABuilder buildBot(String discordToken) {
+		Activity activity = getBotActivity();
+		JDABuilder builder = JDABuilder.createDefault(discordToken)
 				.setStatus(OnlineStatus.ONLINE)
 				.setActivity(activity);
 
@@ -94,9 +94,9 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 	 * @return A Discord {@code Activity} object.
 	 */
 	private Activity getBotActivity() {
-		final String activityType = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY");
-		final String activityText = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY_TEXT");
-		final String activityStreamingUrl = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY_STREAMING_URL");
+		String activityType = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY");
+		String activityText = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY_TEXT");
+		String activityStreamingUrl = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY_STREAMING_URL");
 
 		if (activityType == null || activityText == null) {
 			LogUtil.logInfo("Activity or activity text not given, ignoring activity settings.");
@@ -124,7 +124,7 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 	 * @param url  The URL to the stream, only needed when the {@code ActivityType} is set to 'streaming'.
 	 * @return A Discord {@code Activity} object.
 	 */
-	private Activity buildActivity(final String type, final String text, final String url) {
+	private Activity buildActivity(String type, String text, String url) {
 		switch (type.toLowerCase()) {
 			case "playing":
 				return Activity.playing(text);
@@ -147,7 +147,7 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 	 * @param builder The builder that is supposed to generate the JDA instance.
 	 * @return The JDA instance, the 'core' of the API/the bot.
 	 */
-	private JDA botLogin(final JDABuilder builder) {
+	private JDA botLogin(JDABuilder builder) {
 		try {
 			return builder.build();
 		} catch (LoginException e) {

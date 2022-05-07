@@ -26,7 +26,7 @@ public class SlashCommandListener extends ListenerAdapter {
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	public SlashCommandListener(final Map<String, Command> commandMap, final DiscordGuildRepo guildRepo) {
+	public SlashCommandListener(Map<String, Command> commandMap, DiscordGuildRepo guildRepo) {
 		this.commandMap = commandMap;
 		this.guildRepo = guildRepo;
 	}
@@ -40,14 +40,14 @@ public class SlashCommandListener extends ListenerAdapter {
 			return;
 		}
 
-		final TextChannel senderChannel = event.getTextChannel();
+		TextChannel senderChannel = event.getTextChannel();
 		if (isInvalidChannel(senderChannel)) {
 			denyUsage(event, "You can not use that command in this channel!");
 			return;
 		}
 
 		String commandName = event.getName();
-		final Command command = identifyCommand(commandName);
+		Command command = identifyCommand(commandName);
 		if (command == null) {
 			denyUsage(event, "Unknown command!");
 			return;
@@ -56,7 +56,7 @@ public class SlashCommandListener extends ListenerAdapter {
 		executeCommand(event, command);
 	}
 
-	private boolean isInvalidMessage(final Member member) {
+	private boolean isInvalidMessage(Member member) {
 		if (member == null) {
 			return true;
 		}
@@ -68,7 +68,7 @@ public class SlashCommandListener extends ListenerAdapter {
 		event.reply(message).setEphemeral(true).queue();
 	}
 
-	private boolean isInvalidChannel(final TextChannel channel) {
+	private boolean isInvalidChannel(TextChannel channel) {
 		if (channel == null) {
 			return true;
 		}
@@ -76,7 +76,7 @@ public class SlashCommandListener extends ListenerAdapter {
 		return !channel.canTalk();
 	}
 
-	private Command identifyCommand(final String commandName) {
+	private Command identifyCommand(String commandName) {
 		return commandMap.get(commandName);
 	}
 
@@ -87,7 +87,7 @@ public class SlashCommandListener extends ListenerAdapter {
 	 * @param event   The GuildMessageReceivedEvent provided by JDA.
 	 * @param command The command to execute.
 	 */
-	private void executeCommand(final SlashCommandEvent event, final Command command) {
+	private void executeCommand(SlashCommandEvent event, Command command) {
 		if (!isAuthorizedMember(command, event.getMember())) {
 			denyUsage(event, "You are not allowed to use this command!");
 			return;
@@ -106,7 +106,7 @@ public class SlashCommandListener extends ListenerAdapter {
 		}
 	}
 
-	private boolean isAuthorizedMember(final Command command, final Member member) {
+	private boolean isAuthorizedMember(Command command, Member member) {
 		if (member == null) {
 			return false;
 		}
@@ -114,8 +114,8 @@ public class SlashCommandListener extends ListenerAdapter {
 		return !command.isAdminCommand() || member.hasPermission(Permission.ADMINISTRATOR);
 	}
 
-	private boolean isAuthorizedChannel(final Command command, final SlashCommandEvent event) {
-		final Guild guild = event.getGuild();
+	private boolean isAuthorizedChannel(Command command, SlashCommandEvent event) {
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return false;
 		}
@@ -128,14 +128,14 @@ public class SlashCommandListener extends ListenerAdapter {
 			return true;
 		}
 
-		final long guildId = guild.getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
+		long guildId = guild.getIdLong();
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
 		if (dcGuild.getCoinChannelId() == 0) {
 			return true;
 		}
 
-		final TextChannel channel = event.getTextChannel();
+		TextChannel channel = event.getTextChannel();
 		return dcGuild.getCoinChannelId() == channel.getIdLong();
 	}
 }

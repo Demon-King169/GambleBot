@@ -3,7 +3,6 @@ package com.motorbesitzen.gamblebot.bot.command.impl.coin.game;
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
-import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.util.SlashOptionUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -32,12 +31,6 @@ public abstract class PlayCommandImpl extends CommandImpl {
 
 	protected DiscordMember createNewMember(DiscordGuild dcGuild, long memberId) {
 		return DiscordMember.createDefault(memberId, dcGuild);
-	}
-
-	protected DiscordGuild createNewGuild(DiscordGuildRepo guildRepo, long guildId) {
-		DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
-		guildRepo.save(dcGuild);
-		return dcGuild;
 	}
 
 	protected long getWager(SlashCommandEvent event, String wager_option_name) {

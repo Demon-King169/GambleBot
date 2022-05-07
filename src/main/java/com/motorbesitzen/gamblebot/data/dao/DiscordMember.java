@@ -2,7 +2,14 @@ package com.motorbesitzen.gamblebot.data.dao;
 
 import com.motorbesitzen.gamblebot.util.ParseUtil;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
@@ -65,7 +72,7 @@ public class DiscordMember {
 		this.guild = guild;
 	}
 
-	public static DiscordMember createDefault(final long discordId, final DiscordGuild guild) {
+	public static DiscordMember createDefault(long discordId, DiscordGuild guild) {
 		return new DiscordMember(discordId, 0, guild);
 	}
 
@@ -73,7 +80,7 @@ public class DiscordMember {
 		return discordId;
 	}
 
-	public void setNextGambleMs(final long nextGambleMs) {
+	public void setNextGambleMs(long nextGambleMs) {
 		this.nextGambleMs = nextGambleMs;
 	}
 
@@ -81,7 +88,7 @@ public class DiscordMember {
 		return nextDailyCoinsMs;
 	}
 
-	public void setNextDailyCoinsMs(final long nextDailyCoinsMs) {
+	public void setNextDailyCoinsMs(long nextDailyCoinsMs) {
 		this.nextDailyCoinsMs = nextDailyCoinsMs;
 	}
 
@@ -134,7 +141,7 @@ public class DiscordMember {
 	}
 
 	public String getTimeToCooldownEndText() {
-		final long toEndMs = nextGambleMs - System.currentTimeMillis();
+		long toEndMs = nextGambleMs - System.currentTimeMillis();
 		if (toEndMs <= 0) {
 			return "0s";
 		}
@@ -143,7 +150,7 @@ public class DiscordMember {
 	}
 
 	public String getTimeToNextDailyText() {
-		final long toNextMs = nextDailyCoinsMs - System.currentTimeMillis();
+		long toNextMs = nextDailyCoinsMs - System.currentTimeMillis();
 		if (toNextMs <= 0) {
 			return "0s";
 		}
@@ -151,42 +158,42 @@ public class DiscordMember {
 		return ParseUtil.parseMillisecondsToText(toNextMs);
 	}
 
-	private long safelyAdd(final long a, final long b) {
-		final BigInteger bigA = BigInteger.valueOf(a);
-		final BigInteger bigB = BigInteger.valueOf(b);
-		final BigInteger result = bigA.add(bigB);
+	private long safelyAdd(long a, long b) {
+		BigInteger bigA = BigInteger.valueOf(a);
+		BigInteger bigB = BigInteger.valueOf(b);
+		BigInteger result = bigA.add(bigB);
 		return ParseUtil.safelyParseBigIntToLong(result);
 	}
 
-	public void lostGame(final long coinsLost) {
+	public void lostGame(long coinsLost) {
 		this.gamesPlayed++;
 		this.gamesLost++;
 		this.coinsLost = safelyAdd(this.coinsLost, coinsLost);
 		this.coins -= coinsLost;
 	}
 
-	public void wonGame(final long coinsWon) {
+	public void wonGame(long coinsWon) {
 		this.gamesPlayed++;
 		this.gamesWon++;
 		this.coinsWon = safelyAdd(this.coinsWon, coinsWon);
 		this.coins = safelyAdd(this.coins, coinsWon);
 	}
 
-	public void spendCoins(final long coins) {
+	public void spendCoins(long coins) {
 		this.coinsSpend = safelyAdd(this.coinsSpend, coins);
 		this.coins -= coins;
 	}
 
-	public void receiveCoins(final long coins) {
+	public void receiveCoins(long coins) {
 		this.coinsReceived = safelyAdd(this.coinsReceived, coins);
 		this.coins = safelyAdd(this.coins, coins);
 	}
 
-	public void giveCoins(final long coins) {
+	public void giveCoins(long coins) {
 		this.coins = safelyAdd(this.coins, coins);
 	}
 
-	public void removeCoins(final long coins) {
+	public void removeCoins(long coins) {
 		this.coins -= coins;
 	}
 }

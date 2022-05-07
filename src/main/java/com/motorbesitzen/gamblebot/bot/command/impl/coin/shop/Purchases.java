@@ -25,7 +25,7 @@ class Purchases extends CommandImpl {
 	private final PurchaseRepo purchaseRepo;
 
 	@Autowired
-	private Purchases(final PurchaseRepo purchaseRepo) {
+	private Purchases(PurchaseRepo purchaseRepo) {
 		this.purchaseRepo = purchaseRepo;
 	}
 
@@ -71,26 +71,26 @@ class Purchases extends CommandImpl {
 		sendPurchaseList(event, user.getIdLong());
 	}
 
-	private void sendPurchaseList(final SlashCommandEvent event, final long mentionedUserId) {
-		final Guild guild = event.getGuild();
+	private void sendPurchaseList(SlashCommandEvent event, long mentionedUserId) {
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
 
-		final long guildId = guild.getIdLong();
-		final PageRequest pageRequest = PageRequest.of(0, 25);
-		final List<Purchase> purchases = purchaseRepo.findAllByGuild_GuildIdAndBuyer_DiscordIdOrderByPurchaseIdDesc(guildId, mentionedUserId, pageRequest);
+		long guildId = guild.getIdLong();
+		PageRequest pageRequest = PageRequest.of(0, 25);
+		List<Purchase> purchases = purchaseRepo.findAllByGuild_GuildIdAndBuyer_DiscordIdOrderByPurchaseIdDesc(guildId, mentionedUserId, pageRequest);
 		if (purchases.size() == 0) {
 			reply(event, "That user does not have any purchases yet.");
 			return;
 		}
 
-		final MessageEmbed purchaseEmbed = buildPurchaseEmbed(purchases);
+		MessageEmbed purchaseEmbed = buildPurchaseEmbed(purchases);
 		reply(event, purchaseEmbed);
 	}
 
-	private MessageEmbed buildPurchaseEmbed(final List<Purchase> purchases) {
-		final EmbedBuilder eb = new EmbedBuilder();
+	private MessageEmbed buildPurchaseEmbed(List<Purchase> purchases) {
+		EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Last " + purchases.size() + " purchases (newest to oldest):");
 		for (Purchase purchase : purchases) {
 			eb.addField(purchase.getProduct(), "for " + purchase.getPrice() + " coins", true);

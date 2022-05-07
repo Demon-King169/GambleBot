@@ -5,7 +5,7 @@ public class GambleWinInfo {
 	private final String priceName;
 	private final double luckyNumber;
 
-	public GambleWinInfo(final String priceName, final double luckyNumber) {
+	public GambleWinInfo(String priceName, double luckyNumber) {
 		this.priceName = priceName;
 		this.luckyNumber = luckyNumber;
 	}

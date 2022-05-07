@@ -26,7 +26,7 @@ public class DelShopOffer extends CommandImpl {
 	private final CoinShopOfferRepo offerRepo;
 
 	@Autowired
-	private DelShopOffer(final DiscordGuildRepo guildRepo, final CoinShopOfferRepo offerRepo) {
+	private DelShopOffer(DiscordGuildRepo guildRepo, CoinShopOfferRepo offerRepo) {
 		this.guildRepo = guildRepo;
 		this.offerRepo = offerRepo;
 	}
@@ -82,12 +82,12 @@ public class DelShopOffer extends CommandImpl {
 		}
 
 		int shopIndex = shopId.intValue() - 1; // IDs in the shop start with 1, but we want 0 as first index
-		final long guildId = event.getGuild().getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		long guildId = event.getGuild().getIdLong();
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
 		dcGuildOpt.ifPresentOrElse(
 				dcGuild -> {
-					final List<CoinShopOffer> offers = offerRepo.findCoinShopOffersByGuild_GuildIdOrderByPriceAsc(guildId);
-					final CoinShopOffer delOffer = offers.get(shopIndex);
+					List<CoinShopOffer> offers = offerRepo.findCoinShopOffersByGuild_GuildIdOrderByPriceAsc(guildId);
+					CoinShopOffer delOffer = offers.get(shopIndex);
 					delOffer.setGuild(null);    // removing link to guild, otherwise cant delete
 					offerRepo.save(delOffer);
 					offerRepo.delete(delOffer);

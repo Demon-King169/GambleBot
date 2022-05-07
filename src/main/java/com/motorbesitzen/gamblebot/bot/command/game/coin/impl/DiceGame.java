@@ -14,20 +14,20 @@ public class DiceGame implements Game {
 	private final Random random;
 
 	@Autowired
-	private DiceGame(final Random random) {
+	private DiceGame(Random random) {
 		this.random = random;
 	}
 
 	@Override
-	public GameWinInfo play(final GameBet bet) {
-		final int houseResult = random.nextInt(6) + 1;
-		final int playerResult = random.nextInt(6) + 1;
+	public GameWinInfo play(GameBet bet) {
+		int houseResult = random.nextInt(6) + 1;
+		int playerResult = random.nextInt(6) + 1;
 		if (playerResult > houseResult) {
 			return GameWinInfo.won(bet.getWager(), "You: **" + playerResult + "**, House: **" + houseResult + "** -");
 		} else if (playerResult < houseResult) {
 			return GameWinInfo.lost(-1, "You: **" + playerResult + "**, House: **" + houseResult + "** -");
 		} else {
-			final int secondPlayerResult = random.nextInt(6) + 1;
+			int secondPlayerResult = random.nextInt(6) + 1;
 			if (secondPlayerResult > playerResult) {
 				return GameWinInfo.won(
 						bet.getWager(),

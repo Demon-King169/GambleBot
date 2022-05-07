@@ -25,7 +25,7 @@ class DailyCoinAmount extends CommandImpl {
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	private DailyCoinAmount(final DiscordGuildRepo guildRepo) {
+	private DailyCoinAmount(DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 
@@ -64,7 +64,7 @@ class DailyCoinAmount extends CommandImpl {
 
 	@Override
 	public void execute(SlashCommandEvent event) {
-		final Guild guild = event.getGuild();
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
@@ -79,9 +79,9 @@ class DailyCoinAmount extends CommandImpl {
 			return;
 		}
 
-		final long guildId = event.getGuild().getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
+		long guildId = event.getGuild().getIdLong();
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
 		dcGuild.setDailyCoins(coinAmount);
 		guildRepo.save(dcGuild);
 		reply(event, "Set the daily coins amount to **" + coinAmount + "** coins.");

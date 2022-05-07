@@ -30,8 +30,7 @@ class PlayLottery extends PlayCommandImpl {
 	private final LotteryGame lotteryGame;
 
 	@Autowired
-	private PlayLottery(final DiscordMemberRepo memberRepo, final DiscordGuildRepo guildRepo,
-						final LotteryGame lotteryGame) {
+	private PlayLottery(DiscordMemberRepo memberRepo, DiscordGuildRepo guildRepo, LotteryGame lotteryGame) {
 		this.memberRepo = memberRepo;
 		this.guildRepo = guildRepo;
 		this.lotteryGame = lotteryGame;
@@ -98,10 +97,10 @@ class PlayLottery extends PlayCommandImpl {
 			return;
 		}
 
-		final HashSet<Integer> bets = new HashSet<>();
-		final String[] betTokens = betText.split(",");
+		HashSet<Integer> bets = new HashSet<>();
+		String[] betTokens = betText.split(",");
 		for (String betToken : betTokens) {
-			final int betNumber = ParseUtil.safelyParseStringToInt(betToken);
+			int betNumber = ParseUtil.safelyParseStringToInt(betToken);
 			if (betNumber < 1 || betNumber > 49) {
 				reply(event, "Please choose a valid bet of six different numbers from 1 to 49.");
 				return;
@@ -114,27 +113,27 @@ class PlayLottery extends PlayCommandImpl {
 			return;
 		}
 
-		final Member author = event.getMember();
+		Member author = event.getMember();
 		if (author == null) {
 			return;
 		}
 
-		final long authorId = author.getIdLong();
-		final long guildId = author.getGuild().getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildRepo, guildId));
-		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
-		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(dcGuild, authorId));
+		long authorId = author.getIdLong();
+		long guildId = author.getGuild().getIdLong();
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createGuild(guildRepo, guildId));
+		Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
+		DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(dcGuild, authorId));
 		if (dcMember.getCoins() < wager) {
 			reply(event, "You do not have enough coins for that bet.\n" +
 					"You only have **" + dcMember.getCoins() + "** coins right now.");
 			return;
 		}
 
-		final GameBet bet = new GameBet(wager, betText);
-		final GameWinInfo winInfo = lotteryGame.play(bet);
+		GameBet bet = new GameBet(wager, betText);
+		GameWinInfo winInfo = lotteryGame.play(bet);
 		if (winInfo.isWin()) {
-			final long winAmount = calcTaxedValue(dcGuild, winInfo.getWinAmount());
+			long winAmount = calcTaxedValue(dcGuild, winInfo.getWinAmount());
 			dcMember.spendCoins(wager);        // price needs to get paid no matter what
 			dcMember.wonGame(winAmount);
 			memberRepo.save(dcMember);

@@ -25,7 +25,7 @@ class DailyCoins extends CommandImpl {
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	private DailyCoins(final DiscordMemberRepo memberRepo, final DiscordGuildRepo guildRepo) {
+	private DailyCoins(DiscordMemberRepo memberRepo, DiscordGuildRepo guildRepo) {
 		this.memberRepo = memberRepo;
 		this.guildRepo = guildRepo;
 	}
@@ -57,21 +57,21 @@ class DailyCoins extends CommandImpl {
 
 	@Override
 	public void execute(SlashCommandEvent event) {
-		final Member author = event.getMember();
+		Member author = event.getMember();
 		if (author == null) {
 			return;
 		}
 
-		final long memberId = author.getIdLong();
-		final long guildId = author.getGuild().getIdLong();
-		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(memberId, guildId);
-		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(memberId, guildId));
+		long memberId = author.getIdLong();
+		long guildId = author.getGuild().getIdLong();
+		Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(memberId, guildId);
+		DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(memberId, guildId));
 		if (dcMember.getNextDailyCoinsMs() >= System.currentTimeMillis()) {
 			reply(event, "You can collect your next daily coins in " + dcMember.getTimeToNextDailyText() + ".", true);
 			return;
 		}
 
-		final long dailyCoinsAmount = getDailyAmount(author, dcMember.getGuild());
+		long dailyCoinsAmount = getDailyAmount(author, dcMember.getGuild());
 		dcMember.giveCoins(dailyCoinsAmount);
 		dcMember.setNextDailyCoinsMs(System.currentTimeMillis() + MS_PER_DAY);
 		memberRepo.save(dcMember);
@@ -79,22 +79,22 @@ class DailyCoins extends CommandImpl {
 				"You now have **" + dcMember.getCoins() + "** coins.", true);
 	}
 
-	private DiscordMember createNewMember(final long memberId, final long guildId) {
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildId));
+	private DiscordMember createNewMember(long memberId, long guildId) {
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildId));
 		return DiscordMember.createDefault(memberId, dcGuild);
 	}
 
-	private DiscordGuild createNewGuild(final long guildId) {
-		final DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
+	private DiscordGuild createNewGuild(long guildId) {
+		DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
 		guildRepo.save(dcGuild);
 		return dcGuild;
 	}
 
-	private long getDailyAmount(final Member author, final DiscordGuild dcGuild) {
-		final long dailyCoinsAmount = dcGuild.getDailyCoins();
+	private long getDailyAmount(Member author, DiscordGuild dcGuild) {
+		long dailyCoinsAmount = dcGuild.getDailyCoins();
 		if (author.getTimeBoosted() != null) {
-			final long boosterDailyBonus = dcGuild.getBoosterDailyBonus();
+			long boosterDailyBonus = dcGuild.getBoosterDailyBonus();
 			return dailyCoinsAmount + boosterDailyBonus;
 		}
 

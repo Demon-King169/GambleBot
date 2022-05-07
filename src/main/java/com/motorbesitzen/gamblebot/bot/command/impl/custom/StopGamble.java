@@ -23,7 +23,7 @@ public class StopGamble extends CommandImpl {
 	private final GambleSettingsRepo settingsRepo;
 
 	@Autowired
-	private StopGamble(final DiscordGuildRepo guildRepo, final GambleSettingsRepo settingsRepo) {
+	private StopGamble(DiscordGuildRepo guildRepo, GambleSettingsRepo settingsRepo) {
 		this.guildRepo = guildRepo;
 		this.settingsRepo = settingsRepo;
 	}
@@ -55,13 +55,13 @@ public class StopGamble extends CommandImpl {
 
 	@Override
 	public void execute(SlashCommandEvent event) {
-		final Guild guild = event.getGuild();
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
 
-		final long guildId = guild.getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		long guildId = guild.getIdLong();
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
 		dcGuildOpt.ifPresentOrElse(
 				dcGuild -> {
 					if (!dcGuild.hasRunningGamble()) {
@@ -69,7 +69,7 @@ public class StopGamble extends CommandImpl {
 						return;
 					}
 
-					final GambleSettings settings = dcGuild.getGambleSettings();
+					GambleSettings settings = dcGuild.getGambleSettings();
 					settings.setStartTimestampMs(System.currentTimeMillis() - settings.getDurationMs());
 					settingsRepo.save(settings);
 					reply(event, "Stopped the gamble.");

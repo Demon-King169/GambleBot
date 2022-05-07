@@ -19,7 +19,7 @@ public class Shop extends CommandImpl {
 	private final CoinShopOfferRepo offerRepo;
 
 	@Autowired
-	private Shop(final CoinShopOfferRepo offerRepo) {
+	private Shop(CoinShopOfferRepo offerRepo) {
 		this.offerRepo = offerRepo;
 	}
 
@@ -50,28 +50,28 @@ public class Shop extends CommandImpl {
 
 	@Override
 	public void execute(SlashCommandEvent event) {
-		final Guild guild = event.getGuild();
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
 
-		final long guildId = event.getGuild().getIdLong();
-		final List<CoinShopOffer> offers = offerRepo.findCoinShopOffersByGuild_GuildIdOrderByPriceAsc(guildId);
+		long guildId = event.getGuild().getIdLong();
+		List<CoinShopOffer> offers = offerRepo.findCoinShopOffersByGuild_GuildIdOrderByPriceAsc(guildId);
 		if (offers.size() == 0) {
 			reply(event, "There are no offers in your guild shop yet!");
 			return;
 		}
 
-		final MessageEmbed embed = buildEmbed(offers);
+		MessageEmbed embed = buildEmbed(offers);
 		reply(event, embed);
 	}
 
-	private MessageEmbed buildEmbed(final List<CoinShopOffer> offers) {
-		final EmbedBuilder eb = new EmbedBuilder();
+	private MessageEmbed buildEmbed(List<CoinShopOffer> offers) {
+		EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle(":coin: Coin Shop :coin:")
 				.setFooter("Use \"/buy <id>\" to buy something from the shop.");
 		for (int i = 0; i < Math.min(25, offers.size()); i++) {
-			final CoinShopOffer offer = offers.get(i);
+			CoinShopOffer offer = offers.get(i);
 			eb.addField("[" + (i + 1) + "] " + offer.getName() + ":", "**" + offer.getPrice() + "** coins", false);
 		}
 		return eb.build();

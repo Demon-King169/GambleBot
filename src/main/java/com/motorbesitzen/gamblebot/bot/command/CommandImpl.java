@@ -2,6 +2,7 @@ package com.motorbesitzen.gamblebot.bot.command;
 
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.GambleSettings;
+import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.util.LogUtil;
 import com.motorbesitzen.gamblebot.util.ParseUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -135,7 +136,7 @@ public abstract class CommandImpl implements Command {
 	 *                to send the message in.
 	 * @param message The message content to send as answer.
 	 */
-	protected void sendMessage(final TextChannel channel, final String message) {
+	protected void sendMessage(TextChannel channel, String message) {
 		if (!isValidMessage(channel, message)) {
 			LogUtil.logError("Tried to send invalid content! Msg: \"" + message + "\"");
 			return;
@@ -144,10 +145,10 @@ public abstract class CommandImpl implements Command {
 		channel.sendMessage(message).queue();
 	}
 
-	protected MessageEmbed buildGambleInfoEmbed(final DiscordGuild dcGuild) {
-		final GambleSettings settings = dcGuild.getGambleSettings();
-		final EmbedBuilder eb = new EmbedBuilder();
-		final String prizeText = settings.getPrizeText();
+	protected MessageEmbed buildGambleInfoEmbed(DiscordGuild dcGuild) {
+		GambleSettings settings = dcGuild.getGambleSettings();
+		EmbedBuilder eb = new EmbedBuilder();
+		String prizeText = settings.getPrizeText();
 		eb.setTitle("Gamble information:")
 				.addField("Duration:", dcGuild.getTimeToEndText(), false)
 				.addField("Cooldown between participation:", ParseUtil.parseMillisecondsToText(settings.getCooldownMs()), false)
@@ -163,13 +164,13 @@ public abstract class CommandImpl implements Command {
 	 *                   where the original message is located in.
 	 * @param logMessage The log message to send.
 	 */
-	protected void sendLogMessage(final TextChannel channel, final String logMessage) {
+	protected void sendLogMessage(TextChannel channel, String logMessage) {
 		if (isValidMessage(channel, logMessage)) {
 			sendMessage(channel, logMessage);
 		}
 	}
 
-	private boolean isValidMessage(final TextChannel channel, final String content) {
+	private boolean isValidMessage(TextChannel channel, String content) {
 		if (channel == null) {
 			return false;
 		}
@@ -181,7 +182,7 @@ public abstract class CommandImpl implements Command {
 		return isValidContent(content);
 	}
 
-	private boolean isValidContent(final String content) {
+	private boolean isValidContent(String content) {
 		if (content == null) {
 			return false;
 		}
@@ -189,7 +190,7 @@ public abstract class CommandImpl implements Command {
 		return !content.isBlank();
 	}
 
-	private boolean isValidContent(final MessageEmbed content) {
+	private boolean isValidContent(MessageEmbed content) {
 		if (content == null) {
 			return false;
 		}
@@ -197,8 +198,14 @@ public abstract class CommandImpl implements Command {
 		return content.isSendable();
 	}
 
-	protected long calcTaxedValue(final DiscordGuild guild, final long value) {
-		final double taxedValue = (double) value - (value * guild.getTaxRate());
+	protected long calcTaxedValue(DiscordGuild guild, long value) {
+		double taxedValue = (double) value - (value * guild.getTaxRate());
 		return Math.max(0, Math.round(taxedValue));
+	}
+
+	protected DiscordGuild createGuild(DiscordGuildRepo guildRepo, long guildId) {
+		DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
+		guildRepo.save(dcGuild);
+		return dcGuild;
 	}
 }

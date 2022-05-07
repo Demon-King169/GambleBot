@@ -1,6 +1,11 @@
 package com.motorbesitzen.gamblebot.data.dao;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -27,7 +32,7 @@ public class CoinShopOffer {
 	protected CoinShopOffer() {
 	}
 
-	public CoinShopOffer(final String name, final long price, final DiscordGuild guild) {
+	public CoinShopOffer(String name, long price, DiscordGuild guild) {
 		this.name = name;
 		this.price = price;
 		this.guild = guild;

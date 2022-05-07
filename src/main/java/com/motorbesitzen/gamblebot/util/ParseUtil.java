@@ -15,12 +15,12 @@ public final class ParseUtil {
 	 * @param integerString The {@code String} representation of a number.
 	 * @return The number as {@code int} or -1 if the {@code String} can not be parsed.
 	 */
-	public static int safelyParseStringToInt(final String integerString) {
+	public static int safelyParseStringToInt(String integerString) {
 		if (integerString == null) {
 			return -1;
 		}
 
-		final String numberString = parseUnitChars(integerString);
+		String numberString = parseUnitChars(integerString);
 		try {
 			return Integer.parseInt(numberString);
 		} catch (NumberFormatException e) {
@@ -35,7 +35,7 @@ public final class ParseUtil {
 	 * @param numberWithUnit The number String that may or may not include the mentioned 'units'.
 	 * @return The string with the mentioned 'units' replaced if they exist.
 	 */
-	private static String parseUnitChars(final String numberWithUnit) {
+	private static String parseUnitChars(String numberWithUnit) {
 		String lowerNumberWithUnit = numberWithUnit.toLowerCase().trim();
 		if (lowerNumberWithUnit.matches("[0-9]+[kmb]")) {
 			lowerNumberWithUnit = lowerNumberWithUnit.replaceFirst("k", "000");
@@ -52,12 +52,12 @@ public final class ParseUtil {
 	 * @param longString The {@code String} representation of a number.
 	 * @return The number as {@code long} or -1 if the {@code String} can not be parsed.
 	 */
-	public static long safelyParseStringToLong(final String longString) {
+	public static long safelyParseStringToLong(String longString) {
 		if (longString == null) {
 			return -1;
 		}
 
-		final String numberString = parseUnitChars(longString);
+		String numberString = parseUnitChars(longString);
 		try {
 			return Long.parseLong(numberString);
 		} catch (NumberFormatException e) {
@@ -65,15 +65,15 @@ public final class ParseUtil {
 		}
 	}
 
-	public static String parseMillisecondsToText(final long ms) {
+	public static String parseMillisecondsToText(long ms) {
 		if (ms < 1000) {
 			return "**" + ms + "**ms";
 		}
 
-		final long days = ms / 86400000;
-		final long hours = (ms % 86400000) / 3600000;
-		final long minutes = ((ms % 86400000) % 3600000) / 60000;
-		final long seconds = (((ms % 86400000) % 3600000) % 60000) / 1000;
+		long days = ms / 86400000;
+		long hours = (ms % 86400000) / 3600000;
+		long minutes = ((ms % 86400000) % 3600000) / 60000;
+		long seconds = (((ms % 86400000) % 3600000) % 60000) / 1000;
 
 		String durationText = days > 0 ? "**" + days + "**d " : "";
 		durationText += hours > 0 ? "**" + hours + "**h " : "";
@@ -82,30 +82,30 @@ public final class ParseUtil {
 		return durationText;
 	}
 
-	public static long parseTextToMilliseconds(final String text) {
+	public static long parseTextToMilliseconds(String text) {
 		long ms = 0;
-		final String[] tokens = text.split(" ");
+		String[] tokens = text.split(" ");
 		for (String token : tokens) {
 			if (token.matches("[0-9]+d")) {
-				final String number = token.replaceAll("[^0-9]", "");
+				String number = token.replaceAll("[^0-9]", "");
 				ms += safelyParseStringToLong(number) * 86400000;
 				continue;
 			}
 
 			if (token.matches("[0-9]+h")) {
-				final String number = token.replaceAll("[^0-9]", "");
+				String number = token.replaceAll("[^0-9]", "");
 				ms += safelyParseStringToLong(number) * 3600000;
 				continue;
 			}
 
 			if (token.matches("[0-9]+m")) {
-				final String number = token.replaceAll("[^0-9]", "");
+				String number = token.replaceAll("[^0-9]", "");
 				ms += safelyParseStringToLong(number) * 60000;
 				continue;
 			}
 
 			if (token.matches("[0-9]+s")) {
-				final String number = token.replaceAll("[^0-9]", "");
+				String number = token.replaceAll("[^0-9]", "");
 				ms += safelyParseStringToLong(number) * 1000;
 			}
 		}
@@ -121,13 +121,13 @@ public final class ParseUtil {
 	 * returns {@code Long.MAX_VALUE}. If the {@param number} is smaller than {@code Long.MIN_VALUE} it
 	 * returns {@code Long.MIN_VALUE}.
 	 */
-	public static long safelyParseBigIntToLong(final BigInteger number) {
-		final BigInteger lowerLimit = BigInteger.valueOf(Long.MIN_VALUE);
+	public static long safelyParseBigIntToLong(BigInteger number) {
+		BigInteger lowerLimit = BigInteger.valueOf(Long.MIN_VALUE);
 		if (number.compareTo(lowerLimit) <= 0) {
 			return Long.MIN_VALUE;
 		}
 
-		final BigInteger upperLimit = BigInteger.valueOf(Long.MAX_VALUE);
+		BigInteger upperLimit = BigInteger.valueOf(Long.MAX_VALUE);
 		if (number.compareTo(upperLimit) >= 0) {
 			return Long.MAX_VALUE;
 		}
@@ -143,13 +143,13 @@ public final class ParseUtil {
 	 * returns {@code Long.MAX_VALUE}. If the {@param number} is smaller than {@code Long.MIN_VALUE} it
 	 * returns {@code Long.MIN_VALUE}.
 	 */
-	public static long safelyParseBigDecToLong(final BigDecimal number) {
-		final BigDecimal lowerLimit = BigDecimal.valueOf(Long.MIN_VALUE);
+	public static long safelyParseBigDecToLong(BigDecimal number) {
+		BigDecimal lowerLimit = BigDecimal.valueOf(Long.MIN_VALUE);
 		if (number.compareTo(lowerLimit) <= 0) {
 			return Long.MIN_VALUE;
 		}
 
-		final BigDecimal upperLimit = BigDecimal.valueOf(Long.MAX_VALUE);
+		BigDecimal upperLimit = BigDecimal.valueOf(Long.MAX_VALUE);
 		if (number.compareTo(upperLimit) >= 0) {
 			return Long.MAX_VALUE;
 		}
@@ -157,12 +157,12 @@ public final class ParseUtil {
 		return number.longValue();
 	}
 
-	public static double safelyParseStringToDouble(final String doubleString) {
+	public static double safelyParseStringToDouble(String doubleString) {
 		if (doubleString == null) {
 			return -1;
 		}
 
-		final String numberString = parseUnitChars(doubleString);
+		String numberString = parseUnitChars(doubleString);
 		try {
 			return Double.parseDouble(numberString);
 		} catch (NumberFormatException e) {

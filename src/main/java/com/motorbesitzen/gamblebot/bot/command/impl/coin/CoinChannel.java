@@ -69,12 +69,12 @@ class CoinChannel extends CommandImpl {
 
 	@Override
 	public void execute(SlashCommandEvent event) {
-		final Guild guild = event.getGuild();
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
 
-		final long guildId = guild.getIdLong();
+		long guildId = guild.getIdLong();
 		GuildChannel channel = SlashOptionUtil.getGuildChannelOption(event, OPTION_CHANNEL_NAME);
 		if (isInvalidGuildChannel(channel)) {
 			clearCoinChannel(guildId);
@@ -100,7 +100,7 @@ class CoinChannel extends CommandImpl {
 		return channel.getType() != ChannelType.TEXT;
 	}
 
-	private void clearCoinChannel(final long guildId) {
+	private void clearCoinChannel(long guildId) {
 		setCoinChannel(guildId, 0);
 	}
 
@@ -112,9 +112,9 @@ class CoinChannel extends CommandImpl {
 		return !channel.canTalk();
 	}
 
-	private void setCoinChannel(final long guildId, final long channelId) {
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
+	private void setCoinChannel(long guildId, long channelId) {
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
 		dcGuild.setCoinChannelId(channelId);
 		guildRepo.save(dcGuild);
 	}

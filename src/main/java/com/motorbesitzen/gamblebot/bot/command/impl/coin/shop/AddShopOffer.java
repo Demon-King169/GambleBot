@@ -25,7 +25,7 @@ public class AddShopOffer extends CommandImpl {
 	private final CoinShopOfferRepo offerRepo;
 
 	@Autowired
-	private AddShopOffer(final DiscordGuildRepo guildRepo, final CoinShopOfferRepo offerRepo) {
+	private AddShopOffer(DiscordGuildRepo guildRepo, CoinShopOfferRepo offerRepo) {
 		this.guildRepo = guildRepo;
 		this.offerRepo = offerRepo;
 	}
@@ -88,8 +88,8 @@ public class AddShopOffer extends CommandImpl {
 			return;
 		}
 
-		final long guildId = guild.getIdLong();
-		final DiscordGuild dcGuild = guildRepo.findById(guildId).orElseGet(() -> createNewGuild(guildId));
+		long guildId = guild.getIdLong();
+		DiscordGuild dcGuild = guildRepo.findById(guildId).orElseGet(() -> createGuild(guildRepo, guildId));
 		if (dcGuild.getShopOffers() != null) {
 			if (dcGuild.getShopOffers().size() >= SHOP_SIZE) {
 				reply(event, "You can only set " + SHOP_SIZE + " offers in your shop!");
@@ -97,7 +97,7 @@ public class AddShopOffer extends CommandImpl {
 			}
 		}
 
-		final CoinShopOffer offer = new CoinShopOffer(offerName, offerPrice, dcGuild);
+		CoinShopOffer offer = new CoinShopOffer(offerName, offerPrice, dcGuild);
 		offerRepo.save(offer);
 		reply(event, "Added offer to the shop!");
 	}
@@ -122,11 +122,5 @@ public class AddShopOffer extends CommandImpl {
 		}
 
 		return name;
-	}
-
-	private DiscordGuild createNewGuild(final long guildId) {
-		final DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
-		guildRepo.save(dcGuild);
-		return dcGuild;
 	}
 }

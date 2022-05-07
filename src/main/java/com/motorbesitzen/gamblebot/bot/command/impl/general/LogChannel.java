@@ -24,7 +24,7 @@ class LogChannel extends CommandImpl {
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	private LogChannel(final DiscordGuildRepo guildRepo) {
+	private LogChannel(DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 
@@ -49,7 +49,7 @@ class LogChannel extends CommandImpl {
 	}
 
 	@Override
-	public void register(final JDA jda) {
+	public void register(JDA jda) {
 		jda.upsertCommand(getName(), getDescription())
 				.addOptions(
 						new OptionData(
@@ -63,12 +63,12 @@ class LogChannel extends CommandImpl {
 
 	@Override
 	public void execute(SlashCommandEvent event) {
-		final Guild guild = event.getGuild();
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
 
-		final long guildId = guild.getIdLong();
+		long guildId = guild.getIdLong();
 		GuildChannel mentionedChannel = SlashOptionUtil.getGuildChannelOption(event, CHANNEL_OPTION_NAME);
 		if (mentionedChannel == null) {
 			reply(event, "Please provide a valid channel!");
@@ -79,9 +79,9 @@ class LogChannel extends CommandImpl {
 		reply(event, "Set the log channel to " + mentionedChannel.getAsMention() + "!");
 	}
 
-	private void setLogChannel(final long guildId, final long channelId) {
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
+	private void setLogChannel(long guildId, long channelId) {
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
 		dcGuild.setLogChannelId(channelId);
 		guildRepo.save(dcGuild);
 	}

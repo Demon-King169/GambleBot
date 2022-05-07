@@ -13,5 +13,5 @@ public interface PurchaseRepo extends CrudRepository<Purchase, Long> {
 			"from Purchase p " +
 			"where p.guild.guildId = ?1 and p.buyer.discordId = ?2 " +
 			"order by p.purchaseId desc")
-	List<Purchase> findAllByGuild_GuildIdAndBuyer_DiscordIdOrderByPurchaseIdDesc(final long guildId, final long buyerId, final Pageable pageable);
+	List<Purchase> findAllByGuild_GuildIdAndBuyer_DiscordIdOrderByPurchaseIdDesc(long guildId, long buyerId, Pageable pageable);
 }

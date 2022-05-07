@@ -15,7 +15,7 @@ public final class LogUtil {
 	 *
 	 * @param message The message to log.
 	 */
-	public static void logInfo(final String message) {
+	public static void logInfo(String message) {
 		LOGGER.info(message);
 	}
 
@@ -24,7 +24,7 @@ public final class LogUtil {
 	 *
 	 * @param message The message to log.
 	 */
-	public static void logWarning(final String message) {
+	public static void logWarning(String message) {
 		LOGGER.warn(message);
 	}
 
@@ -33,7 +33,7 @@ public final class LogUtil {
 	 *
 	 * @param message The message to print as debug information.
 	 */
-	public static void logDebug(final String message) {
+	public static void logDebug(String message) {
 		LOGGER.debug(message);
 	}
 
@@ -43,7 +43,7 @@ public final class LogUtil {
 	 * @param message The message to print as debug information.
 	 * @param t       The thrown error.
 	 */
-	public static void logDebug(final String message, Throwable t) {
+	public static void logDebug(String message, Throwable t) {
 		LOGGER.debug(message, t);
 	}
 
@@ -52,7 +52,7 @@ public final class LogUtil {
 	 *
 	 * @param message The message to describe the error.
 	 */
-	public static void logError(final String message) {
+	public static void logError(String message) {
 		LOGGER.error(message);
 	}
 
@@ -62,7 +62,7 @@ public final class LogUtil {
 	 * @param message The message to describe the error.
 	 * @param t       The thrown error.
 	 */
-	public static void logError(final String message, Throwable t) {
+	public static void logError(String message, Throwable t) {
 		LOGGER.error(message, t);
 	}
 }

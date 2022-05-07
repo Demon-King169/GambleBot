@@ -25,7 +25,7 @@ class Help extends CommandImpl {
 	private final Map<String, Command> commandMap;
 
 	@Autowired
-	private Help(final Map<String, Command> commandMap) {
+	private Help(Map<String, Command> commandMap) {
 		this.commandMap = commandMap;
 	}
 
@@ -50,7 +50,7 @@ class Help extends CommandImpl {
 	}
 
 	@Override
-	public void register(final JDA jda) {
+	public void register(JDA jda) {
 		jda.upsertCommand(getName(), getDescription()).queue();
 	}
 
@@ -61,7 +61,7 @@ class Help extends CommandImpl {
 	 */
 	@Override
 	public void execute(SlashCommandEvent event) {
-		final Member author = event.getMember();
+		Member author = event.getMember();
 		if (author != null) {
 			sendHelpMessage(event, author);
 		}
@@ -73,14 +73,14 @@ class Help extends CommandImpl {
 	 * @param event  The slash command event.
 	 * @param author The author of the command.
 	 */
-	private void sendHelpMessage(final SlashCommandEvent event, final Member author) {
-		final List<Command> commands = new ArrayList<>(commandMap.values());
+	private void sendHelpMessage(SlashCommandEvent event, Member author) {
+		List<Command> commands = new ArrayList<>(commandMap.values());
 		if (commands.size() == 0) {
 			reply(event, "No commands found!");
 			return;
 		}
 
-		final List<Command> fittingCommands = new ArrayList<>();
+		List<Command> fittingCommands = new ArrayList<>();
 		for (Command command : commands) {
 			if (command.isAdminCommand() && !author.hasPermission(Permission.ADMINISTRATOR)) {
 				continue;
@@ -94,7 +94,7 @@ class Help extends CommandImpl {
 			return;
 		}
 
-		final int pages = (fittingCommands.size() / FIELDS_PER_EMBED) + 1;
+		int pages = (fittingCommands.size() / FIELDS_PER_EMBED) + 1;
 		List<MessageEmbed> embeds = buildPages(pages, fittingCommands);
 		replyMultipleEmbeds(event, embeds);
 	}
@@ -108,7 +108,7 @@ class Help extends CommandImpl {
 				eb = buildEmbedPage((i / FIELDS_PER_EMBED) + 1, pages);
 			}
 
-			final Command command = fittingCommands.get(i);
+			Command command = fittingCommands.get(i);
 			addHelpEntry(eb, command);
 		}
 
@@ -123,7 +123,7 @@ class Help extends CommandImpl {
 	 * @param totalPages The total pages needed to display all commands
 	 * @return An {@code EmbedBuilder} with page identification if needed.
 	 */
-	private EmbedBuilder buildEmbedPage(final int page, final int totalPages) {
+	private EmbedBuilder buildEmbedPage(int page, int totalPages) {
 		return new EmbedBuilder().setTitle(
 				page == 1 && totalPages == 1 ?
 						"Commands and their variations" :
@@ -141,8 +141,8 @@ class Help extends CommandImpl {
 	 * @param eb      The {@code EmbedBuilder} to which each commands help information gets.
 	 * @param command The command to add to the help page.
 	 */
-	private void addHelpEntry(final EmbedBuilder eb, final Command command) {
-		final String title = "/" + command.getName();
+	private void addHelpEntry(EmbedBuilder eb, Command command) {
+		String title = "/" + command.getName();
 		eb.addField(title, command.getDescription(), false);
 	}
 }

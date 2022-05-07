@@ -19,18 +19,18 @@ public class RpsGame implements Game {
 	private static final double PAYOUT_RATE = 0.95;
 
 	@Autowired
-	private RpsGame(final Random random) {
+	private RpsGame(Random random) {
 		this.random = random;
 	}
 
 	@Override
-	public GameWinInfo play(final GameBet bet) {
-		final int result = random.nextInt(3);
-		final String rps = getRps(result);
+	public GameWinInfo play(GameBet bet) {
+		int result = random.nextInt(3);
+		String rps = getRps(result);
 		return getWin(bet, rps);
 	}
 
-	private String getRps(final int result) {
+	private String getRps(int result) {
 		switch (result) {
 			case 0:
 				return RPS_ROCK;
@@ -42,32 +42,32 @@ public class RpsGame implements Game {
 		}
 	}
 
-	private GameWinInfo getWin(final GameBet bet, final String rpsResult) {
-		if(isWin(bet.getBetInfo(), rpsResult)) {
+	private GameWinInfo getWin(GameBet bet, String rpsResult) {
+		if (isWin(bet.getBetInfo(), rpsResult)) {
 			return GameWinInfo.lost(calcPayout(bet.getWager()), rpsResult);
 		}
 
-		if(isDraw(bet.getBetInfo(), rpsResult)) {
+		if (isDraw(bet.getBetInfo(), rpsResult)) {
 			return GameWinInfo.draw(0, rpsResult);
 		}
 
 		return GameWinInfo.lost(-1, rpsResult);
 	}
 
-	private boolean isWin(final String bet, final String rpsResult) {
+	private boolean isWin(String bet, String rpsResult) {
 		return (bet.matches("(?i)R(ock)?") && rpsResult.equals(RPS_SCISSORS)) ||
 				(bet.matches("(?i)S(cissors?)?") && rpsResult.equals(RPS_PAPER)) ||
 				(bet.matches("(?i)P(aper)?") && rpsResult.equals(RPS_ROCK));
 	}
 
-	private boolean isDraw(final String bet, final String rpsResult) {
-		final char betChar = bet.toLowerCase().charAt(0);
-		final char resChar = rpsResult.toLowerCase().charAt(0);
+	private boolean isDraw(String bet, String rpsResult) {
+		char betChar = bet.toLowerCase().charAt(0);
+		char resChar = rpsResult.toLowerCase().charAt(0);
 		return betChar == resChar;
 	}
 
-	private long calcPayout(final long wager) {
-		final double payout = (double) wager * PAYOUT_RATE;
+	private long calcPayout(long wager) {
+		double payout = (double) wager * PAYOUT_RATE;
 		return Math.max(1, Math.round(payout));
 	}
 }

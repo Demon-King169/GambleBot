@@ -23,7 +23,7 @@ class Info extends CommandImpl {
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	private Info(final DiscordGuildRepo guildRepo) {
+	private Info(DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 
@@ -48,33 +48,33 @@ class Info extends CommandImpl {
 	}
 
 	@Override
-	public void register(final JDA jda) {
+	public void register(JDA jda) {
 		jda.upsertCommand(getName(), getDescription()).queue();
 	}
 
 	@Override
 	public void execute(SlashCommandEvent event) {
-		final Guild guild = event.getGuild();
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
 
-		final long guildId = guild.getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
-		final MessageEmbed infoEmbed = buildInfoEmbed(dcGuild, guild);
+		long guildId = guild.getIdLong();
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> DiscordGuild.withGuildId(guildId));
+		MessageEmbed infoEmbed = buildInfoEmbed(dcGuild, guild);
 		reply(event, infoEmbed);
 	}
 
-	private MessageEmbed buildInfoEmbed(final DiscordGuild dcGuild, final Guild guild) {
-		final TextChannel logChannel = guild.getTextChannelById(dcGuild.getLogChannelId());
-		final TextChannel coinChannel = guild.getTextChannelById(dcGuild.getCoinChannelId());
-		final String logChannelMention = logChannel == null ? "-" : logChannel.getAsMention();
-		final String coinChannelMention = coinChannel == null ? "-" : coinChannel.getAsMention();
-		final long dailyCoinsAmount = dcGuild.getDailyCoins();
-		final long boosterDailyCoinsAmount = dcGuild.getBoosterDailyBonus();
-		final int taxRate = (int) (dcGuild.getTaxRate() * 100);
-		final EmbedBuilder eb = new EmbedBuilder();
+	private MessageEmbed buildInfoEmbed(DiscordGuild dcGuild, Guild guild) {
+		TextChannel logChannel = guild.getTextChannelById(dcGuild.getLogChannelId());
+		TextChannel coinChannel = guild.getTextChannelById(dcGuild.getCoinChannelId());
+		String logChannelMention = logChannel == null ? "-" : logChannel.getAsMention();
+		String coinChannelMention = coinChannel == null ? "-" : coinChannel.getAsMention();
+		long dailyCoinsAmount = dcGuild.getDailyCoins();
+		long boosterDailyCoinsAmount = dcGuild.getBoosterDailyBonus();
+		int taxRate = (int) (dcGuild.getTaxRate() * 100);
+		EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Info for \"" + guild.getName() + "\":")
 				.addField("Log channel:", logChannelMention, true)
 				.addField("Coin channel:", coinChannelMention, true)

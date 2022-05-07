@@ -25,7 +25,7 @@ class Balance extends CommandImpl {
 	private final DiscordMemberRepo memberRepo;
 
 	@Autowired
-	private Balance(final DiscordMemberRepo memberRepo) {
+	private Balance(DiscordMemberRepo memberRepo) {
 		this.memberRepo = memberRepo;
 	}
 
@@ -70,30 +70,30 @@ class Balance extends CommandImpl {
 		displayUserBalance(event, user.getIdLong());
 	}
 
-	private void displayUserBalance(final SlashCommandEvent event, final long mentionedUserId) {
-		final Guild guild = event.getGuild();
+	private void displayUserBalance(SlashCommandEvent event, long mentionedUserId) {
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
 
-		final long guildId = guild.getIdLong();
-		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(mentionedUserId, guildId);
+		long guildId = guild.getIdLong();
+		Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(mentionedUserId, guildId);
 		dcMemberOpt.ifPresentOrElse(
 				dcMember -> reply(event, "That user owns **" + dcMember.getCoins() + "** coins.", true),
 				() -> reply(event, "That user does not have any coins.", true)
 		);
 	}
 
-	private void displayOwnBalance(final SlashCommandEvent event) {
-		final Guild guild = event.getGuild();
+	private void displayOwnBalance(SlashCommandEvent event) {
+		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
 
-		final User author = event.getUser();
-		final long guildId = guild.getIdLong();
-		final long authorId = author.getIdLong();
-		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
+		User author = event.getUser();
+		long guildId = guild.getIdLong();
+		long authorId = author.getIdLong();
+		Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
 		dcMemberOpt.ifPresentOrElse(
 				dcMember -> reply(event, "You own **" + dcMember.getCoins() + "** coins.", true),
 				() -> reply(event, "You do not own any coins at the moment.", true)

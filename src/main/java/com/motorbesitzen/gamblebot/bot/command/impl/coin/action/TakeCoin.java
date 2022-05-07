@@ -31,7 +31,7 @@ class TakeCoin extends CommandImpl {
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	private TakeCoin(final DiscordMemberRepo memberRepo, final DiscordGuildRepo guildRepo) {
+	private TakeCoin(DiscordMemberRepo memberRepo, DiscordGuildRepo guildRepo) {
 		this.memberRepo = memberRepo;
 		this.guildRepo = guildRepo;
 	}
@@ -86,7 +86,7 @@ class TakeCoin extends CommandImpl {
 		takeCoins(event, user.getIdLong());
 	}
 
-	private void takeCoins(final SlashCommandEvent event, final long userId) {
+	private void takeCoins(SlashCommandEvent event, long userId) {
 		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
@@ -98,9 +98,9 @@ class TakeCoin extends CommandImpl {
 			return;
 		}
 
-		final long guildId = guild.getIdLong();
-		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(userId, guildId);
-		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(userId, guildId));
+		long guildId = guild.getIdLong();
+		Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(userId, guildId);
+		DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(userId, guildId));
 		if (coinAmount > dcMember.getCoins()) {
 			reply(event, "That user does not have that many coins. <@" +
 					dcMember.getDiscordId() + "> balance: " + dcMember.getCoins());
@@ -122,14 +122,14 @@ class TakeCoin extends CommandImpl {
 		return coinAmount;
 	}
 
-	private DiscordMember createNewMember(final long memberId, final long guildId) {
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildId));
+	private DiscordMember createNewMember(long memberId, long guildId) {
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildId));
 		return DiscordMember.createDefault(memberId, dcGuild);
 	}
 
-	private DiscordGuild createNewGuild(final long guildId) {
-		final DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
+	private DiscordGuild createNewGuild(long guildId) {
+		DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
 		guildRepo.save(dcGuild);
 		return dcGuild;
 	}
