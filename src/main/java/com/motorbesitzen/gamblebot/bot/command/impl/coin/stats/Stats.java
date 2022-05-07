@@ -98,15 +98,15 @@ class Stats extends CommandImpl {
 				dcMember -> event.getJDA().retrieveUserById(dcMember.getDiscordId()).queue(
 						requestedUser -> {
 							MessageEmbed embed = buildStatsMessage(requestedUser.getAsTag(), dcMember);
-							reply(event, embed);
+							reply(event, embed, true);
 						},
 						throwable -> {
 							LogUtil.logDebug("Could not find user with ID: " + dcMember.getDiscordId());
 							MessageEmbed embed = buildStatsMessage("Unknown User", dcMember);
-							reply(event, embed);
+							reply(event, embed, true);
 						}
 				),
-				() -> reply(event, "No stats available!")
+				() -> reply(event, "No stats available!", true)
 		);
 	}
 
