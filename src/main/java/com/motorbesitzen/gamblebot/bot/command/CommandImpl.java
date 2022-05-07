@@ -83,8 +83,9 @@ public abstract class CommandImpl implements Command {
 	 * only the author of the event can see. Only sends the message if its content is valid according to
 	 * Discord standards.
 	 *
-	 * @param event   The event to reply to.
-	 * @param message The message to send.
+	 * @param event     The event to reply to.
+	 * @param message   The message to send.
+	 * @param ephemeral If the message should only be visible to the user we reply to.
 	 */
 	protected void reply(SlashCommandEvent event, String message, boolean ephemeral) {
 		if (!isValidContent(message)) {
@@ -113,8 +114,9 @@ public abstract class CommandImpl implements Command {
 	 * message which only the author of the event can see. Only sends the message if its content is valid according to
 	 * Discord standards.
 	 *
-	 * @param event The event to reply to.
-	 * @param embed The embedded message to send.
+	 * @param event     The event to reply to.
+	 * @param embed     The embedded message to send.
+	 * @param ephemeral If the message should only be visible to the user we reply to.
 	 */
 	protected void reply(SlashCommandEvent event, MessageEmbed embed, boolean ephemeral) {
 		if (!isValidContent(embed)) {
@@ -128,13 +130,15 @@ public abstract class CommandImpl implements Command {
 	}
 
 	/**
-	 * Reply to a {@code SlashCommandEvent} with multiple embeds in a message. Only sends the message if its content
+	 * Reply to a {@code SlashCommandEvent} with multiple embeds in a message. Can send the embedded message as
+	 * ephemeral message which only the author of the event can see. Only sends the message if its content
 	 * is valid according to Discord standards.
 	 *
-	 * @param event  The event to reply to.
-	 * @param embeds The embeds to send in a message.
+	 * @param event     The event to reply to.
+	 * @param embeds    The embeds to send in a message.
+	 * @param ephemeral The embeds to send in a message.
 	 */
-	protected void replyMultipleEmbeds(SlashCommandEvent event, List<MessageEmbed> embeds) {
+	protected void replyMultipleEmbeds(SlashCommandEvent event, List<MessageEmbed> embeds, boolean ephemeral) {
 		for (MessageEmbed embed : embeds) {
 			if (!isValidContent(embed)) {
 				LogUtil.logError("Tried to send invalid embed! Embed: \"" + embed.toData() + "\"");
@@ -142,7 +146,9 @@ public abstract class CommandImpl implements Command {
 			}
 		}
 
-		event.replyEmbeds(embeds).queue();
+		event.replyEmbeds(embeds)
+				.setEphemeral(ephemeral)
+				.queue();
 	}
 
 	/**

@@ -76,7 +76,7 @@ class Help extends CommandImpl {
 	private void sendHelpMessage(SlashCommandEvent event, Member author) {
 		List<Command> commands = new ArrayList<>(commandMap.values());
 		if (commands.size() == 0) {
-			reply(event, "No commands found!");
+			reply(event, "No commands found!", true);
 			return;
 		}
 
@@ -90,13 +90,13 @@ class Help extends CommandImpl {
 		}
 
 		if (fittingCommands.size() == 0) {
-			reply(event, "No commands found!");
+			reply(event, "No commands found!", true);
 			return;
 		}
 
 		int pages = (fittingCommands.size() / FIELDS_PER_EMBED) + 1;
 		List<MessageEmbed> embeds = buildPages(pages, fittingCommands);
-		replyMultipleEmbeds(event, embeds);
+		replyMultipleEmbeds(event, embeds, true);
 	}
 
 	private List<MessageEmbed> buildPages(int pages, List<Command> fittingCommands) {
