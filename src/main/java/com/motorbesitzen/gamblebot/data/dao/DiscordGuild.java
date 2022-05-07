@@ -66,10 +66,6 @@ public class DiscordGuild {
 		this.members = new HashSet<>();
 	}
 
-	public static DiscordGuild createDefault(long guildId, long logChannelId) {
-		return new DiscordGuild(guildId, logChannelId);
-	}
-
 	public static DiscordGuild withGuildId(long guildId) {
 		return new DiscordGuild(guildId);
 	}
@@ -128,10 +124,6 @@ public class DiscordGuild {
 
 	public Set<CoinShopOffer> getShopOffers() {
 		return shopOffers;
-	}
-
-	public void setShopOffers(Set<CoinShopOffer> shopOffers) {
-		this.shopOffers = shopOffers;
 	}
 
 	public boolean hasRunningGamble() {

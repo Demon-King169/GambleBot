@@ -39,8 +39,4 @@ public class GameWinInfo {
 	public boolean isDraw() {
 		return gameState == GameState.DRAW;
 	}
-
-	public boolean isLoss() {
-		return gameState == GameState.LOST;
-	}
 }

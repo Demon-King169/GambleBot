@@ -57,10 +57,6 @@ public class GambleSettings {
 		this.guild = guild;
 	}
 
-	public static GambleSettings createDefault(DiscordGuild guild) {
-		return new GambleSettings(0, 0, 0, guild);
-	}
-
 	public long getStartTimestampMs() {
 		return startTimestampMs;
 	}
@@ -73,16 +69,8 @@ public class GambleSettings {
 		return durationMs;
 	}
 
-	public void setDurationMs(long durationMs) {
-		this.durationMs = durationMs;
-	}
-
 	public long getCooldownMs() {
 		return cooldownMs;
-	}
-
-	public void setCooldownMs(long cooldownMs) {
-		this.cooldownMs = cooldownMs;
 	}
 
 	public Set<GamblePrize> getPrizes() {
@@ -91,14 +79,6 @@ public class GambleSettings {
 
 	public void setPrizes(Set<GamblePrize> prizes) {
 		this.prizes = prizes;
-	}
-
-	public void addPrize(String prizeName, double prizeChance) {
-		addPrize(new GamblePrize(prizeName, prizeChance, this));
-	}
-
-	public void addPrize(GamblePrize prize) {
-		prizes.add(prize);
 	}
 
 	public String getPrizeText() {

@@ -6,7 +6,4 @@ public final class EnvironmentUtil {
 		return System.getenv(name);
 	}
 
-	public static String getEnvironmentVariableOrDefault(String name, String defaultValue) {
-		return System.getenv().getOrDefault(name, defaultValue);
-	}
 }

@@ -38,31 +38,11 @@ public final class LogUtil {
 	}
 
 	/**
-	 * Used to log debug information. Uses Spring (slf4j) debug logger ({@code Logger.debug(...)}).
-	 *
-	 * @param message The message to print as debug information.
-	 * @param t       The thrown error.
-	 */
-	public static void logDebug(String message, Throwable t) {
-		LOGGER.debug(message, t);
-	}
-
-	/**
 	 * Used to log errors. Uses Spring (slf4j) debug logger ({@code Logger.debug(...)}).
 	 *
 	 * @param message The message to describe the error.
 	 */
 	public static void logError(String message) {
 		LOGGER.error(message);
-	}
-
-	/**
-	 * Used to log errors and additional info. Uses Spring (slf4j) debug logger ({@code Logger.debug(...)}).
-	 *
-	 * @param message The message to describe the error.
-	 * @param t       The thrown error.
-	 */
-	public static void logError(String message, Throwable t) {
-		LOGGER.error(message, t);
 	}
 }

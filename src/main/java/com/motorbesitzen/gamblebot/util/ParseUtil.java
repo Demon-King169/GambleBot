@@ -46,25 +46,6 @@ public final class ParseUtil {
 		return lowerNumberWithUnit;
 	}
 
-	/**
-	 * Tries to parse a {@code String} to a {@code long}. Also supports text like "1k" for "1000".
-	 *
-	 * @param longString The {@code String} representation of a number.
-	 * @return The number as {@code long} or -1 if the {@code String} can not be parsed.
-	 */
-	public static long safelyParseStringToLong(String longString) {
-		if (longString == null) {
-			return -1;
-		}
-
-		String numberString = parseUnitChars(longString);
-		try {
-			return Long.parseLong(numberString);
-		} catch (NumberFormatException e) {
-			return -1;
-		}
-	}
-
 	public static String parseMillisecondsToText(long ms) {
 		if (ms < 1000) {
 			return "**" + ms + "**ms";
@@ -80,37 +61,6 @@ public final class ParseUtil {
 		durationText += minutes > 0 ? "**" + minutes + "**m " : "";
 		durationText += seconds > 0 ? "**" + seconds + "**s" : "";
 		return durationText;
-	}
-
-	public static long parseTextToMilliseconds(String text) {
-		long ms = 0;
-		String[] tokens = text.split(" ");
-		for (String token : tokens) {
-			if (token.matches("\\d+d")) {
-				String number = token.replaceAll("\\D", "");
-				ms += safelyParseStringToLong(number) * 86400000;
-				continue;
-			}
-
-			if (token.matches("\\d+h")) {
-				String number = token.replaceAll("\\D", "");
-				ms += safelyParseStringToLong(number) * 3600000;
-				continue;
-			}
-
-			if (token.matches("\\d+m")) {
-				String number = token.replaceAll("\\D", "");
-				ms += safelyParseStringToLong(number) * 60000;
-				continue;
-			}
-
-			if (token.matches("\\d+s")) {
-				String number = token.replaceAll("\\D", "");
-				ms += safelyParseStringToLong(number) * 1000;
-			}
-		}
-
-		return ms;
 	}
 
 	/**

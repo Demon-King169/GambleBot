@@ -118,17 +118,6 @@ public abstract class CommandImpl implements Command {
 				.queue();
 	}
 
-	protected void replyNoPings(SlashCommandEvent event, MessageEmbed embed) {
-		if (!isValidContent(embed)) {
-			LogUtil.logError("Tried to send invalid embed! Embed: \"" + embed.toData() + "\"");
-			return;
-		}
-
-		event.replyEmbeds(embed)
-				.allowedMentions(Collections.emptyList())
-				.queue();
-	}
-
 	/**
 	 * Sends a message to a channel. Does not do anything if bot can not write in that channel.
 	 *
