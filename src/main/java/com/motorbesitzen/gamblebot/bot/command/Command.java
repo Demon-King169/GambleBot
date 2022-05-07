@@ -38,6 +38,8 @@ public interface Command {
 
 	/**
 	 * Registers the command to Discord.
+	 *
+	 * @param jda The JDA object that represents the bot.
 	 */
 	void register(JDA jda);
 

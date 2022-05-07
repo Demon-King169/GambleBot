@@ -18,6 +18,9 @@ public class DiceGame implements Game {
 		this.random = random;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public GameWinInfo play(GameBet bet) {
 		int houseResult = random.nextInt(6) + 1;

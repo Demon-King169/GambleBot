@@ -40,6 +40,9 @@ public class RouletteGame implements Game {
 		0-36 - set on 6 numbers			-> 5*wager
 	*/
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public GameWinInfo play(GameBet bet) {
 		int result = random.nextInt(37);    // 0 -36
 		String resultText = getColorEmote(result) + " (" + result + ")";

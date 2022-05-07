@@ -1,5 +1,9 @@
 package com.motorbesitzen.gamblebot.bot.command.game.coin;
 
+/**
+ * Summarises the result of a game with information about the {@link GameState}, the amount the player won
+ * and a fitting result text provided by the game.
+ */
 public class GameWinInfo {
 
 	private final GameState gameState;

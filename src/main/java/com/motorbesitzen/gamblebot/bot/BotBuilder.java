@@ -18,6 +18,9 @@ import org.springframework.stereotype.Service;
 import javax.security.auth.login.LoginException;
 import java.util.Map;
 
+/**
+ * Builds and starts the Bot when the Spring application is ready.
+ */
 @Service
 public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 
@@ -42,6 +45,10 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 		startBot();
 	}
 
+	/**
+	 * Starts the bot and sets information like online status, activity and other JDA related values.
+	 * Also registers all listeners that the bot uses to react to commands and events.
+	 */
 	private void startBot() {
 		String discordToken = getToken();
 		JDABuilder jdaBuilder = buildBot(discordToken);
@@ -73,6 +80,13 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 		return discordToken;
 	}
 
+	/**
+	 * Sets the online status and activity of the bot. Also controls the caching and other JDA flags.
+	 * Registers all listeners with JDA.
+	 *
+	 * @param discordToken The Discord token of the bot.
+	 * @return The set-up {@code JDABuilder} object to build the bot with.
+	 */
 	private JDABuilder buildBot(String discordToken) {
 		Activity activity = getBotActivity();
 		JDABuilder builder = JDABuilder.createDefault(discordToken)

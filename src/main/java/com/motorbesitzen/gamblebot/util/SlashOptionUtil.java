@@ -7,8 +7,20 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
+/**
+ * Utility class that handles the process of retrieving the option values from the SlashCommands a
+ * Discord user can use.
+ */
 public class SlashOptionUtil {
 
+	/**
+	 * Retrieves a Discord user from a command option.
+	 *
+	 * @param event      The received information about the slash command.
+	 * @param optionName The name of the option that holds the user.
+	 * @return The mentioned user or null if there is no user given or if the given value is not a
+	 * representation of a Discord user.
+	 */
 	public static User getUserOption(SlashCommandEvent event, String optionName) {
 		OptionMapping memberOption = event.getOption(optionName);
 		if (memberOption == null) {
@@ -24,6 +36,14 @@ public class SlashOptionUtil {
 		return memberOption.getAsUser();
 	}
 
+	/**
+	 * Retrieves a guild channel from a command option.
+	 *
+	 * @param event      The received information about the slash command.
+	 * @param optionName The name of the option that holds the guild channel.
+	 * @return The mentioned channel or null if there is no channel given or if the given value is not a
+	 * text channel.
+	 */
 	public static GuildChannel getGuildChannelOption(SlashCommandEvent event, String optionName) {
 		OptionMapping channelOption = event.getOption(optionName);
 		if (channelOption == null) {
@@ -44,6 +64,15 @@ public class SlashOptionUtil {
 		return channelOption.getAsGuildChannel();
 	}
 
+	/**
+	 * Retrieves an integer from a command option.
+	 *
+	 * @param event      The received information about the slash command.
+	 * @param optionName The name of the option that holds the integer.
+	 * @return The integer value as a {@code Long} as Discord uses JavaScript's {@code MAX_SAFE_INTEGER} which is a
+	 * {@code Long} in Java. Returns null if there is no integer value given or if the given value is not a
+	 * representation of an integer.
+	 */
 	public static Long getIntegerOption(SlashCommandEvent event, String optionName) {
 		OptionMapping intOption = event.getOption(optionName);
 		if (intOption == null) {
@@ -59,6 +88,13 @@ public class SlashOptionUtil {
 		return intOption.getAsLong();
 	}
 
+	/**
+	 * Retrieves a {@code String} from a command option.
+	 *
+	 * @param event      The received information about the slash command.
+	 * @param optionName The name of the option that holds the {@code String}.
+	 * @return The {@code String} or null if there is no {@code String} given.
+	 */
 	public static String getStringOption(SlashCommandEvent event, String optionName) {
 		OptionMapping stringOption = event.getOption(optionName);
 		if (stringOption == null) {

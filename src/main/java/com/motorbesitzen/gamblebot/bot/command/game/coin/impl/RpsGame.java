@@ -23,6 +23,9 @@ public class RpsGame implements Game {
 		this.random = random;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public GameWinInfo play(GameBet bet) {
 		int result = random.nextInt(3);

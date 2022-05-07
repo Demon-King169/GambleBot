@@ -12,6 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.Set;
 
+/**
+ * On each start the bot registers the slash commands the bot offers on the Discord API so that users can use them in
+ * their client. Command registration might need up to an hour to propagate on Discord's end!
+ */
 @Service
 public class SlashCommandRegister extends ListenerAdapter {
 
@@ -22,6 +26,12 @@ public class SlashCommandRegister extends ListenerAdapter {
 		this.commands = commands;
 	}
 
+	/**
+	 * Gets executed when the Discord bot is ready. Registers the commands on Discord's backend.
+	 * However, it does not wait for completion of the requests; it might take a couple seconds.
+	 *
+	 * @param event The event that gets fired when the bot is ready.
+	 */
 	@Override
 	public void onReady(@NotNull ReadyEvent event) {
 		LogUtil.logInfo("Registering commands...");

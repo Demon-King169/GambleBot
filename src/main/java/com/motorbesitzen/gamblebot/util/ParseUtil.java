@@ -46,6 +46,16 @@ public final class ParseUtil {
 		return lowerNumberWithUnit;
 	}
 
+	/**
+	 * Parses milliseconds to a {@code String} that consists of the days, hours, minutes and
+	 * seconds of the millisecond value to make it readable. Produces an output like {@code 1d 14h 55m 1s}
+	 * with formatting for Discord, so it prints the numbers in a bold format. If a part of the
+	 * text would be 0 it gets ignored, so 1000 milliseconds would just be {@code 1s}. If the value is below
+	 * 1000 is just returns the value as milliseconds.
+	 *
+	 * @param ms The amount of milliseconds.
+	 * @return The {@code String} in the mentioned format.
+	 */
 	public static String parseMillisecondsToText(long ms) {
 		if (ms < 1000) {
 			return "**" + ms + "**ms";
@@ -107,6 +117,13 @@ public final class ParseUtil {
 		return number.longValue();
 	}
 
+	/**
+	 * Tries to parse a {@code String} to a {@code double}.
+	 *
+	 * @param doubleString The {@code String} representation of a number.
+	 * @return The number as {@code long}. Returns -1 if {@param doubleString} is {@code null} or if the
+	 * parsing fails with a {@code NumberFormatException}.
+	 */
 	public static double safelyParseStringToDouble(String doubleString) {
 		if (doubleString == null) {
 			return -1;

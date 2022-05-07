@@ -31,6 +31,9 @@ public class LotteryGame implements Game {
 		else 	-> loss
 	 */
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public GameWinInfo play(GameBet bet) {
 		int[] betNumbers = getBetNumbers(bet);
 		return calcWin(bet.getWager(), betNumbers);
