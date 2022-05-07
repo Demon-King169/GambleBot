@@ -1,7 +1,7 @@
 # Gambler
 
-This is a Discord bot that can start time limited gambles with custom prizes and coin based gambles like roulette,
-dice, or coin flip.
+A Discord bot that offers time-limited gambling games with customizable winnings and coin-based gambling games, such as
+roulette, dice, or coin toss.
 
 ## Setup
 
@@ -11,19 +11,18 @@ on Java 11, so you need to install the Java 11 JDK (or higher) for your system.
 
 ### Windows
 
-There are batch (`.bat`) start and stop scripts available for Windows (tested only on Windows 10 Pro Version 21H1 Build
-19043.1110), **however**, currently the process can not be stopped gracefully. That means there is a possibility of data
-loss as no shutdown hooks get executed. As of now I strongly recommend to **not** use Windows to host this bot with the
-given batch scripts.
+There are batch (`.bat`) start and stop scripts available for Windows; **however**, currently the bot can not be stopped
+gracefully. That means there is a possibility of data loss as no shutdown hooks get executed. As of now, I strongly
+recommend **not** using Windows to host this bot with the given batch scripts.
 
 ### Tokens & APIs
 
 #### Discord bot token
 
-To use this bot you need a Discord bot token. To create one open the
+To use this bot you will need a Discord bot token. To create one open the
 [Discord Developer Portal](https://discord.com/developers/applications)
 and add a new application by clicking on the "New Application" button. \
-After creating the application you should see general information about your application. If not please select your
+After creating the application you should see general information about your application. If not, please select your
 application in the list of applications. Now switch to the "Bot" tab on the left and click the
 "Add Bot" button that shows up. \
 You should now see information about the bot you created, and a button called "Copy" under a header that says "Token".
@@ -35,7 +34,7 @@ commands will not work!
 #### Adding the bot to your server
 
 Once more in the
-[Discord Developer Portal](https://discord.com/developers/applications)
+[Discord Developer Portal](https://discord.com/developers/applications),
 select your application. Now switch to the "OAuth2" tab on the left and select "URL Generator". In the list of scopes
 select "bot" and "applications.command". Now scroll down and select all needed permissions:
 
@@ -50,11 +49,11 @@ Use Slash Commands
 ```
 
 On the bottom of that site there is now a link you can use to add the bot to your server with the
-selected permissions. To use that link just copy and paste it into a new browser tab or window. \
-You can give the bot the administrator permission to decrease the amount of permissions to update but keep in mind that
-it literally means the bot can do anything. That means if anyone has access to your token to control the bot he can do
-pretty much anything to your server. However, even without the administrator permission the bot has enough permissions
-to interfere a lot with your server so even if you do not give the bot the administrator permissions you need to keep
+selected permissions. To use that link, just copy and paste it into a new browser tab or window. \
+You can give the bot administrator permissions to decrease the amount of permissions to update, but keep in mind that
+it literally means the bot can do anything. That means if anyone has access to your token to control the bot, he can do
+pretty much anything to your server. However, even without administrator permissions, the bot has enough permissions
+to interfere a lot with your server, so even if you do not give the bot the administrator permissions, you need to keep
 your token very secure.
 
 #### Additional information about the bot
@@ -88,13 +87,13 @@ met:
 * Make sure your lines do not have trailing spaces or tabs!
 * Encapsulate text with spaces in it with quotation marks (`"`).
 
-Settings that have to be set are marked with `[REQUIRED]`. If you leave these blank the program will not work correctly
-and mostly will not even start completely.
+Settings that have to be set are marked with `[REQUIRED]`. If you leave these blank, the program will not work correctly
+and will mostly not even start.
 
 #### DB_DATABASE
 
-This setting defines the name of the database. If you do not set a value the default name "database" will be chosen. If
-you change that value later on and do not rename the files in `/data/` accordingly the program will create a new
+This setting defines the name of the database. If you do not set a value, the default name "database" will be chosen. If
+you change that value later on and do not rename the files in `/data/` accordingly, the program will create a new
 database!
 
 #### [REQUIRED] DB_ROOT_PASSWORD
@@ -105,7 +104,7 @@ The root password of the database. Make sure to use a secure password!
 
 Username and password for the database to make sure no one else can access your database. Make sure to use a secure
 password! \
-If you change these values after the first run the program will not work as the database got set up with your old
+If you change these values after the first run, the program will not work as the database got set up with your old
 values, so your new credentials are not correct, and the connection will be refused!
 
 #### [REQUIRED] DC_TOKEN
@@ -123,11 +122,11 @@ Discord bots can display an activity in the member list. Discord offers a few ac
 * **streaming** (xyz)
 * **competing** (in xyz)
 
-If you want to display an activity you can use one of the bold printed words. If you do not want to set an activity just
-leave this field blank or remove it completely. \
-If you want to use an activity you also need to set a
+If you want to display an activity, you can use one of the bold printed words. If you do not want to set an activity,
+just leave this field blank or remove it completely. \
+If you want to use an activity, you also need to set a
 [BOT_ACTIVITY_TEXT](#bot_activity_text). Otherwise, no activity will be displayed. If you want to use the streaming
-activity make sure to also set the
+activity, make sure to also set the
 [BOT_ACTIVITY_STREAMING_URL](#bot_activity_streaming_url) as if there is no valid URL set the bot will not display an
 activity.
 
@@ -136,13 +135,13 @@ activity.
 This value replaces the `xyz` in the list shown in
 [BOT_ACTIVITY](#bot_activity) with custom text to further customize your bot activity. A basic example would
 be `gambling` which results in
-"**competing** in gambling" if you also set the fitting activity. If you do not set a text no activity will be shown at
+"**competing** in gambling" if you also set the fitting activity. If you do not set a text, no activity will be shown at
 all. Maximum length of this text is 128 characters!
 
 #### BOT_ACTIVITY_STREAMING_URL
 
 A link to a stream, only needs to be set if the streaming activity is used. Has to be valid according to Discord
-standards, so it needs to include the "https(s)://" at the start. Discord only supports twitch and YouTube links at the
+standards, so it needs to include the "https(s)://" at the start. Discord only supports Twitch and YouTube links at the
 moment.
 
 ## Starting and stopping the bot
@@ -159,7 +158,7 @@ To stop the bot you can use:
 sh stop.sh
 ```
 
-If `stop.sh` does not work for some reason you can also search for the `java` process and kill it manually.
+If `stop.sh` does not work for some reason, you can also search for the `java` process and kill it manually.
 
 ---
 
@@ -172,7 +171,7 @@ You do not need to understand anything below to use this program.
 
 This program currently offers a few profiles. The default profile (production), and the developer profile called "dev"
 are probably the most important ones. The debug profile has debug outputs and other features that make developing and
-debugging easier. To change the profile to the developer profile open the `.env` file and add the following line:
+debugging easier. To change the profile to the developer profile, open the `.env` file and add the following line:
 
 ```dotenv
 SPRING_PROFILES_ACTIVE=dev
@@ -181,12 +180,12 @@ SPRING_PROFILES_ACTIVE=dev
 The same effect can be achieved by changing the run configuration of your IDE to use that profile.
 
 The database creation process in the `dev` profile will try to import a file called `data.sql` in the `resources` folder
-on startup. It will crash if that file is not present so either disable the auto import in `application.yml` or create
+on startup. It will crash if that file is not present, so either disable the auto-import in `application.yml` or create
 the file yourself. The file can be used for sample data.
 
 ### Adding commands
 
-To add a command to the bot there are a few steps to perform. First create the command class in
+To add a command to the bot, there are a few steps to perform. First, create the command class in
 `com.motorbesitzen.gamblebot.bot.command.impl`. The command class needs to extend `CommandImpl`. The command needs to
 be a `@Service` and needs to have its command set as a value in lowercase. So a command like `help` would be the
 following:
@@ -199,13 +198,13 @@ public class Help extends CommandImpl {
 }
 ```
 
-Your IDE or the compiler should notify you about the methods you need to implement for a command to function.
+Your IDE or compiler should notify you about the methods you need to implement for a command to function.
 
 ### Adding event listeners
 
-Event listeners do not need a name and thus no special value. Just annotate the listener class as a service and make
-sure it extends the `ListenerAdapter`. Override at least one of the `ListenerAdapter` methods so your event listener
-actually does something.
+Event listeners do not need a name and thus have no special value. Just annotate the listener class as a service and
+make sure it extends the `ListenerAdapter`. Override at least one of the `ListenerAdapter` methods so your event
+listener actually does something.
 
 ```java
 
