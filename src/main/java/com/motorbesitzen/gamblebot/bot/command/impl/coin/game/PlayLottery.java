@@ -92,7 +92,7 @@ class PlayLottery extends PlayCommandImpl {
 			return;
 		}
 
-		if (!betText.matches("[0-9]{1,2}(,[0-9]{1,2}){5}")) {
+		if (!betText.matches("\\d{1,2}(,\\d{1,2}){5}")) {
 			reply(event, "Please choose a valid bet of six different numbers from 1 to 49.");
 			return;
 		}

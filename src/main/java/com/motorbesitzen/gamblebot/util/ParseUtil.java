@@ -37,7 +37,7 @@ public final class ParseUtil {
 	 */
 	private static String parseUnitChars(String numberWithUnit) {
 		String lowerNumberWithUnit = numberWithUnit.toLowerCase().trim();
-		if (lowerNumberWithUnit.matches("[0-9]+[kmb]")) {
+		if (lowerNumberWithUnit.matches("\\d+[kmb]")) {
 			lowerNumberWithUnit = lowerNumberWithUnit.replaceFirst("k", "000");
 			lowerNumberWithUnit = lowerNumberWithUnit.replaceFirst("m", "000000");
 			lowerNumberWithUnit = lowerNumberWithUnit.replaceFirst("b", "000000000");
@@ -86,26 +86,26 @@ public final class ParseUtil {
 		long ms = 0;
 		String[] tokens = text.split(" ");
 		for (String token : tokens) {
-			if (token.matches("[0-9]+d")) {
-				String number = token.replaceAll("[^0-9]", "");
+			if (token.matches("\\d+d")) {
+				String number = token.replaceAll("\\D", "");
 				ms += safelyParseStringToLong(number) * 86400000;
 				continue;
 			}
 
-			if (token.matches("[0-9]+h")) {
-				String number = token.replaceAll("[^0-9]", "");
+			if (token.matches("\\d+h")) {
+				String number = token.replaceAll("\\D", "");
 				ms += safelyParseStringToLong(number) * 3600000;
 				continue;
 			}
 
-			if (token.matches("[0-9]+m")) {
-				String number = token.replaceAll("[^0-9]", "");
+			if (token.matches("\\d+m")) {
+				String number = token.replaceAll("\\D", "");
 				ms += safelyParseStringToLong(number) * 60000;
 				continue;
 			}
 
-			if (token.matches("[0-9]+s")) {
-				String number = token.replaceAll("[^0-9]", "");
+			if (token.matches("\\d+s")) {
+				String number = token.replaceAll("\\D", "");
 				ms += safelyParseStringToLong(number) * 1000;
 			}
 		}

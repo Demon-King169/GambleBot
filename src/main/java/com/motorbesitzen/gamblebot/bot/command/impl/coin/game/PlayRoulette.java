@@ -92,7 +92,7 @@ class PlayRoulette extends PlayCommandImpl {
 			return;
 		}
 
-		if (!betText.matches("(?i)([BREULH]|[0-9]{1,2}(,[0-9]{1,2}){0,5})")) {
+		if (!betText.matches("(?i)([BREULH]|\\d{1,2}(,\\d{1,2}){0,5})")) {
 			reply(event, "Please use a valid bet! Use the help command for further information on what bets exist.");
 			return;
 		}
