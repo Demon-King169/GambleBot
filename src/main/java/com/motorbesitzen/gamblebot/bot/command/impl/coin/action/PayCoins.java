@@ -116,9 +116,9 @@ class PayCoins extends CommandImpl {
 
 		long guildId = member.getGuild().getIdLong();
 		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildId));
+		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createGuild(guildRepo, guildId));
 		Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(member.getIdLong(), guildId);
-		DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(dcGuild, member.getIdLong()));
+		DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createMember(dcGuild, member.getIdLong()));
 		long coinAmount = getCoinAmount(event);
 		if (coinAmount <= 0) {
 			reply(event, "Please choose a valid coin amount of at least 1!");
@@ -161,16 +161,6 @@ class PayCoins extends CommandImpl {
 		}
 
 		return coinAmount;
-	}
-
-	private DiscordMember createNewMember(DiscordGuild dcGuild, long memberId) {
-		return DiscordMember.createDefault(memberId, dcGuild);
-	}
-
-	private DiscordGuild createNewGuild(long guildId) {
-		DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
-		guildRepo.save(dcGuild);
-		return dcGuild;
 	}
 
 	private long calcTax(DiscordGuild guild, long value) {

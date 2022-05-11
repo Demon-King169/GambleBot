@@ -102,7 +102,7 @@ class PlayRps extends PlayCommandImpl {
 		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
 		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createGuild(guildRepo, guildId));
 		Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(authorId, guildId);
-		DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(dcGuild, authorId));
+		DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createMember(dcGuild, authorId));
 		if (dcMember.getCoins() < wager) {
 			reply(event, "You do not have enough coins for that bet.\nYou only have **" + dcMember.getCoins() + "** coins right now.");
 			return;

@@ -1,6 +1,7 @@
 package com.motorbesitzen.gamblebot.bot.command;
 
 import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
+import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.dao.GambleSettings;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.util.LogUtil;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Basic implementation of a Command. Has all needed methods to send messages, answer to commands and log (debug) actions.
@@ -290,5 +292,33 @@ public abstract class CommandImpl implements Command {
 		DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
 		guildRepo.save(dcGuild);
 		return dcGuild;
+	}
+
+	/**
+	 * Creates a default {@link DiscordMember} by ID for a given guild. Also creates
+	 * the guild if it does not exist in the database yet.
+	 *
+	 * @param guildRepo The guild repository.
+	 * @param guildId   The guild ID for the guild to create the member for.
+	 * @param memberId  The ID of the member to create.
+	 * @return The {@link DiscordMember} representation of the user with the given ID.
+	 * @see DiscordMember#createDefault(long, DiscordGuild)
+	 */
+	protected DiscordMember createMember(DiscordGuildRepo guildRepo, long guildId, long memberId) {
+		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createGuild(guildRepo, guildId));
+		return DiscordMember.createDefault(memberId, dcGuild);
+	}
+
+	/**
+	 * Creates a default {@link DiscordMember} by ID for a given guild in the database.
+	 *
+	 * @param dcGuild  The {@link DiscordGuild} to create the member for.
+	 * @param memberId The ID of the member to create.
+	 * @return The {@link DiscordMember} representation of the user with the given ID.
+	 * @see DiscordMember#createDefault(long, DiscordGuild)
+	 */
+	protected DiscordMember createMember(DiscordGuild dcGuild, long memberId) {
+		return DiscordMember.createDefault(memberId, dcGuild);
 	}
 }

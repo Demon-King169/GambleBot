@@ -1,7 +1,6 @@
 package com.motorbesitzen.gamblebot.bot.command.impl.coin.action;
 
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
-import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
 import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.gamblebot.data.repo.DiscordMemberRepo;
@@ -109,7 +108,7 @@ class GiveCoin extends CommandImpl {
 
 		long guildId = member.getGuild().getIdLong();
 		Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(member.getIdLong(), guildId);
-		DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createNewMember(member.getIdLong(), guildId));
+		DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createMember(guildRepo, guildId, member.getIdLong()));
 		dcMember.giveCoins(coinAmount);
 		memberRepo.save(dcMember);
 		replyNoPings(event, "Added **" + coinAmount + "** coins to the balance of " + member.getAsMention() + ".");
@@ -123,17 +122,5 @@ class GiveCoin extends CommandImpl {
 		}
 
 		return coinAmount;
-	}
-
-	private DiscordMember createNewMember(long memberId, long guildId) {
-		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createNewGuild(guildId));
-		return DiscordMember.createDefault(memberId, dcGuild);
-	}
-
-	private DiscordGuild createNewGuild(long guildId) {
-		DiscordGuild dcGuild = DiscordGuild.withGuildId(guildId);
-		guildRepo.save(dcGuild);
-		return dcGuild;
 	}
 }

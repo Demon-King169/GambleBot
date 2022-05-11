@@ -1,8 +1,6 @@
 package com.motorbesitzen.gamblebot.bot.command.impl.coin.game;
 
 import com.motorbesitzen.gamblebot.bot.command.CommandImpl;
-import com.motorbesitzen.gamblebot.data.dao.DiscordGuild;
-import com.motorbesitzen.gamblebot.data.dao.DiscordMember;
 import com.motorbesitzen.gamblebot.util.SlashOptionUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -28,10 +26,6 @@ public abstract class PlayCommandImpl extends CommandImpl {
 
 	@Override
 	public abstract void execute(SlashCommandEvent event);
-
-	protected DiscordMember createNewMember(DiscordGuild dcGuild, long memberId) {
-		return DiscordMember.createDefault(memberId, dcGuild);
-	}
 
 	protected long getWager(SlashCommandEvent event, String wager_option_name) {
 		Long wager = SlashOptionUtil.getIntegerOption(event, wager_option_name);
