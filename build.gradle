@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.motorbesitzen'
 version = '0.3.2'
-sourceCompatibility = '11'
+sourceCompatibility = '1.8'  // Specify Java 8 compatibility
 
 configurations {
     compileOnly {
