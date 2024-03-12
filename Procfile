@@ -1,1 +1,1 @@
-Worker: sh start.sh
+web: java -jar ./build/libs/gamblebot.jar
